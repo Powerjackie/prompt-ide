@@ -44,6 +44,8 @@ export default function ModulesPage() {
       if (result.success) {
         toast.success(t("moduleDeleted"))
         refetch()
+      } else {
+        toast.error(result.error)
       }
     })
   }

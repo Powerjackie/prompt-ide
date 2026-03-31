@@ -7,30 +7,32 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { AnalysisPanel } from "@/components/agent/analysis-panel"
-import { analyzePrompt } from "@/agent"
-import { getPrompts } from "@/app/actions/prompt.actions"
-import type { AgentAnalysisResult } from "@/types/agent"
+import { runStatelessAgentAnalysis } from "@/app/actions/agent.actions"
+import type { AgentAnalysisResult, AgentTrajectoryStep } from "@/types/agent"
+import { toast } from "sonner"
 
 export default function PlaygroundPage() {
   const t = useTranslations("playground")
   const ta = useTranslations("agent")
   const [content, setContent] = useState("")
   const [analysis, setAnalysis] = useState<AgentAnalysisResult | null>(null)
+  const [trajectory, setTrajectory] = useState<AgentTrajectoryStep[] | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
 
   const handleAnalyze = async () => {
     if (!content.trim()) return
+
     setAnalyzing(true)
-    const allResult = await getPrompts()
-    const allPrompts = allResult.success ? allResult.data : []
-    setTimeout(() => {
-      const result = analyzePrompt({
-        content,
-        existingPrompts: allPrompts,
-      })
-      setAnalysis(result)
-      setAnalyzing(false)
-    }, 300)
+
+    const result = await runStatelessAgentAnalysis(content)
+    if (result.success) {
+      setAnalysis(result.data.analysis)
+      setTrajectory(result.data.trajectory)
+    } else {
+      toast.error(result.error)
+    }
+
+    setAnalyzing(false)
   }
 
   return (
@@ -63,7 +65,12 @@ export default function PlaygroundPage() {
         <div>
           <Label className="mb-3 block">{t("results")}</Label>
           <div className="border rounded-lg p-4">
-            <AnalysisPanel analysis={analysis} />
+            <AnalysisPanel
+              analysis={analysis}
+              trajectory={trajectory}
+              analyzing={analyzing}
+              analyzingLabel={ta("analyzingWithEngine", { engine: "MiniMax-2.7" })}
+            />
           </div>
         </div>
       </div>

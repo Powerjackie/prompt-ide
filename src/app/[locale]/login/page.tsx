@@ -4,11 +4,12 @@ import { useActionState } from "react"
 import { useFormStatus } from "react-dom"
 import { useTranslations } from "next-intl"
 import { LockKeyhole } from "lucide-react"
-import { loginAction, initialAuthState } from "@/app/actions/auth.actions"
+import { loginAction } from "@/app/actions/auth.actions"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { initialAuthState } from "@/types/auth"
 
 function SubmitButton() {
   const t = useTranslations("login")

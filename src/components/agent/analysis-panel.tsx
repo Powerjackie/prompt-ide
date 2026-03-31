@@ -8,29 +8,51 @@ import { Progress } from "@/components/ui/progress"
 import { Bot, AlertTriangle, Shield, Tag, FileText, Copy, Puzzle } from "lucide-react"
 import { RISK_COLORS } from "@/lib/constants"
 import { cn } from "@/lib/utils"
-import type { AgentAnalysisResult } from "@/types/agent"
+import type { AgentAnalysisResult, AgentTrajectoryStep } from "@/types/agent"
 import { Link } from "@/i18n/navigation"
+import { TrajectoryTimeline } from "./trajectory-timeline"
 
 interface AnalysisPanelProps {
   analysis: AgentAnalysisResult | null
+  trajectory?: AgentTrajectoryStep[] | null
+  trajectoryLoading?: boolean
   onAnalyze?: () => void
   analyzing?: boolean
   compact?: boolean
+  analyzingLabel?: string
 }
 
-export function AnalysisPanel({ analysis, onAnalyze, analyzing, compact }: AnalysisPanelProps) {
+export function AnalysisPanel({
+  analysis,
+  trajectory,
+  trajectoryLoading,
+  onAnalyze,
+  analyzing,
+  compact,
+  analyzingLabel,
+}: AnalysisPanelProps) {
   const t = useTranslations("agent")
   const tr = useTranslations("agent.risk")
+  const loadingText = analyzingLabel ?? t("analyzing")
 
   if (!analysis) {
     return (
       <div className="text-center py-8 space-y-3">
-        <Bot className="h-10 w-10 mx-auto text-muted-foreground opacity-40" />
-        <p className="text-sm text-muted-foreground">{t("noAnalysis")}</p>
+        {analyzing ? (
+          <div className="space-y-3">
+            <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            <p className="text-sm text-muted-foreground">{loadingText}</p>
+          </div>
+        ) : (
+          <>
+            <Bot className="h-10 w-10 mx-auto text-muted-foreground opacity-40" />
+            <p className="text-sm text-muted-foreground">{t("noAnalysis")}</p>
+          </>
+        )}
         {onAnalyze && (
           <Button size="sm" onClick={onAnalyze} disabled={analyzing}>
             <Bot className="h-4 w-4 mr-1" />
-            {analyzing ? t("analyzing") : t("runAnalysis")}
+            {analyzing ? loadingText : t("runAnalysis")}
           </Button>
         )}
       </div>
@@ -61,6 +83,16 @@ export function AnalysisPanel({ analysis, onAnalyze, analyzing, compact }: Analy
 
   return (
     <div className="space-y-4">
+      {analyzing && (
+        <>
+          <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <span>{loadingText}</span>
+          </div>
+          <Separator />
+        </>
+      )}
+
       {/* Summary + Confidence */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -185,6 +217,13 @@ export function AnalysisPanel({ analysis, onAnalyze, analyzing, compact }: Analy
         </>
       )}
 
+      {(trajectory !== undefined || trajectoryLoading) && (
+        <>
+          <TrajectoryTimeline trajectory={trajectory ?? null} loading={trajectoryLoading} />
+          <Separator />
+        </>
+      )}
+
       {/* Matched Rules */}
       <div className="space-y-1.5">
         <span className="text-xs font-medium text-muted-foreground">
@@ -205,7 +244,7 @@ export function AnalysisPanel({ analysis, onAnalyze, analyzing, compact }: Analy
       {onAnalyze && (
         <Button size="sm" variant="outline" onClick={onAnalyze} disabled={analyzing} className="w-full">
           <Bot className="h-4 w-4 mr-1" />
-          {analyzing ? t("analyzing") : t("reanalyze")}
+          {analyzing ? loadingText : t("reanalyze")}
         </Button>
       )}
     </div>

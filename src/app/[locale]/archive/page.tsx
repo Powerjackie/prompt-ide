@@ -75,9 +75,13 @@ export default function ArchivePage() {
                   disabled={pending}
                   onClick={() => {
                     startTransition(async () => {
-                      await setPromptStatus(p.id, "production")
-                      toast.success(tc("restored"))
-                      refetch()
+                      const result = await setPromptStatus(p.id, "production")
+                      if (result.success) {
+                        toast.success(tc("restored"))
+                        refetch()
+                      } else {
+                        toast.error(result.error)
+                      }
                     })
                   }}
                 >
@@ -90,9 +94,13 @@ export default function ArchivePage() {
                   disabled={pending}
                   onClick={() => {
                     startTransition(async () => {
-                      await deletePromptAction(p.id)
-                      toast.success(t("permanentlyDeleted"))
-                      refetch()
+                      const result = await deletePromptAction(p.id)
+                      if (result.success) {
+                        toast.success(t("permanentlyDeleted"))
+                        refetch()
+                      } else {
+                        toast.error(result.error)
+                      }
                     })
                   }}
                 >

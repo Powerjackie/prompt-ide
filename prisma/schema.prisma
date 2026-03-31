@@ -32,6 +32,9 @@ model Prompt {
   updatedAt  DateTime @updatedAt
 
   agentHistory AgentHistory[]
+  versions     PromptVersion[]
+  benchmarkRuns BenchmarkRun[]
+  collectionItems CollectionItem[]
 }
 
 model Module {
@@ -43,6 +46,8 @@ model Module {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  collectionItems CollectionItem[]
 }
 
 model AgentHistory {
@@ -55,6 +60,73 @@ model AgentHistory {
   trajectory String @default("[]") // JSON array — rule reasons, ReAct thoughts/actions, or chat messages
 
   createdAt DateTime @default(now())
+}
+
+model PromptVersion {
+  id            String   @id @default(cuid())
+  promptId      String
+  prompt        Prompt   @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  versionNumber Int
+  changeSummary String   @default("")
+  title         String
+  description   String   @default("")
+  content       String
+  status        String   @default("inbox")
+  source        String   @default("")
+  model         String   @default("universal")
+  category      String   @default("general")
+  tags          String   @default("[]")
+  notes         String   @default("")
+  variables     String   @default("[]")
+  createdAt     DateTime @default(now())
+
+  benchmarkRuns BenchmarkRun[]
+
+  @@unique([promptId, versionNumber])
+}
+
+model BenchmarkRun {
+  id                       String        @id @default(cuid())
+  promptId                 String
+  prompt                   Prompt        @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  promptVersionId          String
+  promptVersion            PromptVersion @relation(fields: [promptVersionId], references: [id], onDelete: Cascade)
+  evaluator                String        @default("MiniMax-M2.7")
+  input                    String
+  summary                  String
+  overallScore             Int
+  clarityScore             Int
+  reusabilityScore         Int
+  controllabilityScore     Int
+  deploymentReadinessScore Int
+  improvementSuggestions   String        @default("[]")
+  recommendedForProduction Boolean       @default(false)
+  rawOutput                String
+  createdAt                DateTime      @default(now())
+}
+
+model Collection {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  type        String   @default("workflow") // workflow | toolkit | learning
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items CollectionItem[]
+}
+
+model CollectionItem {
+  id           String     @id @default(cuid())
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  itemType     String     // prompt | module
+  promptId     String?
+  prompt       Prompt?    @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  moduleId     String?
+  module       Module?    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  position     Int        @default(0)
+  createdAt    DateTime   @default(now())
 }
 
 model Setting {

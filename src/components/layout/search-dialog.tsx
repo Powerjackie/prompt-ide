@@ -24,9 +24,12 @@ import {
   Settings,
   FlaskConical,
   LayoutDashboard,
+  LibraryBig,
 } from "lucide-react"
 import { getPrompts, type SerializedPrompt } from "@/app/actions/prompt.actions"
 import { getModules, type SerializedModule } from "@/app/actions/module.actions"
+import { getCollections } from "@/app/actions/collection.actions"
+import type { Collection } from "@/types/collection"
 
 const PAGES = [
   { nameKey: "home", href: "/", icon: LayoutDashboard },
@@ -34,6 +37,7 @@ const PAGES = [
   { nameKey: "editor", href: "/editor", icon: PenSquare },
   { nameKey: "inbox", href: "/inbox", icon: Inbox },
   { nameKey: "modules", href: "/modules", icon: Puzzle },
+  { nameKey: "collections", href: "/collections", icon: LibraryBig },
   { nameKey: "favorites", href: "/favorites", icon: Star },
   { nameKey: "archive", href: "/archive", icon: Archive },
   { nameKey: "tags", href: "/tags", icon: Tags },
@@ -46,6 +50,7 @@ export function SearchDialog() {
   const router = useRouter()
   const [prompts, setPrompts] = useState<SerializedPrompt[]>([])
   const [modules, setModules] = useState<SerializedModule[]>([])
+  const [collections, setCollections] = useState<Collection[]>([])
   const t = useTranslations("search")
   const tn = useTranslations("nav")
   const tc = useTranslations("common")
@@ -58,6 +63,9 @@ export function SearchDialog() {
     })
     getModules().then((result) => {
       if (result.success) setModules(result.data)
+    })
+    getCollections().then((result) => {
+      if (result.success) setCollections(result.data)
     })
   }, [open])
 
@@ -124,6 +132,28 @@ export function SearchDialog() {
                     <div className="flex-1 min-w-0">
                       <div className="text-sm truncate">{m.title}</div>
                       <div className="text-xs text-muted-foreground truncate">{m.type}</div>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </>
+          )}
+
+          {collections.length > 0 && (
+            <>
+              <CommandSeparator />
+              <CommandGroup heading={t("collections")}>
+                {collections.map((collection) => (
+                  <CommandItem
+                    key={collection.id}
+                    onSelect={() => navigate(`/collections/${collection.id}`)}
+                  >
+                    <LibraryBig className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm truncate">{collection.title}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {collection.description || tn(`collections`)}
+                      </div>
                     </div>
                   </CommandItem>
                 ))}

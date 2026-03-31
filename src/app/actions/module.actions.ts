@@ -1,5 +1,6 @@
 "use server"
 
+import { ensureAuthenticated } from "@/lib/action-auth"
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 
@@ -34,6 +35,10 @@ export type SerializedModule = ReturnType<typeof deserializeModule>
 
 // ─── Queries ─────────────────────────────────────────────────────
 export async function getModules(): Promise<ActionResult<SerializedModule[]>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const rows = await prisma.module.findMany({ orderBy: { updatedAt: "desc" } })
     return { success: true, data: rows.map(deserializeModule) }
@@ -43,6 +48,10 @@ export async function getModules(): Promise<ActionResult<SerializedModule[]>> {
 }
 
 export async function getModuleById(id: string): Promise<ActionResult<SerializedModule>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const row = await prisma.module.findUnique({ where: { id } })
     if (!row) return { success: false, error: "Module not found" }
@@ -53,6 +62,10 @@ export async function getModuleById(id: string): Promise<ActionResult<Serialized
 }
 
 export async function getModulesByType(type: string): Promise<ActionResult<SerializedModule[]>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const rows = await prisma.module.findMany({
       where: { type },
@@ -71,6 +84,10 @@ export async function createModule(data: {
   content: string
   tags?: string[]
 }): Promise<ActionResult<SerializedModule>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const row = await prisma.module.create({
       data: {
@@ -96,6 +113,10 @@ export async function updateModule(
     tags?: string[]
   }
 ): Promise<ActionResult<SerializedModule>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const updateData: Record<string, unknown> = {}
     if (data.title !== undefined) updateData.title = data.title
@@ -112,6 +133,10 @@ export async function updateModule(
 }
 
 export async function deleteModule(id: string): Promise<ActionResult<{ id: string }>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     await prisma.module.delete({ where: { id } })
     revalidateAll()

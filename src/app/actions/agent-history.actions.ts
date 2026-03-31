@@ -1,6 +1,8 @@
 "use server"
 
+import { ensureAuthenticated } from "@/lib/action-auth"
 import { prisma } from "@/lib/prisma"
+import type { AgentRunOutput, AgentTrajectoryStep } from "@/types/agent"
 import { revalidatePath } from "next/cache"
 
 // ─── Response type ───────────────────────────────────────────────
@@ -23,8 +25,8 @@ function deserializeHistory(row: {
 }) {
   return {
     ...row,
-    output: JSON.parse(row.output),
-    trajectory: JSON.parse(row.trajectory),
+    output: JSON.parse(row.output) as AgentRunOutput | Record<string, unknown>,
+    trajectory: JSON.parse(row.trajectory) as AgentTrajectoryStep[],
     createdAt: row.createdAt.toISOString(),
   }
 }
@@ -35,6 +37,10 @@ export type SerializedAgentHistory = ReturnType<typeof deserializeHistory>
 export async function getHistoryByPromptId(
   promptId: string
 ): Promise<ActionResult<SerializedAgentHistory[]>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const rows = await prisma.agentHistory.findMany({
       where: { promptId },
@@ -54,6 +60,10 @@ export async function createAgentHistory(data: {
   output: Record<string, unknown>
   trajectory?: unknown[]
 }): Promise<ActionResult<SerializedAgentHistory>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const row = await prisma.agentHistory.create({
       data: {
@@ -72,6 +82,10 @@ export async function createAgentHistory(data: {
 }
 
 export async function deleteAgentHistory(id: string): Promise<ActionResult<{ id: string }>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     await prisma.agentHistory.delete({ where: { id } })
     revalidateAll()

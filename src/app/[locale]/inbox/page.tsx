@@ -101,9 +101,13 @@ export default function InboxPage() {
                   disabled={pending}
                   onClick={() => {
                     startTransition(async () => {
-                      await setPromptStatus(p.id, "production")
-                      toast.success(tc("promoted"))
-                      refetch()
+                      const result = await setPromptStatus(p.id, "production")
+                      if (result.success) {
+                        toast.success(tc("promoted"))
+                        refetch()
+                      } else {
+                        toast.error(result.error)
+                      }
                     })
                   }}
                 >
@@ -122,12 +126,20 @@ export default function InboxPage() {
                   variant="ghost"
                   className="h-7 text-xs"
                   onClick={async () => {
-                    await copyToClipboard(p.content)
+                    const ok = await copyToClipboard(p.content)
+                    if (!ok) {
+                      toast.error("Failed to copy")
+                      return
+                    }
                     startTransition(async () => {
-                      await markPromptLastUsed(p.id)
+                      const result = await markPromptLastUsed(p.id)
+                      if (!result.success) {
+                        toast.error(result.error)
+                      }
                     })
                     toast.success(tc("copied"))
                   }}
+                  disabled={pending}
                 >
                   <Copy className="h-3 w-3 mr-1" /> {tc("copy")}
                 </Button>
@@ -138,9 +150,13 @@ export default function InboxPage() {
                   disabled={pending}
                   onClick={() => {
                     startTransition(async () => {
-                      await setPromptStatus(p.id, "archived")
-                      toast.success(tc("archived"))
-                      refetch()
+                      const result = await setPromptStatus(p.id, "archived")
+                      if (result.success) {
+                        toast.success(tc("archived"))
+                        refetch()
+                      } else {
+                        toast.error(result.error)
+                      }
                     })
                   }}
                 >
@@ -153,9 +169,13 @@ export default function InboxPage() {
                   disabled={pending}
                   onClick={() => {
                     startTransition(async () => {
-                      await deletePromptAction(p.id)
-                      toast.success(tc("deleted"))
-                      refetch()
+                      const result = await deletePromptAction(p.id)
+                      if (result.success) {
+                        toast.success(tc("deleted"))
+                        refetch()
+                      } else {
+                        toast.error(result.error)
+                      }
                     })
                   }}
                 >

@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect, useMemo, useTransition } from
 import { useRouter } from "@/i18n/navigation"
 import { Link } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
-import { ArrowLeft, Save, Eye, Puzzle, Bot } from "lucide-react"
+import { ArrowLeft, Save, Eye, Puzzle, Bot, History } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PromptEditor, extractVariables } from "./prompt-editor"
@@ -12,16 +12,18 @@ import { MetadataForm, type MetadataValues } from "./metadata-form"
 import { PreviewPanel } from "./preview-panel"
 import { ModuleInserter } from "./module-inserter"
 import { AnalysisPanel } from "@/components/agent/analysis-panel"
-import { analyzePrompt } from "@/agent"
+import { VersionHistoryPanel } from "@/components/prompts/version-history-panel"
 import {
   getPromptById,
   createPrompt,
   updatePrompt as updatePromptAction,
-  getPrompts,
   type SerializedPrompt,
 } from "@/app/actions/prompt.actions"
+import { runAgentAnalysis } from "@/app/actions/agent.actions"
+import { getHistoryByPromptId } from "@/app/actions/agent-history.actions"
 import type { Variable } from "@/types/prompt"
-import type { AgentAnalysisResult } from "@/types/agent"
+import type { AgentAnalysisResult, AgentTrajectoryStep } from "@/types/agent"
+import type { PromptVersionSnapshot } from "@/types/prompt-version"
 import { toast } from "sonner"
 
 interface EditorLayoutProps {
@@ -38,6 +40,25 @@ function createInitialMeta(prompt?: SerializedPrompt | null): MetadataValues {
     source: prompt?.source ?? "",
     tags: prompt?.tags ?? [],
     notes: prompt?.notes ?? "",
+  }
+}
+
+function createSnapshotFromEditorState(
+  meta: MetadataValues,
+  content: string,
+  variables: Variable[]
+): PromptVersionSnapshot {
+  return {
+    title: meta.title,
+    description: meta.description,
+    content,
+    status: meta.status,
+    source: meta.source,
+    model: meta.model,
+    category: meta.category,
+    tags: meta.tags,
+    notes: meta.notes,
+    variables,
   }
 }
 
@@ -98,9 +119,40 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
   const [analysis, setAnalysis] = useState<AgentAnalysisResult | null>(
     existing?.agentAnalysis ?? null
   )
+  const [trajectory, setTrajectory] = useState<AgentTrajectoryStep[] | null>(null)
+  const [trajectoryLoading, setTrajectoryLoading] = useState(Boolean(existing?.id))
   const [analyzing, setAnalyzing] = useState(false)
   const cursorRef = useRef<HTMLTextAreaElement | null>(null)
   const isEdit = !!savedPrompt
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadLatestTrajectory() {
+      if (!savedPrompt?.id || !savedPrompt.agentAnalysis || savedPrompt.needsReanalysis) {
+        setTrajectory(null)
+        setTrajectoryLoading(false)
+        return
+      }
+
+      setTrajectoryLoading(true)
+      const result = await getHistoryByPromptId(savedPrompt.id)
+      if (cancelled) return
+
+      if (result.success) {
+        setTrajectory(result.data[0]?.trajectory ?? null)
+      } else {
+        setTrajectory(null)
+      }
+      setTrajectoryLoading(false)
+    }
+
+    void loadLatestTrajectory()
+
+    return () => {
+      cancelled = true
+    }
+  }, [savedPrompt?.agentAnalysis, savedPrompt?.id, savedPrompt?.needsReanalysis])
 
   // Track changes
   const handleContentChange = useCallback((v: string) => {
@@ -126,6 +178,11 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
     })
   }, [content, savedPrompt?.variables])
 
+  const currentSnapshot = useMemo(
+    () => createSnapshotFromEditorState(meta, content, variables),
+    [content, meta, variables]
+  )
+
   // Save handler
   const handleSave = useCallback(() => {
     if (!meta.title.trim()) {
@@ -146,6 +203,10 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
         })
         if (result.success) {
           setSavedPrompt(result.data)
+          setAnalysis(result.data.agentAnalysis ?? null)
+          if (result.data.needsReanalysis || !result.data.agentAnalysis) {
+            setTrajectory(null)
+          }
           toast.success(t("promptUpdated"))
           setDirty(false)
         } else {
@@ -173,20 +234,35 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
       toast.error(ta("writeFirst"))
       return
     }
+    if (!savedPrompt?.id || dirty) {
+      toast.error(ta("savePromptFirst"))
+      return
+    }
+
     setAnalyzing(true)
-    const allResult = await getPrompts()
-    const allPrompts = allResult.success ? allResult.data : []
-    setTimeout(() => {
-      const result = analyzePrompt({
-        content,
-        existingPrompts: allPrompts,
-        currentId: savedPrompt?.id ?? promptId,
-      })
-      setAnalysis(result)
+    startTransition(async () => {
+      const result = await runAgentAnalysis(content, savedPrompt.id)
+      if (result.success) {
+        setAnalysis(result.data.analysis)
+        setTrajectory(result.data.trajectory)
+        setSavedPrompt((current) =>
+          current
+            ? {
+                ...current,
+                agentAnalysis: result.data.analysis,
+                lastAnalyzedAt: result.data.analysis.analyzedAt,
+                agentVersion: result.data.analysis.analysisVersion,
+                needsReanalysis: false,
+              }
+            : current
+        )
+        toast.success(ta("analysisComplete"))
+      } else {
+        toast.error(result.error)
+      }
       setAnalyzing(false)
-      toast.success(ta("analysisComplete"))
-    }, 300)
-  }, [content, promptId, savedPrompt?.id, ta])
+    })
+  }, [content, dirty, savedPrompt, startTransition, ta])
 
   // Ctrl+S shortcut
   useEffect(() => {
@@ -270,6 +346,11 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
               <TabsTrigger value="agent">
                 <Bot className="h-3.5 w-3.5 mr-1" /> Agent
               </TabsTrigger>
+              {savedPrompt?.id && (
+                <TabsTrigger value="versions">
+                  <History className="h-3.5 w-3.5 mr-1" /> {t("versionsTab")}
+                </TabsTrigger>
+              )}
               <TabsTrigger value="modules">
                 <Puzzle className="h-3.5 w-3.5 mr-1" /> {t("modules")}
               </TabsTrigger>
@@ -280,10 +361,30 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
             <TabsContent value="agent" className="mt-4">
               <AnalysisPanel
                 analysis={analysis}
+                trajectory={trajectory}
+                trajectoryLoading={trajectoryLoading}
                 onAnalyze={handleAnalyze}
                 analyzing={analyzing}
+                analyzingLabel={ta("analyzingWithEngine", { engine: "MiniMax-2.7" })}
               />
             </TabsContent>
+            {savedPrompt?.id && (
+              <TabsContent value="versions" className="mt-4">
+                <VersionHistoryPanel
+                  promptId={savedPrompt.id}
+                  currentSnapshot={currentSnapshot}
+                  refreshKey={savedPrompt.updatedAt}
+                  onRestore={(restoredPrompt) => {
+                    setSavedPrompt(restoredPrompt)
+                    setContent(restoredPrompt.content)
+                    setMeta(createInitialMeta(restoredPrompt))
+                    setAnalysis(restoredPrompt.agentAnalysis ?? null)
+                    setTrajectory(null)
+                    setDirty(false)
+                  }}
+                />
+              </TabsContent>
+            )}
             <TabsContent value="modules" className="mt-4">
               <ModuleInserter onInsert={handleInsertModule} />
             </TabsContent>

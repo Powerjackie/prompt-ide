@@ -1,9 +1,12 @@
 "use server"
 
+import { ensureAuthenticated } from "@/lib/action-auth"
 import { prisma } from "@/lib/prisma"
+import { buildChangeSummary, deserializePromptSnapshot, serializePromptSnapshot } from "@/lib/prompt-version"
 import { revalidatePath } from "next/cache"
 import type { Variable, PromptStatus, ModelType } from "@/types/prompt"
 import type { AgentAnalysisResult } from "@/types/agent"
+import type { PromptVersionSnapshot } from "@/types/prompt-version"
 
 // ─── Response type ───────────────────────────────────────────────
 type ActionResult<T = unknown> =
@@ -13,6 +16,80 @@ type ActionResult<T = unknown> =
 // ─── Helpers ─────────────────────────────────────────────────────
 function revalidateAll() {
   revalidatePath("/[locale]", "layout")
+}
+
+const SNAPSHOT_FIELDS = [
+  "title",
+  "description",
+  "content",
+  "status",
+  "source",
+  "model",
+  "category",
+  "tags",
+  "notes",
+  "variables",
+] as const
+
+type PromptVersionWriter = {
+  promptVersion: {
+    findFirst: typeof prisma.promptVersion.findFirst
+    create: typeof prisma.promptVersion.create
+  }
+}
+
+function createSnapshotFromInput(data: {
+  title: string
+  description?: string
+  content: string
+  status?: string
+  source?: string
+  model?: string
+  category?: string
+  tags?: string[]
+  notes?: string
+  variables?: Variable[]
+}): PromptVersionSnapshot {
+  return {
+    title: data.title,
+    description: data.description ?? "",
+    content: data.content,
+    status: (data.status ?? "inbox") as PromptStatus,
+    source: data.source ?? "",
+    model: (data.model ?? "universal") as ModelType,
+    category: data.category ?? "general",
+    tags: data.tags ?? [],
+    notes: data.notes ?? "",
+    variables: data.variables ?? [],
+  }
+}
+
+async function createPromptVersionSnapshot(
+  tx: PromptVersionWriter,
+  promptId: string,
+  snapshot: PromptVersionSnapshot,
+  changeSummary: string,
+  versionNumber?: number
+) {
+  const latestVersion =
+    versionNumber === undefined
+      ? await tx.promptVersion.findFirst({
+          where: { promptId },
+          orderBy: { versionNumber: "desc" },
+          select: { versionNumber: true },
+        })
+      : null
+
+  const nextVersion = versionNumber ?? (latestVersion?.versionNumber ?? 0) + 1
+
+  await tx.promptVersion.create({
+    data: {
+      promptId,
+      versionNumber: nextVersion,
+      changeSummary,
+      ...serializePromptSnapshot(snapshot),
+    },
+  })
 }
 
 /** Convert DB row (JSON strings) → typed Prompt object */
@@ -57,6 +134,10 @@ export type SerializedPrompt = ReturnType<typeof deserializePrompt>
 
 // ─── Queries ─────────────────────────────────────────────────────
 export async function getPrompts(): Promise<ActionResult<SerializedPrompt[]>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const rows = await prisma.prompt.findMany({ orderBy: { updatedAt: "desc" } })
     return { success: true, data: rows.map(deserializePrompt) }
@@ -66,6 +147,10 @@ export async function getPrompts(): Promise<ActionResult<SerializedPrompt[]>> {
 }
 
 export async function getPromptById(id: string): Promise<ActionResult<SerializedPrompt>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const row = await prisma.prompt.findUnique({ where: { id } })
     if (!row) return { success: false, error: "Prompt not found" }
@@ -89,21 +174,23 @@ export async function createPrompt(data: {
   variables?: Variable[]
   isFavorite?: boolean
 }): Promise<ActionResult<SerializedPrompt>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
-    const row = await prisma.prompt.create({
-      data: {
-        title: data.title,
-        content: data.content,
-        description: data.description ?? "",
-        status: data.status ?? "inbox",
-        source: data.source ?? "",
-        model: data.model ?? "universal",
-        category: data.category ?? "general",
-        tags: JSON.stringify(data.tags ?? []),
-        notes: data.notes ?? "",
-        variables: JSON.stringify(data.variables ?? []),
-        isFavorite: data.isFavorite ?? false,
-      },
+    const snapshot = createSnapshotFromInput(data)
+    const row = await prisma.$transaction(async (tx) => {
+      const created = await tx.prompt.create({
+        data: {
+          ...serializePromptSnapshot(snapshot),
+          isFavorite: data.isFavorite ?? false,
+        },
+      })
+
+      await createPromptVersionSnapshot(tx, created.id, snapshot, "Initial version", 1)
+
+      return created
     })
     revalidateAll()
     return { success: true, data: deserializePrompt(row) }
@@ -132,7 +219,14 @@ export async function updatePrompt(
     needsReanalysis?: boolean
   }
 ): Promise<ActionResult<SerializedPrompt>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
+    const existing = await prisma.prompt.findUnique({ where: { id } })
+    if (!existing) return { success: false, error: "Prompt not found" }
+
     const updateData: Record<string, unknown> = {}
     if (data.title !== undefined) updateData.title = data.title
     if (data.content !== undefined) updateData.content = data.content
@@ -152,7 +246,29 @@ export async function updatePrompt(
     if (data.agentVersion !== undefined) updateData.agentVersion = data.agentVersion
     if (data.needsReanalysis !== undefined) updateData.needsReanalysis = data.needsReanalysis
 
-    const row = await prisma.prompt.update({ where: { id }, data: updateData })
+    const changedSnapshotFields = SNAPSHOT_FIELDS.filter((field) => data[field] !== undefined)
+    if (changedSnapshotFields.length > 0 && data.agentAnalysis === undefined) {
+      updateData.agentAnalysis = null
+      updateData.lastAnalyzedAt = null
+      updateData.agentVersion = null
+      updateData.needsReanalysis = data.needsReanalysis ?? true
+    }
+
+    const row = await prisma.$transaction(async (tx) => {
+      const updated = await tx.prompt.update({ where: { id }, data: updateData })
+
+      if (changedSnapshotFields.length > 0) {
+        const snapshot = deserializePromptSnapshot(updated)
+        await createPromptVersionSnapshot(
+          tx,
+          id,
+          snapshot,
+          buildChangeSummary(changedSnapshotFields.map((field) => field.replace(/([A-Z])/g, " $1").toLowerCase()))
+        )
+      }
+
+      return updated
+    })
     revalidateAll()
     return { success: true, data: deserializePrompt(row) }
   } catch (e) {
@@ -161,6 +277,10 @@ export async function updatePrompt(
 }
 
 export async function deletePrompt(id: string): Promise<ActionResult<{ id: string }>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     await prisma.prompt.delete({ where: { id } })
     revalidateAll()
@@ -171,6 +291,10 @@ export async function deletePrompt(id: string): Promise<ActionResult<{ id: strin
 }
 
 export async function toggleFavorite(id: string): Promise<ActionResult<SerializedPrompt>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const existing = await prisma.prompt.findUnique({ where: { id } })
     if (!existing) return { success: false, error: "Prompt not found" }
@@ -189,6 +313,10 @@ export async function setPromptStatus(
   id: string,
   status: string
 ): Promise<ActionResult<SerializedPrompt>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const row = await prisma.prompt.update({ where: { id }, data: { status } })
     revalidateAll()
@@ -199,24 +327,51 @@ export async function setPromptStatus(
 }
 
 export async function clonePrompt(id: string): Promise<ActionResult<SerializedPrompt>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const original = await prisma.prompt.findUnique({ where: { id } })
     if (!original) return { success: false, error: "Prompt not found" }
-    const row = await prisma.prompt.create({
-      data: {
-        title: `${original.title} (Clone)`,
-        description: original.description,
-        content: original.content,
-        status: "inbox",
-        source: original.source,
-        model: original.model,
-        category: original.category,
-        tags: original.tags,
-        notes: original.notes,
-        variables: original.variables,
-        isFavorite: false,
-        needsReanalysis: true,
-      },
+    const row = await prisma.$transaction(async (tx) => {
+      const created = await tx.prompt.create({
+        data: {
+          title: `${original.title} (Clone)`,
+          description: original.description,
+          content: original.content,
+          status: "inbox",
+          source: original.source,
+          model: original.model,
+          category: original.category,
+          tags: original.tags,
+          notes: original.notes,
+          variables: original.variables,
+          isFavorite: false,
+          needsReanalysis: true,
+        },
+      })
+
+      await createPromptVersionSnapshot(
+        tx,
+        created.id,
+        {
+          title: created.title,
+          description: created.description,
+          content: created.content,
+          status: created.status as PromptStatus,
+          source: created.source,
+          model: created.model as ModelType,
+          category: created.category,
+          tags: JSON.parse(created.tags) as string[],
+          notes: created.notes,
+          variables: JSON.parse(created.variables) as Variable[],
+        },
+        "Cloned from existing prompt",
+        1
+      )
+
+      return created
     })
     revalidateAll()
     return { success: true, data: deserializePrompt(row) }
@@ -229,6 +384,10 @@ export async function setPromptAnalysis(
   id: string,
   analysis: AgentAnalysisResult
 ): Promise<ActionResult<SerializedPrompt>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const row = await prisma.prompt.update({
       where: { id },
@@ -247,6 +406,10 @@ export async function setPromptAnalysis(
 }
 
 export async function markPromptLastUsed(id: string): Promise<ActionResult<SerializedPrompt>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const row = await prisma.prompt.update({
       where: { id },

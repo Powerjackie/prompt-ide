@@ -24,21 +24,21 @@
     "deleteForever": "永久删除",
     "deleted": "已删除",
     "newPrompt": "新建提示词",
-    "unsavedChanges": "（未保存的更改）",
-    "titleRequired": "标题为必填项",
-    "contentRequired": "内容为必填项",
+    "unsavedChanges": "（有未保存修改）",
+    "titleRequired": "标题不能为空",
+    "contentRequired": "内容不能为空",
     "noResults": "未找到结果。",
     "promptCount": "{count} 条提示词",
     "characters": "{count} 个字符",
-    "words": "~{count} 个词"
+    "words": "约 {count} 个词"
   },
-
   "nav": {
     "home": "首页",
     "prompts": "提示词",
     "editor": "编辑器",
     "inbox": "收件箱",
     "modules": "模块",
+    "collections": "合集",
     "favorites": "收藏",
     "archive": "归档",
     "tags": "标签",
@@ -46,7 +46,6 @@
     "settings": "设置",
     "collapse": "收起"
   },
-
   "home": {
     "title": "首页",
     "totalPrompts": "提示词总数",
@@ -54,10 +53,9 @@
     "favorites": "收藏",
     "modules": "模块",
     "quickCapture": "快速捕获",
-    "recentPrompts": "最近的提示词",
+    "recentPrompts": "最近提示词",
     "tags": "标签"
   },
-
   "prompts": {
     "title": "提示词",
     "promptContent": "提示词内容",
@@ -72,40 +70,68 @@
     "updated": "更新于",
     "lastUsed": "最后使用",
     "never": "从未使用",
-    "noTags": "无标签",
-    "notFound": "未找到提示词。",
-    "deleteConfirmTitle": "删除此提示词？",
-    "deleteConfirmDesc": "此操作无法撤销。",
-    "allStatus": "所有状态",
-    "allModels": "所有模型",
-    "allTags": "所有标签",
+    "noTags": "暂无标签",
+    "notFound": "未找到该提示词。",
+    "deleteConfirmTitle": "删除这个提示词？",
+    "deleteConfirmDesc": "此操作不可撤销。",
+    "allStatus": "全部状态",
+    "allModels": "全部模型",
+    "allTags": "全部标签",
     "recentlyUpdated": "最近更新",
     "recentlyCreated": "最近创建",
     "alphabetical": "按字母排序",
-    "startWriting": "开始输入以查看预览。"
+    "startWriting": "开始输入以查看预览。",
+    "versions": {
+      "title": "版本历史",
+      "description": "每次保存都会生成一个不可变快照，方便比较与回滚。",
+      "count": "{count} 个版本",
+      "loading": "正在加载版本历史...",
+      "empty": "还没有历史版本。",
+      "versionLabel": "版本 {version}",
+      "latest": "最新",
+      "savedAt": "保存于 {date}",
+      "compareTitle": "与版本 {version} 对比",
+      "restoreAction": "恢复为当前版本",
+      "restoring": "恢复中...",
+      "restored": "已恢复为新的当前工作版本",
+      "noDiff": "该版本与当前工作副本一致。",
+      "current": "当前",
+      "selected": "所选版本",
+      "fields": {
+        "title": "标题",
+        "description": "描述",
+        "content": "内容",
+        "status": "状态",
+        "source": "来源",
+        "model": "模型",
+        "category": "分类",
+        "tags": "标签",
+        "notes": "备注",
+        "variables": "变量"
+      }
+    }
   },
-
   "editor": {
     "newPrompt": "新建提示词",
     "editPrompt": "编辑提示词",
     "preview": "预览",
+    "versionsTab": "版本",
     "modules": "模块",
     "titleLabel": "标题 *",
     "titlePlaceholder": "提示词标题",
     "descriptionLabel": "描述",
     "descriptionPlaceholder": "简要描述",
     "contentLabel": "提示词内容 *",
-    "contentPlaceholder": "在此编写提示词...使用 {{variable}} 表示动态值。",
+    "contentPlaceholder": "在这里编写提示词... 使用 {{variable}} 表示动态值。",
     "sourceLabel": "来源",
-    "sourcePlaceholder": "此提示词来自哪里？",
+    "sourcePlaceholder": "这个提示词来自哪里？",
     "tagsLabel": "标签",
     "tagsPlaceholder": "输入后按回车添加标签",
     "notesLabel": "备注",
-    "notesPlaceholder": "关于此提示词的个人备注...",
+    "notesPlaceholder": "关于这个提示词的个人备注...",
     "promptUpdated": "提示词已更新",
     "promptCreated": "提示词已创建"
   },
-
   "inbox": {
     "title": "收件箱",
     "quickCapture": "快速捕获",
@@ -114,10 +140,9 @@
     "captureContent": "提示词内容 *",
     "captureContentPlaceholder": "粘贴或输入你的提示词...",
     "capture": "捕获",
-    "captured": "已捕获到收件箱",
-    "empty": "收件箱为空。捕获一个提示词以开始。"
+    "captured": "已加入收件箱",
+    "empty": "收件箱为空。先捕获一条提示词开始吧。"
   },
-
   "modules": {
     "title": "模块",
     "newModule": "新建模块",
@@ -131,7 +156,7 @@
     "moduleCreated": "模块已创建",
     "moduleDeleted": "模块已删除",
     "insert": "插入",
-    "noModules": "未找到模块。创建一个以开始。",
+    "noModules": "还没有模块。先创建一个开始吧。",
     "all": "全部",
     "role": "角色",
     "goal": "目标",
@@ -140,34 +165,29 @@
     "style": "风格",
     "selfCheck": "自检"
   },
-
   "favorites": {
     "title": "收藏",
-    "empty": "暂无收藏。为提示词加星标以添加到此处。"
+    "empty": "还没有收藏。给提示词加星即可加入这里。"
   },
-
   "archive": {
     "title": "归档",
     "empty": "暂无归档提示词。",
     "permanentlyDeleted": "已永久删除"
   },
-
   "tags": {
     "title": "标签",
-    "empty": "暂无标签。为提示词或模块添加标签。",
+    "empty": "还没有标签。给提示词或模块添加标签吧。",
     "promptCount": "{count} 条提示词",
     "moduleCount": "{count} 个模块"
   },
-
   "playground": {
     "title": "Agent 实验场",
-    "description": "粘贴任意提示词文本，查看 Agent 如何分析它。这是一个用于测试分类、风险检测、变量提取和相似度匹配的沙盒。",
+    "description": "粘贴任意提示词文本，查看 Agent 如何分析它。这是用于测试分类、风险检测、变量提取和相似性匹配的沙箱。",
     "promptContent": "提示词内容",
-    "placeholder": "在此粘贴提示词进行分析...",
+    "placeholder": "在这里粘贴提示词进行分析...",
     "analyze": "分析",
     "results": "分析结果"
   },
-
   "settings": {
     "title": "设置",
     "defaults": "默认值",
@@ -177,17 +197,17 @@
     "list": "列表",
     "agentSection": "Agent",
     "enableAgent": "启用 Agent",
-    "enableAgentDesc": "对提示词运行分析",
+    "enableAgentDesc": "为提示词运行分析",
     "autoAnalyze": "自动分析",
     "autoAnalyzeDesc": "自动分析新提示词",
     "normalization": "规范化",
     "normalizationDesc": "建议内容清理",
     "moduleExtraction": "模块提取",
-    "moduleExtractionDesc": "检测可复用的模块候选",
+    "moduleExtractionDesc": "检测可复用模块候选",
     "analysisDepth": "分析深度",
     "quick": "快速",
     "standard": "标准",
-    "deep": "深度",
+    "deep": "深入",
     "dataSection": "数据",
     "exportData": "导出数据",
     "exportDataDesc": "下载所有提示词、模块和设置为 JSON",
@@ -196,22 +216,99 @@
     "importData": "导入数据",
     "importDataDesc": "从之前导出的 JSON 文件恢复",
     "import": "导入",
-    "importSuccess": "数据已导入。正在重新加载...",
+    "importSuccess": "数据已导入，正在重新加载...",
     "importError": "导入文件失败",
     "invalidFile": "无效的导出文件",
     "resetSettings": "重置设置",
     "resetSettingsDesc": "恢复默认设置（不会删除数据）",
     "reset": "重置",
-    "resetDone": "设置已重置为默认值"
+    "resetDone": "设置已恢复默认值"
   },
-
   "search": {
     "placeholder": "搜索提示词、模块、页面...",
     "pages": "页面",
     "prompts": "提示词",
-    "modules": "模块"
+    "modules": "模块",
+    "collections": "合集"
   },
-
+  "benchmark": {
+    "title": "Benchmark 评分卡",
+    "description": "使用 MiniMax 对已保存版本进行统一评测，衡量清晰度、复用性、可控性与上线准备度。",
+    "loading": "正在加载 Benchmark 记录...",
+    "run": "运行 Benchmark",
+    "running": "评测中...",
+    "runComplete": "评测完成",
+    "noVersion": "请先保存此 Prompt，生成可评测的版本。",
+    "empty": "还没有 Benchmark 记录。",
+    "latestRun": "最新评测：版本 {version}",
+    "recommended": "可进入生产",
+    "needsWork": "仍需打磨",
+    "suggestions": "改进建议",
+    "compareTitle": "对比评测",
+    "compareDescription": "选择两个 Benchmark 结果，查看新版本是否真的更好。",
+    "compareLeft": "基线版本",
+    "compareRight": "候选版本",
+    "comparing": "正在比较 Benchmark 结果...",
+    "runLabel": "v{version} · {date}",
+    "scores": {
+      "overall": "综合得分",
+      "clarity": "清晰度",
+      "reusability": "复用性",
+      "controllability": "可控性",
+      "deploymentReadiness": "上线准备度"
+    }
+  },
+  "collections": {
+    "title": "合集",
+    "newCollection": "新建合集",
+    "empty": "还没有任何合集。先创建一个，把 Prompt 和 Module 组织成可复用方案包。",
+    "noDescription": "暂无描述。",
+    "itemCount": "{count} 个条目",
+    "notFound": "未找到该合集。",
+    "deleted": "合集已删除",
+    "deleteTitle": "删除这个合集？",
+    "deleteDescription": "这只会删除合集与排序信息，不会删除其中的 Prompt 或 Module。",
+    "itemsTitle": "合集条目",
+    "emptyItems": "这个合集还是空的。",
+    "missingItem": "资源不存在",
+    "itemPosition": "位置 {position}",
+    "addItemTitle": "添加资产",
+    "itemTypeLabel": "资产类型",
+    "itemLabel": "选择资产",
+    "selectPlaceholder": "请选择一个条目",
+    "selectItem": "请先选择 Prompt 或 Module。",
+    "itemAdded": "已添加到合集",
+    "itemRemoved": "已从合集移除",
+    "addItemAction": "加入合集",
+    "itemTypes": {
+      "prompt": "Prompt",
+      "module": "Module"
+    },
+    "types": {
+      "workflow": "工作流",
+      "toolkit": "工具包",
+      "learning": "学习包"
+    },
+    "form": {
+      "createTitle": "新建合集",
+      "editTitle": "编辑合集",
+      "description": "用合集把多个 Prompt 和 Module 打包成可重复复用的解决方案。",
+      "titleLabel": "标题",
+      "titlePlaceholder": "英语口语强化训练包",
+      "titleRequired": "合集标题不能为空",
+      "descriptionLabel": "描述",
+      "descriptionPlaceholder": "这个合集解决什么问题？",
+      "typeLabel": "合集类型",
+      "saving": "保存中...",
+      "created": "合集已创建",
+      "updated": "合集已更新",
+      "types": {
+        "workflow": "工作流",
+        "toolkit": "工具包",
+        "learning": "学习包"
+      }
+    }
+  },
   "login": {
     "eyebrow": "访问保护",
     "title": "登录",
@@ -223,7 +320,6 @@
     "invalidPassword": "密码不正确。",
     "configError": "尚未配置身份验证。"
   },
-
   "agent": {
     "title": "Agent 分析",
     "riskLevel": "风险等级",
@@ -236,44 +332,60 @@
     "runAnalysis": "运行分析",
     "reanalyze": "重新分析",
     "analyzing": "分析中...",
-    "noAnalysis": "尚未分析。",
+    "analyzingWithEngine": "正在使用 {engine} 分析...",
+    "noAnalysis": "还没有分析结果。",
     "analysisComplete": "分析完成",
-    "writeFirst": "请先编写一些内容",
+    "writeFirst": "请先写一点内容",
+    "savePromptFirst": "请先保存提示词，再运行 Agent 分析。",
     "category": "分类",
     "model": "模型",
     "status": "状态",
-    "summaryCategory": "分类: {category}",
+    "summaryCategory": "分类：{category}",
     "summaryVariables": "{count} 个变量",
-    "summaryRisk": "风险: {level}",
+    "summaryRisk": "风险：{level}",
     "summaryDuplicates": "{count} 个相似提示词",
-    "summaryNormalize": "内容可被规范化",
+    "summaryNormalize": "内容可进一步规范化",
+    "timeline": {
+      "title": "推理轨迹",
+      "latest": "最新持久化 ReAct 轨迹",
+      "empty": "还没有可显示的轨迹。",
+      "loading": "正在加载最新轨迹...",
+      "thought": "思考",
+      "action": "行动",
+      "observation": "观察",
+      "tool": "工具",
+      "query": "查询",
+      "details": "查看详情",
+      "content": "内容",
+      "input": "输入",
+      "data": "数据",
+      "step": "步骤 {step}"
+    },
     "risk": {
       "low": "低",
       "medium": "中",
       "high": "高",
-      "detectedPII": "检测到潜在的{type}",
-      "injectionPattern": "潜在的提示词注入模式: {pattern}",
+      "detectedPII": "检测到潜在的 {type}",
+      "injectionPattern": "潜在的提示词注入模式：{pattern}",
       "email": "邮箱地址",
-      "ssn": "社会安全号码",
+      "ssn": "身份证号/社保号",
       "creditCard": "信用卡号",
       "apiKey": "API 密钥",
       "ipAddress": "IP 地址",
       "ignoreInstructions": "忽略指令",
-      "forgetPrevious": "遗忘上文",
+      "forgetPrevious": "忘记上文",
       "jailbreak": "越狱攻击",
       "systemInjection": "系统前缀注入",
       "formatInjection": "格式注入",
       "pretendBypass": "伪装绕过",
-      "bypassRules": "规则绕过"
+      "bypassRules": "绕过规则"
     }
   },
-
   "status": {
     "inbox": "收件箱",
     "production": "生产",
     "archived": "已归档"
   },
-
   "models": {
     "universal": "通用",
     "claude": "Claude",
@@ -281,7 +393,6 @@
     "gemini": "Gemini",
     "deepseek": "DeepSeek"
   },
-
   "locale": {
     "zh": "中文",
     "en": "English",

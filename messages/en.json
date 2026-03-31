@@ -39,6 +39,7 @@
     "editor": "Editor",
     "inbox": "Inbox",
     "modules": "Modules",
+    "collections": "Collections",
     "favorites": "Favorites",
     "archive": "Archive",
     "tags": "Tags",
@@ -82,13 +83,43 @@
     "recentlyUpdated": "Recently Updated",
     "recentlyCreated": "Recently Created",
     "alphabetical": "Alphabetical",
-    "startWriting": "Start writing to see a preview."
+    "startWriting": "Start writing to see a preview.",
+    "versions": {
+      "title": "Version History",
+      "description": "Immutable snapshots created whenever this prompt is saved.",
+      "count": "{count} version(s)",
+      "loading": "Loading saved versions...",
+      "empty": "No saved versions yet.",
+      "versionLabel": "Version {version}",
+      "latest": "Latest",
+      "savedAt": "Saved {date}",
+      "compareTitle": "Compare with version {version}",
+      "restoreAction": "Restore as current",
+      "restoring": "Restoring...",
+      "restored": "Version restored as the current working copy",
+      "noDiff": "This version matches the current working copy.",
+      "current": "Current",
+      "selected": "Selected version",
+      "fields": {
+        "title": "Title",
+        "description": "Description",
+        "content": "Content",
+        "status": "Status",
+        "source": "Source",
+        "model": "Model",
+        "category": "Category",
+        "tags": "Tags",
+        "notes": "Notes",
+        "variables": "Variables"
+      }
+    }
   },
 
   "editor": {
     "newPrompt": "New Prompt",
     "editPrompt": "Edit Prompt",
     "preview": "Preview",
+    "versionsTab": "Versions",
     "modules": "Modules",
     "titleLabel": "Title *",
     "titlePlaceholder": "Prompt title",
@@ -209,7 +240,88 @@
     "placeholder": "Search prompts, modules, pages...",
     "pages": "Pages",
     "prompts": "Prompts",
-    "modules": "Modules"
+    "modules": "Modules",
+    "collections": "Collections"
+  },
+
+  "benchmark": {
+    "title": "Benchmark Scorecard",
+    "description": "Run MiniMax against a saved prompt version to score clarity, reusability, controllability, and deployment readiness.",
+    "loading": "Loading benchmark runs...",
+    "run": "Run Benchmark",
+    "running": "Benchmarking...",
+    "runComplete": "Benchmark complete",
+    "noVersion": "Save this prompt first so a version can be benchmarked.",
+    "empty": "No benchmark runs yet.",
+    "latestRun": "Latest benchmark on version {version}",
+    "recommended": "Production ready",
+    "needsWork": "Needs work",
+    "suggestions": "Improvement Suggestions",
+    "compareTitle": "Compare Runs",
+    "compareDescription": "Pick two benchmark runs to see whether the latest revision improved.",
+    "compareLeft": "Baseline",
+    "compareRight": "Candidate",
+    "comparing": "Comparing benchmark runs...",
+    "runLabel": "v{version} · {date}",
+    "scores": {
+      "overall": "Overall",
+      "clarity": "Clarity",
+      "reusability": "Reusability",
+      "controllability": "Controllability",
+      "deploymentReadiness": "Deployment Readiness"
+    }
+  },
+
+  "collections": {
+    "title": "Collections",
+    "newCollection": "New Collection",
+    "empty": "No collections yet. Create one to group prompts and modules into a reusable pack.",
+    "noDescription": "No description yet.",
+    "itemCount": "{count} item(s)",
+    "notFound": "Collection not found.",
+    "deleted": "Collection deleted",
+    "deleteTitle": "Delete this collection?",
+    "deleteDescription": "This removes the collection shell and its item ordering, but does not delete the underlying prompts or modules.",
+    "itemsTitle": "Collection Items",
+    "emptyItems": "This collection is still empty.",
+    "missingItem": "Missing asset",
+    "itemPosition": "Position {position}",
+    "addItemTitle": "Add Asset",
+    "itemTypeLabel": "Asset Type",
+    "itemLabel": "Choose Asset",
+    "selectPlaceholder": "Select an item",
+    "selectItem": "Choose a prompt or module first.",
+    "itemAdded": "Item added to collection",
+    "itemRemoved": "Item removed from collection",
+    "addItemAction": "Add to Collection",
+    "itemTypes": {
+      "prompt": "Prompt",
+      "module": "Module"
+    },
+    "types": {
+      "workflow": "Workflow",
+      "toolkit": "Toolkit",
+      "learning": "Learning"
+    },
+    "form": {
+      "createTitle": "Create Collection",
+      "editTitle": "Edit Collection",
+      "description": "Use collections to bundle prompts and modules into repeatable solution packs.",
+      "titleLabel": "Title",
+      "titlePlaceholder": "English Speaking Coach Pack",
+      "titleRequired": "Collection title is required",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "What problem does this collection solve?",
+      "typeLabel": "Collection Type",
+      "saving": "Saving...",
+      "created": "Collection created",
+      "updated": "Collection updated",
+      "types": {
+        "workflow": "Workflow",
+        "toolkit": "Toolkit",
+        "learning": "Learning"
+      }
+    }
   },
 
   "login": {
@@ -236,9 +348,11 @@
     "runAnalysis": "Run Analysis",
     "reanalyze": "Re-analyze",
     "analyzing": "Analyzing...",
+    "analyzingWithEngine": "Analyzing with {engine}...",
     "noAnalysis": "No analysis yet.",
     "analysisComplete": "Analysis complete",
     "writeFirst": "Write some content first",
+    "savePromptFirst": "Save the prompt before running agent analysis.",
     "category": "Category",
     "model": "Model",
     "status": "Status",
@@ -247,6 +361,22 @@
     "summaryRisk": "Risk: {level}",
     "summaryDuplicates": "{count} similar prompt(s)",
     "summaryNormalize": "Content can be normalized",
+    "timeline": {
+      "title": "Reasoning Timeline",
+      "latest": "Latest persisted ReAct trace",
+      "empty": "No trajectory recorded yet.",
+      "loading": "Loading latest trajectory...",
+      "thought": "Thought",
+      "action": "Action",
+      "observation": "Observation",
+      "tool": "Tool",
+      "query": "Query",
+      "details": "Show details",
+      "content": "Content",
+      "input": "Input",
+      "data": "Data",
+      "step": "Step {step}"
+    },
     "risk": {
       "low": "low",
       "medium": "medium",

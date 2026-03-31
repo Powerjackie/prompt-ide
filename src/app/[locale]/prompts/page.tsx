@@ -28,7 +28,7 @@ function PromptsContent() {
   const t = useTranslations("prompts")
   const tc = useTranslations("common")
   const { prompts: allPrompts, loading } = usePrompts()
-  const [, startTransition] = useTransition()
+  const [pending, startTransition] = useTransition()
   const searchParams = useSearchParams()
   const [view, setView] = useState<"card" | "list">("card")
 
@@ -128,9 +128,13 @@ function PromptsContent() {
                     e.preventDefault()
                     e.stopPropagation()
                     startTransition(async () => {
-                      await toggleFavorite(p.id)
+                      const result = await toggleFavorite(p.id)
+                      if (!result.success) {
+                        toast.error(result.error)
+                      }
                     })
                   }}
+                  disabled={pending}
                 >
                   <Star className={cn("h-3.5 w-3.5", p.isFavorite ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground")} />
                 </Button>
@@ -141,12 +145,20 @@ function PromptsContent() {
                   onClick={async (e) => {
                     e.preventDefault()
                     e.stopPropagation()
-                    await copyToClipboard(p.content)
+                    const ok = await copyToClipboard(p.content)
+                    if (!ok) {
+                      toast.error("Failed to copy")
+                      return
+                    }
                     startTransition(async () => {
-                      await markPromptLastUsed(p.id)
+                      const result = await markPromptLastUsed(p.id)
+                      if (!result.success) {
+                        toast.error(result.error)
+                      }
                     })
                     toast.success(tc("copied"))
                   }}
+                  disabled={pending}
                 >
                   <Copy className="h-3.5 w-3.5" />
                 </Button>

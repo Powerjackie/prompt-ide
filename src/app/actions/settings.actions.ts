@@ -1,5 +1,6 @@
 "use server"
 
+import { ensureAuthenticated } from "@/lib/action-auth"
 import { prisma } from "@/lib/prisma"
 import type { AppSettings } from "@/types/settings"
 
@@ -32,6 +33,10 @@ const defaultSettings: AppSettings = {
 }
 
 export async function getSettings(): Promise<ActionResult<AppSettings>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const row = await prisma.setting.findUnique({ where: { key: SETTINGS_KEY } })
     if (!row) return { success: true, data: defaultSettings }
@@ -44,6 +49,10 @@ export async function getSettings(): Promise<ActionResult<AppSettings>> {
 export async function updateSettings(
   data: Partial<AppSettings>
 ): Promise<ActionResult<AppSettings>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const existing = await prisma.setting.findUnique({ where: { key: SETTINGS_KEY } })
     const current = existing ? (JSON.parse(existing.value) as AppSettings) : defaultSettings
@@ -62,6 +71,10 @@ export async function updateSettings(
 export async function updateAgentSettings(
   data: Partial<AppSettings["agent"]>
 ): Promise<ActionResult<AppSettings>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     const existing = await prisma.setting.findUnique({ where: { key: SETTINGS_KEY } })
     const current = existing ? (JSON.parse(existing.value) as AppSettings) : defaultSettings
@@ -81,6 +94,10 @@ export async function updateAgentSettings(
 }
 
 export async function resetSettings(): Promise<ActionResult<AppSettings>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
   try {
     await prisma.setting.upsert({
       where: { key: SETTINGS_KEY },

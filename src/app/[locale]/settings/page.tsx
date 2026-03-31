@@ -35,7 +35,7 @@ export default function SettingsPage() {
   const [prompts, setPrompts] = useState<SerializedPrompt[]>([])
   const [modules, setModules] = useState<SerializedModule[]>([])
   const [importing, setImporting] = useState(false)
-  const [, startTransition] = useTransition()
+  const [pending, startTransition] = useTransition()
 
   useEffect(() => {
     getSettings().then((result) => {
@@ -52,14 +52,22 @@ export default function SettingsPage() {
   const handleUpdateSettings = (data: Partial<AppSettings>) => {
     startTransition(async () => {
       const result = await updateSettings(data)
-      if (result.success) setSettings(result.data)
+      if (result.success) {
+        setSettings(result.data)
+      } else {
+        toast.error(result.error)
+      }
     })
   }
 
   const handleUpdateAgentSettings = (data: Partial<AppSettings["agent"]>) => {
     startTransition(async () => {
       const result = await updateAgentSettings(data)
-      if (result.success) setSettings(result.data)
+      if (result.success) {
+        setSettings(result.data)
+      } else {
+        toast.error(result.error)
+      }
     })
   }
 
@@ -69,6 +77,8 @@ export default function SettingsPage() {
       if (result.success) {
         setSettings(result.data)
         toast.success(t("resetDone"))
+      } else {
+        toast.error(result.error)
       }
     })
   }
@@ -144,7 +154,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className={pending ? "max-w-2xl space-y-6 opacity-70 pointer-events-none" : "max-w-2xl space-y-6"}>
       <div className="flex items-center gap-2">
         <SettingsIcon className="h-6 w-6" />
         <h1 className="text-2xl font-bold">{t("title")}</h1>
@@ -282,7 +292,7 @@ export default function SettingsPage() {
               <Label>{t("importData")}</Label>
               <p className="text-xs text-muted-foreground">{t("importDataDesc")}</p>
             </div>
-            <Button variant="outline" size="sm" onClick={handleImport} disabled={importing}>
+            <Button variant="outline" size="sm" onClick={handleImport} disabled={importing || pending}>
               <Upload className="h-4 w-4 mr-1" /> {t("import")}
             </Button>
           </div>
@@ -292,7 +302,7 @@ export default function SettingsPage() {
               <Label>{t("resetSettings")}</Label>
               <p className="text-xs text-muted-foreground">{t("resetSettingsDesc")}</p>
             </div>
-            <Button variant="outline" size="sm" onClick={handleReset}>
+            <Button variant="outline" size="sm" onClick={handleReset} disabled={pending}>
               <RotateCcw className="h-4 w-4 mr-1" /> {t("reset")}
             </Button>
           </div>

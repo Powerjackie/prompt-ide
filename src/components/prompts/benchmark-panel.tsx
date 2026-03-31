@@ -1,0 +1,313 @@
+"use client"
+
+import { useEffect, useMemo, useState, useTransition } from "react"
+import { useTranslations } from "next-intl"
+import { Gauge, Sparkles } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  compareBenchmarkRuns,
+  getBenchmarkRunsByPromptId,
+  runPromptBenchmark,
+} from "@/app/actions/benchmark.actions"
+import { cn, formatDate } from "@/lib/utils"
+import { toast } from "sonner"
+import type { BenchmarkComparison, BenchmarkRun } from "@/types/benchmark"
+import type { PromptVersion } from "@/types/prompt-version"
+
+interface BenchmarkPanelProps {
+  promptId: string
+  latestVersion: PromptVersion | null
+  versions: PromptVersion[]
+}
+
+const SCORE_KEYS = [
+  "overallScore",
+  "clarityScore",
+  "reusabilityScore",
+  "controllabilityScore",
+  "deploymentReadinessScore",
+] as const
+
+export function BenchmarkPanel({
+  promptId,
+  latestVersion,
+  versions,
+}: BenchmarkPanelProps) {
+  const t = useTranslations("benchmark")
+  const [runs, setRuns] = useState<BenchmarkRun[]>([])
+  const [loading, setLoading] = useState(true)
+  const [comparison, setComparison] = useState<BenchmarkComparison | null>(null)
+  const [leftRunId, setLeftRunId] = useState<string>("")
+  const [rightRunId, setRightRunId] = useState<string>("")
+  const [runningBenchmark, startBenchmarkTransition] = useTransition()
+  const [comparing, startCompareTransition] = useTransition()
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadRuns() {
+      setLoading(true)
+      const result = await getBenchmarkRunsByPromptId(promptId)
+      if (cancelled) return
+
+      if (result.success) {
+        setRuns(result.data)
+        setLeftRunId((current) => current || result.data[0]?.id || "")
+        setRightRunId((current) => current || result.data[1]?.id || result.data[0]?.id || "")
+      } else {
+        toast.error(result.error)
+      }
+      setLoading(false)
+    }
+
+    void loadRuns()
+
+    return () => {
+      cancelled = true
+    }
+  }, [promptId])
+
+  useEffect(() => {
+    if (!leftRunId || !rightRunId || leftRunId === rightRunId) {
+      return
+    }
+
+    startCompareTransition(async () => {
+      const result = await compareBenchmarkRuns(leftRunId, rightRunId)
+      if (result.success) {
+        setComparison(result.data)
+      } else {
+        toast.error(result.error)
+      }
+    })
+  }, [leftRunId, rightRunId])
+
+  const activeComparison =
+    leftRunId && rightRunId && leftRunId !== rightRunId ? comparison : null
+
+  const latestRun = runs[0] ?? null
+  const versionMap = useMemo(
+    () => new Map(versions.map((version) => [version.id, version])),
+    [versions]
+  )
+
+  const handleRunBenchmark = () => {
+    if (!latestVersion) {
+      toast.error(t("noVersion"))
+      return
+    }
+
+    startBenchmarkTransition(async () => {
+      const result = await runPromptBenchmark(promptId, latestVersion.id)
+      if (!result.success) {
+        toast.error(result.error)
+        return
+      }
+
+      setRuns((current) => [result.data, ...current])
+      setLeftRunId(result.data.id)
+      setRightRunId((current) => current || result.data.id)
+      toast.success(t("runComplete"))
+    })
+  }
+
+  const renderScore = (
+    label: string,
+    value: number,
+    emphasis = false
+  ) => (
+    <div className={cn("rounded-md border p-3", emphasis && "border-primary/50 bg-primary/5")}>
+      <div className="mb-2 flex items-center justify-between gap-3 text-sm">
+        <span>{label}</span>
+        <span className="font-medium tabular-nums">{value}</span>
+      </div>
+      <Progress value={value} />
+    </div>
+  )
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <Gauge className="h-4 w-4 text-primary" />
+            <h3 className="font-medium">{t("title")}</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">{t("description")}</p>
+        </div>
+        <Button onClick={handleRunBenchmark} disabled={runningBenchmark || !latestVersion}>
+          <Sparkles className="mr-1 h-4 w-4" />
+          {runningBenchmark ? t("running") : t("run")}
+        </Button>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <span>{t("loading")}</span>
+        </div>
+      ) : latestRun ? (
+        <div className="space-y-4">
+          <div className="rounded-lg border p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-medium">
+                    {t("latestRun", { version: latestRun.promptVersionNumber })}
+                  </h4>
+                  <Badge variant={latestRun.recommendedForProduction ? "default" : "outline"}>
+                    {latestRun.recommendedForProduction
+                      ? t("recommended")
+                      : t("needsWork")}
+                  </Badge>
+                </div>
+                <p className="mt-1 text-sm text-muted-foreground">{latestRun.summary}</p>
+              </div>
+              <div className="text-right text-sm">
+                <div className="font-semibold tabular-nums">{latestRun.overallScore}/100</div>
+                <div className="text-muted-foreground">
+                  {formatDate(latestRun.createdAt)}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {renderScore(t("scores.overall"), latestRun.overallScore, true)}
+              {renderScore(t("scores.clarity"), latestRun.clarityScore)}
+              {renderScore(t("scores.reusability"), latestRun.reusabilityScore)}
+              {renderScore(t("scores.controllability"), latestRun.controllabilityScore)}
+              {renderScore(
+                t("scores.deploymentReadiness"),
+                latestRun.deploymentReadinessScore
+              )}
+            </div>
+
+            <div className="mt-4">
+              <div className="mb-2 text-sm font-medium">{t("suggestions")}</div>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                {latestRun.improvementSuggestions.map((suggestion, index) => (
+                  <li key={`${suggestion}-${index}`} className="rounded-md bg-muted/30 px-3 py-2">
+                    {suggestion}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {runs.length >= 2 && (
+            <div className="rounded-lg border p-4">
+              <div className="mb-3">
+                <h4 className="font-medium">{t("compareTitle")}</h4>
+                <p className="text-sm text-muted-foreground">{t("compareDescription")}</p>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="space-y-1.5">
+                  <div className="text-sm text-muted-foreground">{t("compareLeft")}</div>
+                  <Select
+                    value={leftRunId}
+                    onValueChange={(value) => setLeftRunId(value ?? "")}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {runs.map((run) => (
+                        <SelectItem key={run.id} value={run.id}>
+                          {t("runLabel", {
+                            version: run.promptVersionNumber,
+                            date: formatDate(run.createdAt),
+                          })}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="text-sm text-muted-foreground">{t("compareRight")}</div>
+                  <Select
+                    value={rightRunId}
+                    onValueChange={(value) => setRightRunId(value ?? "")}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {runs.map((run) => (
+                        <SelectItem key={run.id} value={run.id}>
+                          {t("runLabel", {
+                            version: run.promptVersionNumber,
+                            date: formatDate(run.createdAt),
+                          })}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {activeComparison ? (
+                <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                  {SCORE_KEYS.map((key) => {
+                    const value = activeComparison.deltas[key]
+                    return (
+                      <div key={key} className="rounded-md border p-3">
+                        <div className="text-sm text-muted-foreground">
+                          {t(`scores.${key.replace("Score", "")}`)}
+                        </div>
+                        <div
+                          className={cn(
+                            "mt-1 text-lg font-semibold tabular-nums",
+                            value > 0 && "text-green-600",
+                            value < 0 && "text-red-600"
+                          )}
+                        >
+                          {value > 0 ? "+" : ""}
+                          {value}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : comparing ? (
+                <p className="mt-4 text-sm text-muted-foreground">{t("comparing")}</p>
+              ) : null}
+
+              {(leftRunId || rightRunId) && (
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  {[leftRunId, rightRunId]
+                    .map((runId) => runs.find((run) => run.id === runId) ?? null)
+                    .map((run, index) =>
+                      run ? (
+                        <div key={run.id} className="rounded-md bg-muted/20 p-3">
+                          <div className="text-sm font-medium">
+                            {index === 0 ? t("compareLeft") : t("compareRight")}
+                          </div>
+                          <div className="mt-1 text-sm text-muted-foreground">
+                            {versionMap.get(run.promptVersionId)?.changeSummary ??
+                              run.promptVersionChangeSummary}
+                          </div>
+                        </div>
+                      ) : null
+                    )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">{t("empty")}</p>
+      )}
+    </div>
+  )
+}

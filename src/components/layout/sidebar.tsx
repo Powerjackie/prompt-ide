@@ -14,6 +14,7 @@ import {
   Tags,
   FlaskConical,
   Settings,
+  LibraryBig,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
@@ -29,6 +30,7 @@ const navItems = [
   { href: "/editor", labelKey: "editor", icon: PenSquare },
   { href: "/inbox", labelKey: "inbox", icon: Inbox, showBadge: true },
   { href: "/modules", labelKey: "modules", icon: Puzzle },
+  { href: "/collections", labelKey: "collections", icon: LibraryBig },
   { href: "/favorites", labelKey: "favorites", icon: Star },
   { href: "/archive", labelKey: "archive", icon: Archive },
   { href: "/tags", labelKey: "tags", icon: Tags },

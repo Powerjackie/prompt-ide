@@ -1,5 +1,17 @@
 import type { Variable } from "./prompt"
 
+export type TrajectoryPhase = "thought" | "action" | "observation"
+
+export interface AgentTrajectoryStep {
+  step: number
+  phase: TrajectoryPhase
+  content: string
+  tool: string | null
+  input: Record<string, unknown> | null
+  data: Record<string, unknown> | null
+  timestamp: string
+}
+
 export interface DuplicateCandidate {
   id: string
   title: string
@@ -42,4 +54,14 @@ export interface AgentAnalysisResult {
   matchedRules: string[]
   analysisVersion: string
   analyzedAt: string
+}
+
+export interface AgentRunOutput {
+  result: AgentAnalysisResult
+  meta: {
+    engine: string
+    provider: string
+    transport: string
+    runType: string
+  }
 }

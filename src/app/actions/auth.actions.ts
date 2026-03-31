@@ -2,20 +2,8 @@
 
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-
-export type AuthActionError = "invalidPassword" | "configError" | null
-
-export interface AuthActionState {
-  error: AuthActionError
-}
-
-export const initialAuthState: AuthActionState = {
-  error: null,
-}
-
-const AUTH_COOKIE_NAME = "auth_token"
-const AUTH_COOKIE_VALUE = "authenticated"
-const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
+import { AUTH_COOKIE_MAX_AGE, AUTH_COOKIE_NAME, buildAuthToken } from "@/lib/auth"
+import type { AuthActionState } from "@/types/auth"
 
 export async function loginAction(
   _prevState: AuthActionState,
@@ -31,8 +19,13 @@ export async function loginAction(
     return { error: "invalidPassword" }
   }
 
+  const authToken = await buildAuthToken()
+  if (!authToken) {
+    return { error: "configError" }
+  }
+
   const cookieStore = await cookies()
-  cookieStore.set(AUTH_COOKIE_NAME, AUTH_COOKIE_VALUE, {
+  cookieStore.set(AUTH_COOKIE_NAME, authToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

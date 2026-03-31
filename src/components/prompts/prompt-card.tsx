@@ -26,17 +26,26 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
     const ok = await copyToClipboard(prompt.content)
     if (ok) {
       startTransition(async () => {
-        await markPromptLastUsed(prompt.id)
+        const result = await markPromptLastUsed(prompt.id)
+        if (!result.success) {
+          toast.error(result.error)
+        }
       })
       toast.success(tc("copied"))
+      return
     }
+
+    toast.error("Failed to copy")
   }
 
   const handleFavorite = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
     startTransition(async () => {
-      await toggleFavorite(prompt.id)
+      const result = await toggleFavorite(prompt.id)
+      if (!result.success) {
+        toast.error(result.error)
+      }
     })
   }
 
@@ -51,6 +60,7 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
               size="icon"
               className="h-6 w-6 shrink-0"
               onClick={handleFavorite}
+              disabled={pending}
             >
               <Star
                 className={cn(
@@ -94,6 +104,7 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
                 size="icon"
                 className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
                 onClick={handleCopy}
+                disabled={pending}
               >
                 <Copy className="h-3 w-3" />
               </Button>

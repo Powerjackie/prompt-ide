@@ -1,10 +1,9 @@
 import createMiddleware from "next-intl/middleware"
 import { NextRequest, NextResponse } from "next/server"
+import { AUTH_COOKIE_NAME, isValidAuthToken } from "@/lib/auth"
 import { routing } from "./i18n/routing"
 
 const handleI18nRouting = createMiddleware(routing)
-const AUTH_COOKIE_NAME = "auth_token"
-const AUTH_COOKIE_VALUE = "authenticated"
 
 function getLocaleFromPathname(pathname: string) {
   const locale = pathname.split("/")[1]
@@ -24,7 +23,7 @@ function isLoginPath(pathname: string) {
   )
 }
 
-export default function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   if (isLoginPath(pathname)) {
@@ -32,7 +31,7 @@ export default function middleware(request: NextRequest) {
   }
 
   const authToken = request.cookies.get(AUTH_COOKIE_NAME)?.value
-  if (authToken !== AUTH_COOKIE_VALUE) {
+  if (!(await isValidAuthToken(authToken))) {
     const locale = getLocaleFromPathname(pathname)
     const loginUrl = new URL(`/${locale}/login`, request.url)
     return NextResponse.redirect(loginUrl)
