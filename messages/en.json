@@ -1,0 +1,290 @@
+{
+  "common": {
+    "viewAll": "View All",
+    "search": "Search prompts...",
+    "save": "Save",
+    "create": "Create",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "copy": "Copy",
+    "copied": "Copied",
+    "edit": "Edit",
+    "back": "Back",
+    "confirm": "Confirm",
+    "archive": "Archive",
+    "archived": "Archived",
+    "restore": "Restore",
+    "restored": "Restored",
+    "promote": "Promote",
+    "promoted": "Promoted to production",
+    "clone": "Clone",
+    "cloned": "Prompt cloned",
+    "favorite": "Favorite",
+    "unfavorite": "Unfavorite",
+    "deleteForever": "Delete Forever",
+    "deleted": "Deleted",
+    "newPrompt": "New Prompt",
+    "unsavedChanges": "(unsaved changes)",
+    "titleRequired": "Title is required",
+    "contentRequired": "Content is required",
+    "noResults": "No results found.",
+    "promptCount": "{count} prompts",
+    "characters": "{count} characters",
+    "words": "~{count} words"
+  },
+
+  "nav": {
+    "home": "Home",
+    "prompts": "Prompts",
+    "editor": "Editor",
+    "inbox": "Inbox",
+    "modules": "Modules",
+    "favorites": "Favorites",
+    "archive": "Archive",
+    "tags": "Tags",
+    "playground": "Playground",
+    "settings": "Settings",
+    "collapse": "Collapse"
+  },
+
+  "home": {
+    "title": "Home",
+    "totalPrompts": "Total Prompts",
+    "inInbox": "In Inbox",
+    "favorites": "Favorites",
+    "modules": "Modules",
+    "quickCapture": "Quick Capture",
+    "recentPrompts": "Recent Prompts",
+    "tags": "Tags"
+  },
+
+  "prompts": {
+    "title": "Prompts",
+    "promptContent": "Prompt Content",
+    "variables": "Variables",
+    "notes": "Notes",
+    "metadata": "Metadata",
+    "status": "Status",
+    "model": "Model",
+    "category": "Category",
+    "source": "Source",
+    "created": "Created",
+    "updated": "Updated",
+    "lastUsed": "Last Used",
+    "never": "Never",
+    "noTags": "No tags",
+    "notFound": "Prompt not found.",
+    "deleteConfirmTitle": "Delete this prompt?",
+    "deleteConfirmDesc": "This action cannot be undone.",
+    "allStatus": "All Status",
+    "allModels": "All Models",
+    "allTags": "All Tags",
+    "recentlyUpdated": "Recently Updated",
+    "recentlyCreated": "Recently Created",
+    "alphabetical": "Alphabetical",
+    "startWriting": "Start writing to see a preview."
+  },
+
+  "editor": {
+    "newPrompt": "New Prompt",
+    "editPrompt": "Edit Prompt",
+    "preview": "Preview",
+    "modules": "Modules",
+    "titleLabel": "Title *",
+    "titlePlaceholder": "Prompt title",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Brief description",
+    "contentLabel": "Prompt Content *",
+    "contentPlaceholder": "Write your prompt here... Use {{variable}} for dynamic values.",
+    "sourceLabel": "Source",
+    "sourcePlaceholder": "Where did this prompt come from?",
+    "tagsLabel": "Tags",
+    "tagsPlaceholder": "Type and press Enter to add tags",
+    "notesLabel": "Notes",
+    "notesPlaceholder": "Personal notes about this prompt...",
+    "promptUpdated": "Prompt updated",
+    "promptCreated": "Prompt created"
+  },
+
+  "inbox": {
+    "title": "Inbox",
+    "quickCapture": "Quick Capture",
+    "captureTitle": "Title (optional)",
+    "captureTitlePlaceholder": "Quick title...",
+    "captureContent": "Prompt Content *",
+    "captureContentPlaceholder": "Paste or type your prompt here...",
+    "capture": "Capture",
+    "captured": "Captured to inbox",
+    "empty": "Inbox is empty. Capture a prompt to get started."
+  },
+
+  "modules": {
+    "title": "Modules",
+    "newModule": "New Module",
+    "editModule": "Edit Module",
+    "moduleTitle": "Title *",
+    "moduleTitlePlaceholder": "Module title",
+    "moduleType": "Type",
+    "moduleContent": "Content *",
+    "moduleContentPlaceholder": "Module content...",
+    "moduleUpdated": "Module updated",
+    "moduleCreated": "Module created",
+    "moduleDeleted": "Module deleted",
+    "insert": "Insert",
+    "noModules": "No modules found. Create one to get started.",
+    "all": "All",
+    "role": "Role",
+    "goal": "Goal",
+    "constraint": "Constraint",
+    "outputFormat": "Output Format",
+    "style": "Style",
+    "selfCheck": "Self Check"
+  },
+
+  "favorites": {
+    "title": "Favorites",
+    "empty": "No favorites yet. Star a prompt to add it here."
+  },
+
+  "archive": {
+    "title": "Archive",
+    "empty": "No archived prompts.",
+    "permanentlyDeleted": "Permanently deleted"
+  },
+
+  "tags": {
+    "title": "Tags",
+    "empty": "No tags yet. Add tags to your prompts or modules.",
+    "promptCount": "{count} prompts",
+    "moduleCount": "{count} modules"
+  },
+
+  "playground": {
+    "title": "Agent Playground",
+    "description": "Paste any prompt text to see how the agent analyzes it. This is a sandbox for testing classification, risk detection, variable extraction, and similarity matching.",
+    "promptContent": "Prompt Content",
+    "placeholder": "Paste a prompt here to analyze...",
+    "analyze": "Analyze",
+    "results": "Analysis Results"
+  },
+
+  "settings": {
+    "title": "Settings",
+    "defaults": "Defaults",
+    "defaultView": "Default View",
+    "defaultModel": "Default Model",
+    "card": "Card",
+    "list": "List",
+    "agentSection": "Agent",
+    "enableAgent": "Enable Agent",
+    "enableAgentDesc": "Run analysis on prompts",
+    "autoAnalyze": "Auto-Analyze",
+    "autoAnalyzeDesc": "Analyze new prompts automatically",
+    "normalization": "Normalization",
+    "normalizationDesc": "Suggest content cleanup",
+    "moduleExtraction": "Module Extraction",
+    "moduleExtractionDesc": "Detect reusable module candidates",
+    "analysisDepth": "Analysis Depth",
+    "quick": "Quick",
+    "standard": "Standard",
+    "deep": "Deep",
+    "dataSection": "Data",
+    "exportData": "Export Data",
+    "exportDataDesc": "Download all prompts, modules, and settings as JSON",
+    "export": "Export",
+    "exported": "Data exported",
+    "importData": "Import Data",
+    "importDataDesc": "Restore from a previously exported JSON file",
+    "import": "Import",
+    "importSuccess": "Data imported. Reloading...",
+    "importError": "Failed to import file",
+    "invalidFile": "Invalid export file",
+    "resetSettings": "Reset Settings",
+    "resetSettingsDesc": "Restore default settings (does not delete data)",
+    "reset": "Reset",
+    "resetDone": "Settings reset to defaults"
+  },
+
+  "search": {
+    "placeholder": "Search prompts, modules, pages...",
+    "pages": "Pages",
+    "prompts": "Prompts",
+    "modules": "Modules"
+  },
+
+  "login": {
+    "eyebrow": "Vault Access",
+    "title": "Sign in",
+    "description": "Enter the admin password to unlock the Prompt IDE.",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "submit": "Unlock",
+    "submitting": "Checking...",
+    "invalidPassword": "The password is incorrect.",
+    "configError": "Authentication is not configured."
+  },
+
+  "agent": {
+    "title": "Agent Analysis",
+    "riskLevel": "Risk Level",
+    "confidence": "Confidence",
+    "suggestions": "Suggestions",
+    "variables": "Variables",
+    "similarPrompts": "Similar Prompts",
+    "moduleCandidates": "Module Candidates",
+    "matchedRules": "Matched Rules",
+    "runAnalysis": "Run Analysis",
+    "reanalyze": "Re-analyze",
+    "analyzing": "Analyzing...",
+    "noAnalysis": "No analysis yet.",
+    "analysisComplete": "Analysis complete",
+    "writeFirst": "Write some content first",
+    "category": "Category",
+    "model": "Model",
+    "status": "Status",
+    "summaryCategory": "Category: {category}",
+    "summaryVariables": "{count} variable(s)",
+    "summaryRisk": "Risk: {level}",
+    "summaryDuplicates": "{count} similar prompt(s)",
+    "summaryNormalize": "Content can be normalized",
+    "risk": {
+      "low": "low",
+      "medium": "medium",
+      "high": "high",
+      "detectedPII": "Detected potential {type}",
+      "injectionPattern": "Potential prompt injection pattern: {pattern}",
+      "email": "email",
+      "ssn": "SSN",
+      "creditCard": "credit card",
+      "apiKey": "API key",
+      "ipAddress": "IP address",
+      "ignoreInstructions": "ignore-previous",
+      "forgetPrevious": "forget-previous",
+      "jailbreak": "jailbreak-dan",
+      "systemInjection": "system-prefix-injection",
+      "formatInjection": "format-injection",
+      "pretendBypass": "pretend-bypass",
+      "bypassRules": "bypass-rules"
+    }
+  },
+
+  "status": {
+    "inbox": "Inbox",
+    "production": "Production",
+    "archived": "Archived"
+  },
+
+  "models": {
+    "universal": "Universal",
+    "claude": "Claude",
+    "gpt4": "GPT",
+    "gemini": "Gemini",
+    "deepseek": "DeepSeek"
+  },
+
+  "locale": {
+    "zh": "中文",
+    "en": "English",
+    "switchLocale": "Switch Language"
+  }
+}

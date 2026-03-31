@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Prompt {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  content     String
+  status      String   @default("inbox") // inbox | production | archived
+  source      String   @default("")
+  model       String   @default("universal") // universal | claude | gpt4 | gemini | deepseek
+  category    String   @default("general")
+  tags        String   @default("[]") // JSON array
+  isFavorite  Boolean  @default(false)
+  notes       String   @default("")
+  variables   String   @default("[]") // JSON array of { name, description, defaultValue }
+
+  // Agent analysis fields
+  agentAnalysis   String? // Full AgentAnalysisResult as JSON
+  lastAnalyzedAt  DateTime?
+  agentVersion    String?
+  needsReanalysis Boolean @default(false)
+
+  lastUsedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  agentHistory AgentHistory[]
+}
+
+model Module {
+  id      String @id @default(cuid())
+  title   String
+  type    String // role | goal | constraint | output_format | style | self_check
+  content String
+  tags    String @default("[]") // JSON array
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AgentHistory {
+  id         String @id @default(cuid())
+  promptId   String
+  prompt     Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
+  type       String @default("rule_analysis") // rule_analysis | react_trajectory | chat
+  input      String // The prompt content that was analyzed
+  output     String // Full result as JSON
+  trajectory String @default("[]") // JSON array — rule reasons, ReAct thoughts/actions, or chat messages
+
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  key   String @id
+  value String // JSON value
+}

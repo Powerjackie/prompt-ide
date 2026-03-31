@@ -1,0 +1,290 @@
+{
+  "common": {
+    "viewAll": "查看全部",
+    "search": "搜索提示词...",
+    "save": "保存",
+    "create": "创建",
+    "delete": "删除",
+    "cancel": "取消",
+    "copy": "复制",
+    "copied": "已复制",
+    "edit": "编辑",
+    "back": "返回",
+    "confirm": "确认",
+    "archive": "归档",
+    "archived": "已归档",
+    "restore": "恢复",
+    "restored": "已恢复",
+    "promote": "提升",
+    "promoted": "已提升为生产",
+    "clone": "克隆",
+    "cloned": "已克隆",
+    "favorite": "收藏",
+    "unfavorite": "取消收藏",
+    "deleteForever": "永久删除",
+    "deleted": "已删除",
+    "newPrompt": "新建提示词",
+    "unsavedChanges": "（未保存的更改）",
+    "titleRequired": "标题为必填项",
+    "contentRequired": "内容为必填项",
+    "noResults": "未找到结果。",
+    "promptCount": "{count} 条提示词",
+    "characters": "{count} 个字符",
+    "words": "~{count} 个词"
+  },
+
+  "nav": {
+    "home": "首页",
+    "prompts": "提示词",
+    "editor": "编辑器",
+    "inbox": "收件箱",
+    "modules": "模块",
+    "favorites": "收藏",
+    "archive": "归档",
+    "tags": "标签",
+    "playground": "实验场",
+    "settings": "设置",
+    "collapse": "收起"
+  },
+
+  "home": {
+    "title": "首页",
+    "totalPrompts": "提示词总数",
+    "inInbox": "收件箱",
+    "favorites": "收藏",
+    "modules": "模块",
+    "quickCapture": "快速捕获",
+    "recentPrompts": "最近的提示词",
+    "tags": "标签"
+  },
+
+  "prompts": {
+    "title": "提示词",
+    "promptContent": "提示词内容",
+    "variables": "变量",
+    "notes": "备注",
+    "metadata": "元数据",
+    "status": "状态",
+    "model": "模型",
+    "category": "分类",
+    "source": "来源",
+    "created": "创建于",
+    "updated": "更新于",
+    "lastUsed": "最后使用",
+    "never": "从未使用",
+    "noTags": "无标签",
+    "notFound": "未找到提示词。",
+    "deleteConfirmTitle": "删除此提示词？",
+    "deleteConfirmDesc": "此操作无法撤销。",
+    "allStatus": "所有状态",
+    "allModels": "所有模型",
+    "allTags": "所有标签",
+    "recentlyUpdated": "最近更新",
+    "recentlyCreated": "最近创建",
+    "alphabetical": "按字母排序",
+    "startWriting": "开始输入以查看预览。"
+  },
+
+  "editor": {
+    "newPrompt": "新建提示词",
+    "editPrompt": "编辑提示词",
+    "preview": "预览",
+    "modules": "模块",
+    "titleLabel": "标题 *",
+    "titlePlaceholder": "提示词标题",
+    "descriptionLabel": "描述",
+    "descriptionPlaceholder": "简要描述",
+    "contentLabel": "提示词内容 *",
+    "contentPlaceholder": "在此编写提示词...使用 {{variable}} 表示动态值。",
+    "sourceLabel": "来源",
+    "sourcePlaceholder": "此提示词来自哪里？",
+    "tagsLabel": "标签",
+    "tagsPlaceholder": "输入后按回车添加标签",
+    "notesLabel": "备注",
+    "notesPlaceholder": "关于此提示词的个人备注...",
+    "promptUpdated": "提示词已更新",
+    "promptCreated": "提示词已创建"
+  },
+
+  "inbox": {
+    "title": "收件箱",
+    "quickCapture": "快速捕获",
+    "captureTitle": "标题（可选）",
+    "captureTitlePlaceholder": "快速标题...",
+    "captureContent": "提示词内容 *",
+    "captureContentPlaceholder": "粘贴或输入你的提示词...",
+    "capture": "捕获",
+    "captured": "已捕获到收件箱",
+    "empty": "收件箱为空。捕获一个提示词以开始。"
+  },
+
+  "modules": {
+    "title": "模块",
+    "newModule": "新建模块",
+    "editModule": "编辑模块",
+    "moduleTitle": "标题 *",
+    "moduleTitlePlaceholder": "模块标题",
+    "moduleType": "类型",
+    "moduleContent": "内容 *",
+    "moduleContentPlaceholder": "模块内容...",
+    "moduleUpdated": "模块已更新",
+    "moduleCreated": "模块已创建",
+    "moduleDeleted": "模块已删除",
+    "insert": "插入",
+    "noModules": "未找到模块。创建一个以开始。",
+    "all": "全部",
+    "role": "角色",
+    "goal": "目标",
+    "constraint": "约束",
+    "outputFormat": "输出格式",
+    "style": "风格",
+    "selfCheck": "自检"
+  },
+
+  "favorites": {
+    "title": "收藏",
+    "empty": "暂无收藏。为提示词加星标以添加到此处。"
+  },
+
+  "archive": {
+    "title": "归档",
+    "empty": "暂无归档提示词。",
+    "permanentlyDeleted": "已永久删除"
+  },
+
+  "tags": {
+    "title": "标签",
+    "empty": "暂无标签。为提示词或模块添加标签。",
+    "promptCount": "{count} 条提示词",
+    "moduleCount": "{count} 个模块"
+  },
+
+  "playground": {
+    "title": "Agent 实验场",
+    "description": "粘贴任意提示词文本，查看 Agent 如何分析它。这是一个用于测试分类、风险检测、变量提取和相似度匹配的沙盒。",
+    "promptContent": "提示词内容",
+    "placeholder": "在此粘贴提示词进行分析...",
+    "analyze": "分析",
+    "results": "分析结果"
+  },
+
+  "settings": {
+    "title": "设置",
+    "defaults": "默认值",
+    "defaultView": "默认视图",
+    "defaultModel": "默认模型",
+    "card": "卡片",
+    "list": "列表",
+    "agentSection": "Agent",
+    "enableAgent": "启用 Agent",
+    "enableAgentDesc": "对提示词运行分析",
+    "autoAnalyze": "自动分析",
+    "autoAnalyzeDesc": "自动分析新提示词",
+    "normalization": "规范化",
+    "normalizationDesc": "建议内容清理",
+    "moduleExtraction": "模块提取",
+    "moduleExtractionDesc": "检测可复用的模块候选",
+    "analysisDepth": "分析深度",
+    "quick": "快速",
+    "standard": "标准",
+    "deep": "深度",
+    "dataSection": "数据",
+    "exportData": "导出数据",
+    "exportDataDesc": "下载所有提示词、模块和设置为 JSON",
+    "export": "导出",
+    "exported": "数据已导出",
+    "importData": "导入数据",
+    "importDataDesc": "从之前导出的 JSON 文件恢复",
+    "import": "导入",
+    "importSuccess": "数据已导入。正在重新加载...",
+    "importError": "导入文件失败",
+    "invalidFile": "无效的导出文件",
+    "resetSettings": "重置设置",
+    "resetSettingsDesc": "恢复默认设置（不会删除数据）",
+    "reset": "重置",
+    "resetDone": "设置已重置为默认值"
+  },
+
+  "search": {
+    "placeholder": "搜索提示词、模块、页面...",
+    "pages": "页面",
+    "prompts": "提示词",
+    "modules": "模块"
+  },
+
+  "login": {
+    "eyebrow": "访问保护",
+    "title": "登录",
+    "description": "请输入管理员密码以解锁 Prompt IDE。",
+    "passwordLabel": "密码",
+    "passwordPlaceholder": "输入密码",
+    "submit": "解锁",
+    "submitting": "验证中...",
+    "invalidPassword": "密码不正确。",
+    "configError": "尚未配置身份验证。"
+  },
+
+  "agent": {
+    "title": "Agent 分析",
+    "riskLevel": "风险等级",
+    "confidence": "置信度",
+    "suggestions": "建议",
+    "variables": "变量",
+    "similarPrompts": "相似提示词",
+    "moduleCandidates": "模块候选",
+    "matchedRules": "匹配规则",
+    "runAnalysis": "运行分析",
+    "reanalyze": "重新分析",
+    "analyzing": "分析中...",
+    "noAnalysis": "尚未分析。",
+    "analysisComplete": "分析完成",
+    "writeFirst": "请先编写一些内容",
+    "category": "分类",
+    "model": "模型",
+    "status": "状态",
+    "summaryCategory": "分类: {category}",
+    "summaryVariables": "{count} 个变量",
+    "summaryRisk": "风险: {level}",
+    "summaryDuplicates": "{count} 个相似提示词",
+    "summaryNormalize": "内容可被规范化",
+    "risk": {
+      "low": "低",
+      "medium": "中",
+      "high": "高",
+      "detectedPII": "检测到潜在的{type}",
+      "injectionPattern": "潜在的提示词注入模式: {pattern}",
+      "email": "邮箱地址",
+      "ssn": "社会安全号码",
+      "creditCard": "信用卡号",
+      "apiKey": "API 密钥",
+      "ipAddress": "IP 地址",
+      "ignoreInstructions": "忽略指令",
+      "forgetPrevious": "遗忘上文",
+      "jailbreak": "越狱攻击",
+      "systemInjection": "系统前缀注入",
+      "formatInjection": "格式注入",
+      "pretendBypass": "伪装绕过",
+      "bypassRules": "规则绕过"
+    }
+  },
+
+  "status": {
+    "inbox": "收件箱",
+    "production": "生产",
+    "archived": "已归档"
+  },
+
+  "models": {
+    "universal": "通用",
+    "claude": "Claude",
+    "gpt4": "GPT",
+    "gemini": "Gemini",
+    "deepseek": "DeepSeek"
+  },
+
+  "locale": {
+    "zh": "中文",
+    "en": "English",
+    "switchLocale": "切换语言"
+  }
+}
