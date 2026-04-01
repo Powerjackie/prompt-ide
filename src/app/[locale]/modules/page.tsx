@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl"
 import { Puzzle, Plus, PenSquare, Trash2, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { PageHeader } from "@/components/layout/page-header"
 import { useModules } from "@/hooks/use-modules"
 import { useModuleUIStore } from "@/stores/module-store"
 import { deleteModule as deleteModuleAction } from "@/app/actions/module.actions"
@@ -59,17 +60,29 @@ export default function ModulesPage() {
   }
 
   return (
-    <div className={pending ? "opacity-70 pointer-events-none space-y-6" : "space-y-6"}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Puzzle className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
-          <Badge variant="secondary">{modules.length}</Badge>
+    <div className={pending ? "pointer-events-none space-y-8 opacity-70" : "space-y-8"}>
+      <PageHeader
+        eyebrow={
+          <>
+            <Puzzle className="h-3.5 w-3.5" />
+            {t("title")}
+          </>
+        }
+        title={t("title")}
+        description="Maintain the reusable roles, goals, constraints, and formats that power stronger prompt systems."
+        actions={
+          <Button onClick={openCreate} className="rounded-2xl">
+            <Plus className="mr-1 h-4 w-4" />
+            {t("newModule")}
+          </Button>
+        }
+      >
+        <div className="chip-row">
+          <Badge variant="outline" className="rounded-full px-3 py-1">
+            {modules.length} assets
+          </Badge>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="h-4 w-4 mr-1" /> {t("newModule")}
-        </Button>
-      </div>
+      </PageHeader>
 
       {/* Type filter tabs */}
       <div className="flex flex-wrap gap-1.5">
@@ -96,7 +109,7 @@ export default function ModulesPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="app-panel py-14 text-center text-muted-foreground">
           <Puzzle className="h-12 w-12 mx-auto mb-3 opacity-30" />
           <p>{t("noModules")}</p>
         </div>
@@ -107,7 +120,7 @@ export default function ModulesPage() {
             return (
               <div
                 key={m.id}
-                className="border rounded-lg p-4 space-y-3 hover:bg-accent/30 transition-colors"
+                className="app-panel rounded-[1.75rem] p-5 space-y-3 hover:border-primary/20 hover:bg-accent/20 transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div>

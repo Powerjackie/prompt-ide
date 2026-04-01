@@ -15,18 +15,25 @@ import {
 } from "@/components/ui/select"
 import {
   compareBenchmarkRuns,
+  getLatestPromptEvolutionComparison,
   getBenchmarkRunsByPromptId,
   runPromptBenchmark,
 } from "@/app/actions/benchmark.actions"
 import { cn, formatDate } from "@/lib/utils"
 import { toast } from "sonner"
-import type { BenchmarkComparison, BenchmarkRun } from "@/types/benchmark"
+import type {
+  BenchmarkComparison,
+  BenchmarkRun,
+  PromptEvolutionComparison,
+  PromptEvolutionComparisonStrategy,
+} from "@/types/benchmark"
 import type { PromptVersion } from "@/types/prompt-version"
 
 interface BenchmarkPanelProps {
   promptId: string
   latestVersion: PromptVersion | null
   versions: PromptVersion[]
+  evolutionComparison?: PromptEvolutionComparison | null
 }
 
 const SCORE_KEYS = [
@@ -41,6 +48,7 @@ export function BenchmarkPanel({
   promptId,
   latestVersion,
   versions,
+  evolutionComparison = null,
 }: BenchmarkPanelProps) {
   const t = useTranslations("benchmark")
   const [runs, setRuns] = useState<BenchmarkRun[]>([])
@@ -48,8 +56,24 @@ export function BenchmarkPanel({
   const [comparison, setComparison] = useState<BenchmarkComparison | null>(null)
   const [leftRunId, setLeftRunId] = useState<string>("")
   const [rightRunId, setRightRunId] = useState<string>("")
+  const [manualEvolutionStrategy, setManualEvolutionStrategy] =
+    useState<PromptEvolutionComparisonStrategy | null>(null)
+  const [loadedEvolutionComparison, setLoadedEvolutionComparison] =
+    useState<PromptEvolutionComparison | null>(null)
+  const [loadingEvolution, setLoadingEvolution] = useState(false)
   const [runningBenchmark, startBenchmarkTransition] = useTransition()
   const [comparing, startCompareTransition] = useTransition()
+
+  const hasBaseline = versions.some((version) => version.isBaseline)
+  const hasPreviousVersion = versions.length >= 2
+  const fallbackEvolutionStrategy: PromptEvolutionComparisonStrategy =
+    hasBaseline ? "baseline" : "previous_version"
+  const selectedEvolutionStrategy =
+    manualEvolutionStrategy &&
+    ((manualEvolutionStrategy === "baseline" && hasBaseline) ||
+      (manualEvolutionStrategy === "previous_version" && hasPreviousVersion))
+      ? manualEvolutionStrategy
+      : fallbackEvolutionStrategy
 
   useEffect(() => {
     let cancelled = false
@@ -91,8 +115,49 @@ export function BenchmarkPanel({
     })
   }, [leftRunId, rightRunId])
 
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadEvolutionComparison() {
+      setLoadedEvolutionComparison(null)
+
+      if (
+        !latestVersion ||
+        (selectedEvolutionStrategy === "baseline" && !hasBaseline) ||
+        (selectedEvolutionStrategy === "previous_version" && !hasPreviousVersion)
+      ) {
+        setLoadedEvolutionComparison(null)
+        return
+      }
+
+      setLoadingEvolution(true)
+      const result = await getLatestPromptEvolutionComparison(promptId, selectedEvolutionStrategy)
+      if (cancelled) return
+
+      if (result.success) {
+        setLoadedEvolutionComparison(result.data)
+      } else {
+        setLoadedEvolutionComparison(null)
+        toast.error(result.error)
+      }
+      setLoadingEvolution(false)
+    }
+
+    void loadEvolutionComparison()
+
+    return () => {
+      cancelled = true
+    }
+  }, [hasBaseline, hasPreviousVersion, latestVersion, promptId, selectedEvolutionStrategy])
+
   const activeComparison =
     leftRunId && rightRunId && leftRunId !== rightRunId ? comparison : null
+  const displayedEvolutionComparison =
+    evolutionComparison?.strategy === selectedEvolutionStrategy
+      ? evolutionComparison
+      : loadedEvolutionComparison?.strategy === selectedEvolutionStrategy
+        ? loadedEvolutionComparison
+        : null
 
   const latestRun = runs[0] ?? null
   const versionMap = useMemo(
@@ -113,7 +178,10 @@ export function BenchmarkPanel({
         return
       }
 
-      setRuns((current) => [result.data, ...current])
+      setRuns((current) => [
+        result.data,
+        ...current.filter((run) => run.id !== result.data.id),
+      ])
       setLeftRunId(result.data.id)
       setRightRunId((current) => current || result.data.id)
       toast.success(t("runComplete"))
@@ -157,6 +225,133 @@ export function BenchmarkPanel({
         </div>
       ) : latestRun ? (
         <div className="space-y-4">
+          {displayedEvolutionComparison || loadingEvolution ? (
+            <div className="rounded-lg border border-primary/40 bg-primary/5 p-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  {displayedEvolutionComparison ? (
+                    <>
+                      <Badge variant="outline">
+                        {displayedEvolutionComparison.strategy === "baseline"
+                          ? t("evolution.strategyBaseline")
+                          : t("evolution.strategyPrevious")}
+                      </Badge>
+                      <Badge
+                        variant={
+                          displayedEvolutionComparison.recommendedForProduction
+                            ? "default"
+                            : "secondary"
+                        }
+                      >
+                        {displayedEvolutionComparison.recommendedForProduction
+                          ? t("evolution.recommended")
+                          : t("evolution.iterate")}
+                      </Badge>
+                    </>
+                  ) : null}
+                </div>
+
+                {(hasBaseline || hasPreviousVersion) && (
+                  <div className="min-w-[220px] space-y-1.5">
+                    <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                      {t("evolution.strategyLabel")}
+                    </div>
+                    <Select
+                      value={selectedEvolutionStrategy}
+                      onValueChange={(value) =>
+                        setManualEvolutionStrategy(
+                          (value as PromptEvolutionComparisonStrategy | null) ?? null
+                        )
+                      }
+                    >
+                      <SelectTrigger className="w-full bg-background/80">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {hasBaseline ? (
+                          <SelectItem value="baseline">
+                            {t("evolution.viewBaseline")}
+                          </SelectItem>
+                        ) : null}
+                        {hasPreviousVersion ? (
+                          <SelectItem value="previous_version">
+                            {t("evolution.viewPrevious")}
+                          </SelectItem>
+                        ) : null}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-3">
+                <div className="text-sm font-medium">{t("evolution.title")}</div>
+                {loadingEvolution && !displayedEvolutionComparison ? (
+                  <p className="mt-1 text-sm text-muted-foreground">{t("evolution.loading")}</p>
+                ) : displayedEvolutionComparison ? (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {displayedEvolutionComparison.summary}
+                  </p>
+                ) : (
+                  <p className="mt-1 text-sm text-muted-foreground">{t("evolution.empty")}</p>
+                )}
+              </div>
+
+              {displayedEvolutionComparison ? (
+                <>
+                  <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+                    {SCORE_KEYS.map((key) => {
+                      const value = displayedEvolutionComparison.deltas[key]
+
+                      return (
+                        <div key={key} className="rounded-md border bg-background/80 p-3">
+                          <div className="text-sm text-muted-foreground">
+                            {t(`evolution.scores.${key}`)}
+                          </div>
+                          <div
+                            className={cn(
+                              "mt-1 text-lg font-semibold tabular-nums",
+                              value > 0 && "text-green-600",
+                              value < 0 && "text-red-600"
+                            )}
+                          >
+                            {value > 0 ? "+" : ""}
+                            {value}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    <div className="rounded-md bg-background/80 p-3">
+                      <div className="text-sm font-medium">{t("evolution.comparisonRun")}</div>
+                      <div className="mt-1 text-sm text-muted-foreground">
+                        {t("evolution.versionLabel", {
+                          version: displayedEvolutionComparison.comparison.promptVersionNumber,
+                        })}
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        {displayedEvolutionComparison.comparison.summary}
+                      </div>
+                    </div>
+                    <div className="rounded-md bg-background/80 p-3">
+                      <div className="text-sm font-medium">{t("evolution.candidateRun")}</div>
+                      <div className="mt-1 text-sm text-muted-foreground">
+                        {t("evolution.versionLabel", {
+                          version: displayedEvolutionComparison.candidate.promptVersionNumber,
+                        })}
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        {displayedEvolutionComparison.candidate.summary}
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : null}
+            </div>
+          ) : null}
+
           <div className="rounded-lg border p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>

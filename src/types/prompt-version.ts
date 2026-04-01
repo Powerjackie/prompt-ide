@@ -17,6 +17,7 @@ export interface PromptVersion extends PromptVersionSnapshot {
   id: string
   promptId: string
   versionNumber: number
+  isBaseline: boolean
   changeSummary: string
   createdAt: string
 }

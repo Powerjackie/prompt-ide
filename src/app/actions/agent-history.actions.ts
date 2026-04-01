@@ -2,7 +2,8 @@
 
 import { ensureAuthenticated } from "@/lib/action-auth"
 import { prisma } from "@/lib/prisma"
-import type { AgentRunOutput, AgentTrajectoryStep } from "@/types/agent"
+import type { AgentHistoryType, AgentRunOutput, AgentTrajectoryStep } from "@/types/agent"
+import type { PromptRefactorRunOutput } from "@/types/refactor"
 import { revalidatePath } from "next/cache"
 
 // ─── Response type ───────────────────────────────────────────────
@@ -25,7 +26,10 @@ function deserializeHistory(row: {
 }) {
   return {
     ...row,
-    output: JSON.parse(row.output) as AgentRunOutput | Record<string, unknown>,
+    output: JSON.parse(row.output) as
+      | AgentRunOutput
+      | PromptRefactorRunOutput
+      | Record<string, unknown>,
     trajectory: JSON.parse(row.trajectory) as AgentTrajectoryStep[],
     createdAt: row.createdAt.toISOString(),
   }
@@ -35,7 +39,8 @@ export type SerializedAgentHistory = ReturnType<typeof deserializeHistory>
 
 // ─── Queries ─────────────────────────────────────────────────────
 export async function getHistoryByPromptId(
-  promptId: string
+  promptId: string,
+  type?: AgentHistoryType
 ): Promise<ActionResult<SerializedAgentHistory[]>> {
   if (!(await ensureAuthenticated())) {
     return { success: false, error: "Unauthorized" }
@@ -43,7 +48,10 @@ export async function getHistoryByPromptId(
 
   try {
     const rows = await prisma.agentHistory.findMany({
-      where: { promptId },
+      where: {
+        promptId,
+        ...(type ? { type } : {}),
+      },
       orderBy: { createdAt: "desc" },
     })
     return { success: true, data: rows.map(deserializeHistory) }

@@ -6,6 +6,8 @@ import { Link } from "@/i18n/navigation"
 import { Inbox, ArrowUpRight, Archive, Trash2, Copy, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { PageHeader } from "@/components/layout/page-header"
+import { SectionHeader } from "@/components/layout/section-header"
 import { usePrompts } from "@/hooks/use-prompts"
 import {
   setPromptStatus,
@@ -36,19 +38,30 @@ export default function InboxPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Inbox className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
-          <Badge variant="secondary">{inboxPrompts.length}</Badge>
+    <div className="space-y-8 max-w-5xl">
+      <PageHeader
+        eyebrow={
+          <>
+            <Inbox className="h-3.5 w-3.5" />
+            {t("title")}
+          </>
+        }
+        title={t("quickCapture")}
+        description="Use the inbox as a low-friction capture layer, then promote the best items when they are ready."
+      />
+
+      <div className="app-panel p-6">
+        <SectionHeader
+          title={t("quickCapture")}
+          description="Paste rough ideas fast so they enter the workflow before you lose them."
+        />
+        <div className="mt-5">
+          <QuickCapture onCaptured={refetch} />
         </div>
       </div>
 
-      <QuickCapture onCaptured={refetch} />
-
       {inboxPrompts.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="app-panel py-14 text-center text-muted-foreground">
           <Inbox className="h-12 w-12 mx-auto mb-3 opacity-30" />
           <p>{t("empty")}</p>
         </div>
@@ -57,7 +70,7 @@ export default function InboxPage() {
           {inboxPrompts.map((p) => (
             <div
               key={p.id}
-              className="border rounded-lg p-4 space-y-3 hover:bg-accent/30 transition-colors"
+              className="app-panel space-y-3 rounded-[1.75rem] p-5 transition-colors hover:border-primary/20 hover:bg-accent/20"
             >
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1">

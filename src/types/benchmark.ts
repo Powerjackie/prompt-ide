@@ -1,3 +1,8 @@
+export type PromptEvolutionComparisonStrategy = "baseline" | "previous_version"
+export type PromptEvolutionComparisonRequestStrategy =
+  | "auto"
+  | PromptEvolutionComparisonStrategy
+
 export interface BenchmarkScores {
   overallScore: number
   clarityScore: number
@@ -32,5 +37,14 @@ export interface BenchmarkRun extends BenchmarkScores {
 export interface BenchmarkComparison {
   left: BenchmarkRun
   right: BenchmarkRun
+  deltas: BenchmarkScores
+}
+
+export interface PromptEvolutionComparison {
+  strategy: PromptEvolutionComparisonStrategy
+  candidate: BenchmarkRun
+  comparison: BenchmarkRun
+  summary: string
+  recommendedForProduction: boolean
   deltas: BenchmarkScores
 }

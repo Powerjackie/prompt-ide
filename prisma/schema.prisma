@@ -35,6 +35,7 @@ model Prompt {
   versions     PromptVersion[]
   benchmarkRuns BenchmarkRun[]
   collectionItems CollectionItem[]
+  entrySkills Skill[] @relation("SkillEntryPrompt")
 }
 
 model Module {
@@ -54,7 +55,7 @@ model AgentHistory {
   id         String @id @default(cuid())
   promptId   String
   prompt     Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
-  type       String @default("rule_analysis") // rule_analysis | react_trajectory | chat
+  type       String @default("rule_analysis") // rule_analysis | react_trajectory | refactor_proposal | chat
   input      String // The prompt content that was analyzed
   output     String // Full result as JSON
   trajectory String @default("[]") // JSON array — rule reasons, ReAct thoughts/actions, or chat messages
@@ -67,6 +68,7 @@ model PromptVersion {
   promptId      String
   prompt        Prompt   @relation(fields: [promptId], references: [id], onDelete: Cascade)
   versionNumber Int
+  isBaseline    Boolean  @default(false)
   changeSummary String   @default("")
   title         String
   description   String   @default("")
@@ -114,6 +116,25 @@ model Collection {
   updatedAt   DateTime @updatedAt
 
   items CollectionItem[]
+  skills Skill[]
+}
+
+model Skill {
+  id               String      @id @default(cuid())
+  name             String
+  description      String      @default("")
+  goal             String      @default("")
+  status           String      @default("draft") // draft | active | archived
+  entryPromptId    String
+  entryPrompt      Prompt      @relation("SkillEntryPrompt", fields: [entryPromptId], references: [id], onDelete: Cascade)
+  collectionId     String?
+  collection       Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  recommendedModel String      @default("universal")
+  inputSchema      String      @default("{}")
+  outputSchema     String      @default("{}")
+  notes            String      @default("")
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 }
 
 model CollectionItem {

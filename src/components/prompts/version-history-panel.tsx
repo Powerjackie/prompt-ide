@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react"
 import { useTranslations } from "next-intl"
-import { History, RotateCcw } from "lucide-react"
+import { Flag, History, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
   getPromptVersionsByPromptId,
   restorePromptVersion,
+  setPromptVersionBaseline,
 } from "@/app/actions/prompt-version.actions"
 import { cn, formatDate } from "@/lib/utils"
 import { toast } from "sonner"
@@ -117,6 +118,27 @@ export function VersionHistoryPanel({
     })
   }
 
+  const handleSetBaseline = (version: PromptVersion) => {
+    startTransition(async () => {
+      const result = await setPromptVersionBaseline(promptId, version.id)
+      if (!result.success) {
+        toast.error(result.error)
+        return
+      }
+
+      setVersions((current) =>
+        current
+          .map((item) => ({
+            ...item,
+            isBaseline: item.id === version.id,
+          }))
+          .sort((left, right) => right.versionNumber - left.versionNumber)
+      )
+      setSelectedVersionId(version.id)
+      toast.success(t("baselineSet"))
+    })
+  }
+
   if (loading) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -159,7 +181,10 @@ export function VersionHistoryPanel({
                 <span className="font-medium">
                   {t("versionLabel", { version: version.versionNumber })}
                 </span>
-                {index === 0 && <Badge variant="outline">{t("latest")}</Badge>}
+                <div className="flex items-center gap-1.5">
+                  {version.isBaseline ? <Badge variant="default">{t("baseline")}</Badge> : null}
+                  {index === 0 && <Badge variant="outline">{t("latest")}</Badge>}
+                </div>
               </div>
               <p className="mt-1 text-xs text-muted-foreground">{version.changeSummary}</p>
               <p className="mt-2 text-xs text-muted-foreground">
@@ -179,15 +204,26 @@ export function VersionHistoryPanel({
                   </h4>
                   <p className="text-sm text-muted-foreground">{selectedVersion.changeSummary}</p>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleRestore(selectedVersion)}
-                  disabled={pending}
-                >
-                  <RotateCcw className="mr-1 h-4 w-4" />
-                  {pending ? t("restoring") : t("restoreAction")}
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleSetBaseline(selectedVersion)}
+                    disabled={pending || selectedVersion.isBaseline}
+                  >
+                    <Flag className="mr-1 h-4 w-4" />
+                    {selectedVersion.isBaseline ? t("baseline") : t("setBaselineAction")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleRestore(selectedVersion)}
+                    disabled={pending}
+                  >
+                    <RotateCcw className="mr-1 h-4 w-4" />
+                    {pending ? t("restoring") : t("restoreAction")}
+                  </Button>
+                </div>
               </div>
 
               {diffEntries.length === 0 ? (

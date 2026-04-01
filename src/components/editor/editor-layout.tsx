@@ -7,11 +7,14 @@ import { useTranslations } from "next-intl"
 import { ArrowLeft, Save, Eye, Puzzle, Bot, History } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { PageHeader } from "@/components/layout/page-header"
+import { SectionHeader } from "@/components/layout/section-header"
 import { PromptEditor, extractVariables } from "./prompt-editor"
 import { MetadataForm, type MetadataValues } from "./metadata-form"
 import { PreviewPanel } from "./preview-panel"
 import { ModuleInserter } from "./module-inserter"
 import { AnalysisPanel } from "@/components/agent/analysis-panel"
+import { RefactorPanel } from "@/components/agent/refactor-panel"
 import { VersionHistoryPanel } from "@/components/prompts/version-history-panel"
 import {
   getPromptById,
@@ -136,7 +139,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
       }
 
       setTrajectoryLoading(true)
-      const result = await getHistoryByPromptId(savedPrompt.id)
+      const result = await getHistoryByPromptId(savedPrompt.id, "react_trajectory")
       if (cancelled) return
 
       if (result.success) {
@@ -167,7 +170,13 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
 
   // Build variables from content
   const variables: Variable[] = useMemo(() => {
-    const names = extractVariables(content)
+    const names = Array.from(
+      new Set([
+        ...extractVariables(content),
+        ...(savedPrompt?.variables.map((variable) => variable.name) ?? []),
+      ])
+    )
+
     return names.map((name) => {
       const prev = savedPrompt?.variables.find((v) => v.name === name)
       return {
@@ -264,6 +273,22 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
     })
   }, [content, dirty, savedPrompt, startTransition, ta])
 
+  const handleRefactorApplied = useCallback(
+    (updatedPrompt: SerializedPrompt, mode: "draft" | "variables") => {
+      setSavedPrompt(updatedPrompt)
+      setAnalysis(updatedPrompt.agentAnalysis ?? null)
+      setTrajectory(null)
+
+      if (mode === "draft") {
+        setContent(updatedPrompt.content)
+        setMeta(createInitialMeta(updatedPrompt))
+      }
+
+      setDirty(false)
+    },
+    []
+  )
+
   // Ctrl+S shortcut
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -300,33 +325,61 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
   }, [content])
 
   return (
-    <div className="space-y-4 max-w-7xl">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={isEdit ? `/prompts/${promptId}` : "/prompts"}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> {tc("back")}
-            </Link>
-          </Button>
-          <h1 className="text-xl font-bold">
-            {isEdit ? t("editPrompt") : t("newPrompt")}
-          </h1>
-          {dirty && (
-            <span className="text-xs text-muted-foreground">{tc("unsavedChanges")}</span>
-          )}
+    <div className="space-y-8">
+      <PageHeader
+        eyebrow={
+          <>
+            <Bot className="h-3.5 w-3.5" />
+            Workspace
+          </>
+        }
+        title={isEdit ? t("editPrompt") : t("newPrompt")}
+        description="Shape prompt content, review live structure, and run the MiniMax agent without leaving the workspace."
+        actions={
+          <>
+            <Button variant="ghost" size="sm" asChild className="rounded-2xl">
+              <Link href={isEdit ? `/prompts/${promptId}` : "/prompts"}>
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                {tc("back")}
+              </Link>
+            </Button>
+            <Button onClick={handleSave} disabled={pending} className="rounded-2xl">
+              <Save className="mr-1 h-4 w-4" />
+              {isEdit ? tc("save") : tc("create")}
+            </Button>
+          </>
+        }
+      >
+        <div className="chip-row">
+          {dirty ? (
+            <span className="rounded-full border border-amber-300/50 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
+              {tc("unsavedChanges")}
+            </span>
+          ) : null}
+          <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs text-muted-foreground">
+            {variables.length} variables
+          </span>
         </div>
-        <Button onClick={handleSave} disabled={pending}>
-          <Save className="h-4 w-4 mr-1" /> {isEdit ? tc("save") : tc("create")}
-        </Button>
-      </div>
+      </PageHeader>
 
-      {/* Two-panel layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(380px,0.92fr)] xl:items-start">
         {/* Left: Metadata + Editor */}
         <div className="space-y-4">
-          <MetadataForm values={meta} onChange={handleMetaChange} />
-          <div className="space-y-1.5">
+          <div className="app-panel p-5">
+            <SectionHeader
+              title="Prompt Metadata"
+              description="Keep title, intent, model, and tags aligned with the draft you are evolving."
+            />
+            <div className="mt-5">
+              <MetadataForm values={meta} onChange={handleMetaChange} />
+            </div>
+          </div>
+
+          <div className="app-panel space-y-3 p-5">
+            <SectionHeader
+              title={t("contentLabel")}
+              description="Write, restructure, and prepare the prompt body that powers the workbench."
+            />
             <label className="text-sm font-medium">{t("contentLabel")}</label>
             <PromptEditor
               value={content}
@@ -337,9 +390,9 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
         </div>
 
         {/* Right: Preview / Agent / Modules tabs */}
-        <div>
-          <Tabs defaultValue="preview">
-            <TabsList>
+        <div className="app-panel flex min-h-[680px] flex-col overflow-hidden p-5 xl:sticky xl:top-6 xl:max-h-[calc(100vh-7rem)]">
+          <Tabs defaultValue="preview" className="flex h-full min-h-0 flex-col">
+            <TabsList className="rounded-2xl bg-muted/45 p-1">
               <TabsTrigger value="preview">
                 <Eye className="h-3.5 w-3.5 mr-1" /> {t("preview")}
               </TabsTrigger>
@@ -355,38 +408,72 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
                 <Puzzle className="h-3.5 w-3.5 mr-1" /> {t("modules")}
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="preview" className="mt-4">
-              <PreviewPanel content={content} variables={variables} />
+            <TabsContent value="preview" className="mt-4 min-h-0 flex-1 overflow-hidden">
+              <div className="h-full overflow-y-auto pr-1">
+                <PreviewPanel content={content} variables={variables} />
+              </div>
             </TabsContent>
-            <TabsContent value="agent" className="mt-4">
-              <AnalysisPanel
-                analysis={analysis}
-                trajectory={trajectory}
-                trajectoryLoading={trajectoryLoading}
-                onAnalyze={handleAnalyze}
-                analyzing={analyzing}
-                analyzingLabel={ta("analyzingWithEngine", { engine: "MiniMax-2.7" })}
-              />
+            <TabsContent value="agent" className="mt-4 min-h-0 flex-1 overflow-hidden">
+              <Tabs defaultValue="analysis" className="flex h-full min-h-0 flex-col">
+                <TabsList variant="line" className="rounded-2xl bg-muted/45 p-1">
+                  <TabsTrigger value="analysis">{ta("modes.analysis")}</TabsTrigger>
+                  <TabsTrigger value="refactor">{ta("modes.refactor")}</TabsTrigger>
+                </TabsList>
+                <TabsContent value="analysis" className="mt-4 min-h-0 flex-1 overflow-hidden">
+                  <div className="h-full overflow-y-auto pr-1">
+                    <AnalysisPanel
+                      analysis={analysis}
+                      trajectory={trajectory}
+                      trajectoryLoading={trajectoryLoading}
+                      onAnalyze={handleAnalyze}
+                      analyzing={analyzing}
+                      analyzingLabel={ta("analyzingWithEngine", { engine: "MiniMax-2.7" })}
+                    />
+                  </div>
+                </TabsContent>
+                <TabsContent value="refactor" className="mt-4 min-h-0 flex-1 overflow-hidden">
+                  <div className="h-full overflow-y-auto pr-1">
+                    <RefactorPanel
+                      promptId={savedPrompt?.id}
+                      promptContent={content}
+                      currentDraft={{
+                        title: meta.title,
+                        description: meta.description,
+                        content,
+                        tags: meta.tags,
+                      }}
+                      canRun={Boolean(savedPrompt?.id) && !dirty}
+                      canApply={Boolean(savedPrompt?.id) && !dirty}
+                      refreshKey={savedPrompt?.updatedAt}
+                      onPromptApplied={handleRefactorApplied}
+                    />
+                  </div>
+                </TabsContent>
+              </Tabs>
             </TabsContent>
             {savedPrompt?.id && (
-              <TabsContent value="versions" className="mt-4">
-                <VersionHistoryPanel
-                  promptId={savedPrompt.id}
-                  currentSnapshot={currentSnapshot}
-                  refreshKey={savedPrompt.updatedAt}
-                  onRestore={(restoredPrompt) => {
-                    setSavedPrompt(restoredPrompt)
-                    setContent(restoredPrompt.content)
-                    setMeta(createInitialMeta(restoredPrompt))
-                    setAnalysis(restoredPrompt.agentAnalysis ?? null)
-                    setTrajectory(null)
-                    setDirty(false)
-                  }}
-                />
+              <TabsContent value="versions" className="mt-4 min-h-0 flex-1 overflow-hidden">
+                <div className="h-full overflow-y-auto pr-1">
+                  <VersionHistoryPanel
+                    promptId={savedPrompt.id}
+                    currentSnapshot={currentSnapshot}
+                    refreshKey={savedPrompt.updatedAt}
+                    onRestore={(restoredPrompt) => {
+                      setSavedPrompt(restoredPrompt)
+                      setContent(restoredPrompt.content)
+                      setMeta(createInitialMeta(restoredPrompt))
+                      setAnalysis(restoredPrompt.agentAnalysis ?? null)
+                      setTrajectory(null)
+                      setDirty(false)
+                    }}
+                  />
+                </div>
               </TabsContent>
             )}
-            <TabsContent value="modules" className="mt-4">
-              <ModuleInserter onInsert={handleInsertModule} />
+            <TabsContent value="modules" className="mt-4 min-h-0 flex-1 overflow-hidden">
+              <div className="h-full overflow-y-auto pr-1">
+                <ModuleInserter onInsert={handleInsertModule} />
+              </div>
             </TabsContent>
           </Tabs>
         </div>

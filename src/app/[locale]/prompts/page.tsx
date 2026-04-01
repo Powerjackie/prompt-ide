@@ -1,19 +1,21 @@
 "use client"
 
-import { useState, useMemo, useTransition, Suspense } from "react"
+import { Suspense, useEffect, useMemo, useState, useTransition } from "react"
 import { useSearchParams } from "next/navigation"
-import { useTranslations } from "next-intl"
-import { FileText, Plus, Star, Copy, Clock } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Link } from "@/i18n/navigation"
-import { usePrompts } from "@/hooks/use-prompts"
-import { toggleFavorite, markPromptLastUsed } from "@/app/actions/prompt.actions"
-import { usePromptFilters } from "@/hooks/use-prompt-filters"
+import { useTranslations } from "next-intl"
+import { Clock, Copy, FileText, Plus, Sparkles, Star } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { PageHeader } from "@/components/layout/page-header"
+import { SectionHeader } from "@/components/layout/section-header"
 import { PromptCard } from "@/components/prompts/prompt-card"
 import { PromptFiltersBar } from "@/components/prompts/prompt-filters"
-import { formatDate, cn, copyToClipboard } from "@/lib/utils"
+import { usePrompts } from "@/hooks/use-prompts"
+import { usePromptFilters } from "@/hooks/use-prompt-filters"
+import { markPromptLastUsed, toggleFavorite } from "@/app/actions/prompt.actions"
 import { MODEL_OPTIONS, STATUS_OPTIONS } from "@/lib/constants"
+import { cn, copyToClipboard, formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 
 export default function PromptsPage() {
@@ -27,153 +29,214 @@ export default function PromptsPage() {
 function PromptsContent() {
   const t = useTranslations("prompts")
   const tc = useTranslations("common")
+  const searchParams = useSearchParams()
   const { prompts: allPrompts, loading } = usePrompts()
   const [pending, startTransition] = useTransition()
-  const searchParams = useSearchParams()
   const [view, setView] = useState<"card" | "list">("card")
 
   const prompts = useMemo(
-    () => allPrompts.filter((p) => p.status !== "archived"),
+    () => allPrompts.filter((prompt) => prompt.status !== "archived"),
     [allPrompts]
   )
 
   const { filters, filtered, updateFilter, resetFilters } = usePromptFilters(prompts)
 
   const tagParam = searchParams.get("tag")
-  useMemo(() => {
+  useEffect(() => {
     if (tagParam && filters.tag === "all") {
       updateFilter("tag", tagParam)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tagParam])
+  }, [filters.tag, tagParam, updateFilter])
 
   const allTags = useMemo(() => {
     const tags = new Set<string>()
-    prompts.forEach((p) => p.tags.forEach((tag) => tags.add(tag)))
+    prompts.forEach((prompt) => prompt.tags.forEach((tag) => tags.add(tag)))
     return Array.from(tags).sort()
   }, [prompts])
 
+  const highlightedPrompts = filtered.slice(0, 3)
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FileText className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
-        </div>
-        <Button asChild>
-          <Link href="/editor"><Plus className="h-4 w-4 mr-1" /> {tc("newPrompt")}</Link>
-        </Button>
-      </div>
-
-      <PromptFiltersBar
-        filters={filters}
-        updateFilter={updateFilter}
-        resetFilters={resetFilters}
-        allTags={allTags}
-        view={view}
-        onViewChange={setView}
-        resultCount={filtered.length}
-      />
-
-      {view === "card" ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtered.map((p) => (
-            <PromptCard key={p.id} prompt={p} />
+    <div className="space-y-8">
+      <PageHeader
+        eyebrow={
+          <>
+            <Sparkles className="h-3.5 w-3.5" />
+            Prompt Library
+          </>
+        }
+        title={t("title")}
+        description="Discover your prompt assets quickly, move between status buckets, and keep the best entries close at hand."
+        actions={
+          <Button asChild className="rounded-2xl">
+            <Link href="/editor">
+              <Plus className="mr-1 h-4 w-4" />
+              {tc("newPrompt")}
+            </Link>
+          </Button>
+        }
+      >
+        <div className="grid gap-3 md:grid-cols-3">
+          {highlightedPrompts.map((prompt) => (
+            <Link
+              key={prompt.id}
+              href={`/prompts/${prompt.id}`}
+              className="rounded-2xl border border-white/60 bg-background/70 p-4 transition hover:-translate-y-0.5 hover:border-primary/20 hover:bg-card"
+            >
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+                <FileText className="h-3.5 w-3.5" />
+                {prompt.status}
+              </div>
+              <div className="mt-3 line-clamp-1 text-sm font-semibold">{prompt.title}</div>
+              <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                {prompt.description || prompt.content}
+              </p>
+            </Link>
           ))}
         </div>
-      ) : (
-        <div className="border rounded-md divide-y">
-          {filtered.map((p) => {
-            const modelLabel = MODEL_OPTIONS.find((m) => m.value === p.model)?.label ?? p.model
-            const statusOpt = STATUS_OPTIONS.find((s) => s.value === p.status)
-            return (
-              <Link
-                key={p.id}
-                href={`/prompts/${p.id}`}
-                className="flex items-center gap-4 px-4 py-3 hover:bg-accent/50 transition-colors"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm truncate">{p.title}</div>
-                  {p.description && (
-                    <div className="text-xs text-muted-foreground truncate">{p.description}</div>
-                  )}
-                </div>
-                <Badge variant="outline" className="text-[10px] shrink-0">{modelLabel}</Badge>
-                <div className="flex items-center gap-1 shrink-0">
-                  <span className={cn("inline-block h-1.5 w-1.5 rounded-full", statusOpt?.color)} />
-                  <span className="text-xs text-muted-foreground">{statusOpt?.label}</span>
-                </div>
-                <div className="flex gap-1 shrink-0">
-                  {p.tags.slice(0, 2).map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-[10px]">{tag}</Badge>
-                  ))}
-                </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
-                  <Clock className="h-3 w-3" />
-                  {formatDate(p.updatedAt)}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 shrink-0"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    startTransition(async () => {
-                      const result = await toggleFavorite(p.id)
-                      if (!result.success) {
-                        toast.error(result.error)
-                      }
-                    })
-                  }}
-                  disabled={pending}
-                >
-                  <Star className={cn("h-3.5 w-3.5", p.isFavorite ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground")} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 shrink-0"
-                  onClick={async (e) => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    const ok = await copyToClipboard(p.content)
-                    if (!ok) {
-                      toast.error("Failed to copy")
-                      return
-                    }
-                    startTransition(async () => {
-                      const result = await markPromptLastUsed(p.id)
-                      if (!result.success) {
-                        toast.error(result.error)
-                      }
-                    })
-                    toast.success(tc("copied"))
-                  }}
-                  disabled={pending}
-                >
-                  <Copy className="h-3.5 w-3.5" />
-                </Button>
-              </Link>
-            )
-          })}
-        </div>
-      )}
+      </PageHeader>
 
-      {filtered.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
-          <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p>{tc("noResults")}</p>
-        </div>
-      )}
+      <div className="space-y-5">
+        <SectionHeader
+          title={tc("promptCount", { count: filtered.length })}
+          description="Use search, filters, and tags together to move through your library with less friction."
+        />
+
+        <PromptFiltersBar
+          filters={filters}
+          updateFilter={updateFilter}
+          resetFilters={resetFilters}
+          allTags={allTags}
+          view={view}
+          onViewChange={setView}
+          resultCount={filtered.length}
+        />
+
+        {view === "card" ? (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
+            {filtered.map((prompt) => (
+              <PromptCard key={prompt.id} prompt={prompt} />
+            ))}
+          </div>
+        ) : (
+          <div className="app-panel overflow-hidden">
+            <div className="grid grid-cols-[minmax(0,2.3fr)_auto_auto_auto] items-center gap-4 border-b border-border/70 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              <span>Prompt</span>
+              <span>Status</span>
+              <span>Tags</span>
+              <span>Updated</span>
+            </div>
+            <div className="divide-y divide-border/70">
+              {filtered.map((prompt) => {
+                const modelLabel =
+                  MODEL_OPTIONS.find((option) => option.value === prompt.model)?.label ?? prompt.model
+                const statusOption = STATUS_OPTIONS.find((option) => option.value === prompt.status)
+
+                return (
+                  <Link
+                    key={prompt.id}
+                    href={`/prompts/${prompt.id}`}
+                    className="grid grid-cols-[minmax(0,2.3fr)_auto_auto_auto] items-center gap-4 px-5 py-4 transition hover:bg-muted/40"
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold">{prompt.title}</div>
+                      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                        <Badge variant="outline" className="rounded-full px-2.5 py-0.5">
+                          {modelLabel}
+                        </Badge>
+                        <span className="line-clamp-1 truncate">
+                          {prompt.description || prompt.content}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className={cn("inline-block h-2 w-2 rounded-full", statusOption?.color)} />
+                      <span>{statusOption?.label}</span>
+                    </div>
+
+                    <div className="flex min-w-[180px] flex-wrap justify-end gap-1.5">
+                      {prompt.tags.slice(0, 2).map((tag) => (
+                        <Badge key={tag} variant="outline" className="rounded-full px-2.5 py-0.5">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center justify-end gap-1 text-xs text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5" />
+                      {formatDate(prompt.updatedAt)}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="ml-2 h-8 w-8 rounded-2xl"
+                        onClick={(event) => {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          startTransition(async () => {
+                            const result = await toggleFavorite(prompt.id)
+                            if (!result.success) toast.error(result.error)
+                          })
+                        }}
+                        disabled={pending}
+                      >
+                        <Star
+                          className={cn(
+                            "h-3.5 w-3.5",
+                            prompt.isFavorite ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"
+                          )}
+                        />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-2xl"
+                        onClick={async (event) => {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          const ok = await copyToClipboard(prompt.content)
+                          if (!ok) {
+                            toast.error("Failed to copy")
+                            return
+                          }
+                          startTransition(async () => {
+                            const result = await markPromptLastUsed(prompt.id)
+                            if (!result.success) toast.error(result.error)
+                          })
+                          toast.success(tc("copied"))
+                        }}
+                        disabled={pending}
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {filtered.length === 0 ? (
+          <div className="app-panel flex flex-col items-center justify-center gap-3 px-6 py-16 text-center">
+            <FileText className="h-12 w-12 text-muted-foreground/40" />
+            <div className="space-y-1">
+              <p className="font-medium">{tc("noResults")}</p>
+              <p className="text-sm text-muted-foreground">
+                Try widening your search or clearing the active filters.
+              </p>
+            </div>
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }

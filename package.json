@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "smoke:browser": "powershell -ExecutionPolicy Bypass -File scripts/playwright-smoke.ps1",
+    "smoke:browser:headed": "powershell -ExecutionPolicy Bypass -File scripts/playwright-smoke.ps1 -Headed",
     "db:push": "npx prisma db push",
     "db:seed": "npx tsx prisma/seed.ts",
     "db:reset": "npx prisma db push --force-reset && npx tsx prisma/seed.ts"

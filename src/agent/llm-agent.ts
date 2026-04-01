@@ -17,8 +17,15 @@ import type {
   TrajectoryPhase,
 } from "@/types/agent"
 import type { BenchmarkResult } from "@/types/benchmark"
+import type { ModuleType } from "@/types/module"
 import type { Variable } from "@/types/prompt"
 import type { PromptVersionSnapshot } from "@/types/prompt-version"
+import type {
+  CleanedPromptDraft,
+  PromptRefactorResult,
+  PromptRefactorRunOutput,
+  RefactorModuleSuggestion,
+} from "@/types/refactor"
 
 export interface AgentRunResult {
   analysis: AgentAnalysisResult
@@ -26,11 +33,28 @@ export interface AgentRunResult {
   output: AgentRunOutput
 }
 
+export interface PromptRefactorRunResult {
+  proposal: PromptRefactorResult
+  trajectory: AgentTrajectoryStep[]
+  output: PromptRefactorRunOutput
+}
+
+interface ModuleAwareLoopResult {
+  finalText: string
+  trajectory: AgentTrajectoryStep[]
+  usedModuleTool: boolean
+  fallbackModuleCandidates: ModuleCandidate[]
+  termination: "final" | "missing_client" | "iteration_limit"
+}
+
 const MINIMAX_BASE_URL = "https://api.minimax.chat/v1"
 const MINIMAX_MODEL = "MiniMax-M2.7"
 const SEARCH_PROMPT_MODULES_TOOL = "search_prompt_modules"
 const MAX_REACT_ITERATIONS = 5
 const MAX_MODULE_RESULTS = 5
+const MINIMAX_ANALYSIS_TIMEOUT_MS = 45_000
+const MINIMAX_BENCHMARK_TIMEOUT_MS = 90_000
+const MINIMAX_REFACTOR_TIMEOUT_MS = 120_000
 
 const AGENT_TOOLS: ChatCompletionTool[] = [
   {
@@ -134,14 +158,58 @@ Be specific, concise, and practical.
 Do not wrap JSON in markdown.
 `.trim()
 
-function createMiniMaxClient() {
+const REFACTOR_SYSTEM_PROMPT = `
+You are a Prompt Refactor Expert for a personal Prompt IDE.
+
+Operating rules:
+1. You MUST use the search_prompt_modules tool before you finalize the refactor proposal.
+2. Use the tool to check whether reusable ideas already exist in the saved module library.
+3. After you receive tool observations, produce the final answer as JSON only.
+4. Do not wrap the JSON in markdown fences.
+5. Match the exact PromptRefactorResult shape and field names below.
+6. extractedModules.type must be one of: role, goal, constraint, output_format, style, self_check.
+
+Required JSON shape:
+{
+  "summary": "string",
+  "cleanedPromptDraft": {
+    "title": "string",
+    "description": "string",
+    "content": "string",
+    "tags": ["string"]
+  },
+  "suggestedVariables": [
+    { "name": "string", "description": "string", "defaultValue": "string" }
+  ],
+  "extractedModules": [
+    {
+      "title": "string",
+      "type": "role | goal | constraint | output_format | style | self_check",
+      "content": "string",
+      "tags": ["string"],
+      "rationale": "string"
+    }
+  ],
+  "analysisVersion": "string",
+  "generatedAt": "ISO timestamp string"
+}
+
+Guidance:
+- summary should explain what changed and why.
+- cleanedPromptDraft should keep the user's intent intact while making the prompt more structured and deployable.
+- suggestedVariables should focus on reusable input slots.
+- extractedModules should only include high-value reusable building blocks.
+- Set analysisVersion to "minimax-2.7-refactor-v1".
+`.trim()
+
+function createMiniMaxClient(timeout = MINIMAX_ANALYSIS_TIMEOUT_MS) {
   const apiKey = process.env.MINIMAX_API_KEY
   if (!apiKey) return null
 
   return new OpenAI({
     apiKey,
     baseURL: MINIMAX_BASE_URL,
-    timeout: 30_000,
+    timeout,
   })
 }
 
@@ -451,6 +519,147 @@ function normalizeBenchmarkResult(parsed: unknown, snapshot: PromptVersionSnapsh
   }
 }
 
+function normalizeVariables(value: unknown, fallback: Variable[] = []): Variable[] {
+  if (!Array.isArray(value)) return fallback
+
+  return value
+    .filter(isRecord)
+    .map((variable) => ({
+      name: ensureString(variable.name, ""),
+      description: ensureString(variable.description, ""),
+      defaultValue: ensureString(variable.defaultValue, ""),
+    }))
+    .filter((variable) => variable.name.length > 0)
+}
+
+const MODULE_TYPES: ModuleType[] = [
+  "role",
+  "goal",
+  "constraint",
+  "output_format",
+  "style",
+  "self_check",
+]
+
+function normalizeModuleType(value: unknown): ModuleType {
+  if (typeof value !== "string") return "goal"
+
+  const normalized = value.trim().toLowerCase().replace(/[\s-]+/g, "_")
+  if (MODULE_TYPES.includes(normalized as ModuleType)) {
+    return normalized as ModuleType
+  }
+
+  if (normalized.includes("role") || normalized.includes("persona")) return "role"
+  if (normalized.includes("goal") || normalized.includes("objective")) return "goal"
+  if (normalized.includes("constraint") || normalized.includes("guardrail")) return "constraint"
+  if (normalized.includes("output")) return "output_format"
+  if (normalized.includes("style") || normalized.includes("tone")) return "style"
+  if (normalized.includes("self") || normalized.includes("check")) return "self_check"
+
+  return "goal"
+}
+
+function buildRefactorFallbackModules(
+  fallbackModuleCandidates: ModuleCandidate[]
+): RefactorModuleSuggestion[] {
+  return fallbackModuleCandidates.map((candidate, index) => ({
+    title: `Reusable ${candidate.type} module ${index + 1}`,
+    type: normalizeModuleType(candidate.type),
+    content: candidate.content,
+    tags: [candidate.type, "refactor"],
+    rationale: "Suggested from the closest reusable module already saved in the vault.",
+  }))
+}
+
+function normalizeRefactorModules(
+  value: unknown,
+  fallbackModuleCandidates: ModuleCandidate[]
+): RefactorModuleSuggestion[] {
+  if (!Array.isArray(value)) {
+    return buildRefactorFallbackModules(fallbackModuleCandidates)
+  }
+
+  const normalized = value
+    .filter(isRecord)
+    .map((module): RefactorModuleSuggestion | null => {
+      const content = ensureString(module.content, "")
+      if (!content) return null
+
+      return {
+        title: ensureString(module.title, "Reusable prompt module"),
+        type: normalizeModuleType(module.type),
+        content,
+        tags: ensureStringArray(module.tags, []),
+        rationale: ensureString(
+          module.rationale,
+          "MiniMax identified this section as a reusable building block."
+        ),
+      }
+    })
+    .filter((module): module is RefactorModuleSuggestion => module !== null)
+
+  return normalized.length > 0 ? normalized : buildRefactorFallbackModules(fallbackModuleCandidates)
+}
+
+function normalizeCleanedPromptDraft(
+  value: unknown,
+  promptContent: string,
+  finalThought: string
+): CleanedPromptDraft {
+  const source = isRecord(value) ? value : {}
+
+  return {
+    title: ensureString(source.title, deriveTitle(promptContent)),
+    description: ensureString(
+      source.description,
+      summarizeText(finalThought || "MiniMax prepared a cleaned prompt draft.", 160)
+    ),
+    content: ensureString(source.content, promptContent.trim() || promptContent),
+    tags: ensureStringArray(source.tags, ["refactor", "minimax"]),
+  }
+}
+
+function normalizeRefactorResult(
+  parsed: unknown,
+  promptContent: string,
+  finalThought: string,
+  fallbackModuleCandidates: ModuleCandidate[]
+): PromptRefactorResult {
+  const now = new Date().toISOString()
+  const source = isRecord(parsed) ? parsed : {}
+  const cleanedPromptDraft = normalizeCleanedPromptDraft(
+    source.cleanedPromptDraft,
+    promptContent,
+    finalThought
+  )
+
+  return {
+    summary: ensureString(
+      source.summary,
+      summarizeText(finalThought || "MiniMax generated a prompt refactor proposal.", 180)
+    ),
+    cleanedPromptDraft,
+    suggestedVariables: normalizeVariables(
+      source.suggestedVariables,
+      extractVariablesFromPrompt(cleanedPromptDraft.content)
+    ),
+    extractedModules: normalizeRefactorModules(
+      source.extractedModules,
+      fallbackModuleCandidates
+    ),
+    analysisVersion: ensureString(source.analysisVersion, "minimax-2.7-refactor-v1"),
+    generatedAt: ensureString(source.generatedAt, now),
+  }
+}
+
+function createFallbackRefactor(
+  promptContent: string,
+  finalThought: string,
+  fallbackModuleCandidates: ModuleCandidate[]
+) {
+  return normalizeRefactorResult({}, promptContent, finalThought, fallbackModuleCandidates)
+}
+
 function pushTrajectoryStep(
   trajectory: AgentTrajectoryStep[],
   phase: TrajectoryPhase,
@@ -468,6 +677,153 @@ function pushTrajectoryStep(
     data,
     timestamp: new Date().toISOString(),
   })
+}
+
+async function runModuleAwareLoop(options: {
+  systemPrompt: string
+  userPrompt: string
+  promptContent: string
+  promptId: string
+  missingClientThought: string
+  timeoutMs?: number
+}): Promise<ModuleAwareLoopResult> {
+  const client = createMiniMaxClient(options.timeoutMs)
+  const trajectory: AgentTrajectoryStep[] = []
+  let usedModuleTool = false
+  let fallbackModuleCandidates: ModuleCandidate[] = []
+
+  const messages: ChatCompletionMessageParam[] = [
+    { role: "system", content: options.systemPrompt },
+    { role: "user", content: options.userPrompt },
+  ]
+
+  if (!client) {
+    const fallbackQuery = deriveTitle(options.promptContent)
+    const toolResult = await searchPromptModules(fallbackQuery)
+    fallbackModuleCandidates = await fetchModuleCandidates(fallbackQuery)
+    usedModuleTool = true
+
+    pushTrajectoryStep(trajectory, "thought", options.missingClientThought)
+    pushTrajectoryStep(
+      trajectory,
+      "action",
+      `Executed ${SEARCH_PROMPT_MODULES_TOOL} with a fallback query derived from the prompt title.`,
+      SEARCH_PROMPT_MODULES_TOOL,
+      { query: fallbackQuery, promptId: options.promptId },
+      null
+    )
+    pushTrajectoryStep(
+      trajectory,
+      "observation",
+      toolResult,
+      null,
+      null,
+      buildToolObservationData(fallbackQuery, toolResult, fallbackModuleCandidates)
+    )
+
+    return {
+      finalText: "",
+      trajectory,
+      usedModuleTool,
+      fallbackModuleCandidates,
+      termination: "missing_client",
+    }
+  }
+
+  let iteration = 0
+
+  while (iteration < MAX_REACT_ITERATIONS) {
+    iteration += 1
+
+    const toolChoice: ChatCompletionToolChoiceOption = usedModuleTool
+      ? "auto"
+      : { type: "function", function: { name: SEARCH_PROMPT_MODULES_TOOL } }
+
+    const completion = await client.chat.completions.create({
+      model: MINIMAX_MODEL,
+      temperature: 0.2,
+      messages,
+      tools: AGENT_TOOLS,
+      tool_choice: toolChoice,
+    })
+
+    const message = completion.choices[0]?.message
+    if (!message) {
+      break
+    }
+
+    const toolCalls = message.tool_calls ?? []
+    if (toolCalls.length > 0) {
+      const assistantMessage: ChatCompletionAssistantMessageParam = {
+        role: "assistant",
+        content: message.content ?? null,
+        tool_calls: toolCalls,
+      }
+      messages.push(assistantMessage)
+
+      for (const toolCall of toolCalls) {
+        if (toolCall.type !== "function" || toolCall.function.name !== SEARCH_PROMPT_MODULES_TOOL) {
+          continue
+        }
+
+        const args = parseToolArguments(toolCall.function.arguments)
+        const query = ensureString(args.query, deriveTitle(options.promptContent))
+        usedModuleTool = true
+
+        pushTrajectoryStep(
+          trajectory,
+          "action",
+          `Requested reusable prompt modules using the query "${query}".`,
+          SEARCH_PROMPT_MODULES_TOOL,
+          { query, promptId: options.promptId, iteration },
+          null
+        )
+
+        let toolResult: string
+        try {
+          toolResult = await searchPromptModules(query)
+          fallbackModuleCandidates = await fetchModuleCandidates(query)
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Unknown module search failure."
+          toolResult = `Module search failed for query "${query}": ${message}`
+        }
+
+        pushTrajectoryStep(
+          trajectory,
+          "observation",
+          toolResult,
+          null,
+          null,
+          buildToolObservationData(query, toolResult, fallbackModuleCandidates)
+        )
+
+        const toolMessage: ChatCompletionToolMessageParam = {
+          role: "tool",
+          tool_call_id: toolCall.id,
+          content: toolResult,
+        }
+        messages.push(toolMessage)
+      }
+
+      continue
+    }
+
+    return {
+      finalText: stripCodeFences(extractMessageText(message.content)),
+      trajectory,
+      usedModuleTool,
+      fallbackModuleCandidates,
+      termination: "final",
+    }
+  }
+
+  return {
+    finalText: "",
+    trajectory,
+    usedModuleTool,
+    fallbackModuleCandidates,
+    termination: "iteration_limit",
+  }
 }
 
 async function searchPromptModules(query: string) {
@@ -552,7 +908,7 @@ export async function evaluatePromptBenchmark(
   promptId: string,
   versionNumber: number
 ): Promise<BenchmarkResult> {
-  const client = createMiniMaxClient()
+  const client = createMiniMaxClient(MINIMAX_BENCHMARK_TIMEOUT_MS)
   const promptPayload = {
     promptId,
     versionNumber,
@@ -595,207 +951,55 @@ export async function analyzePromptWithAgent(
   promptContent: string,
   promptId: string
 ): Promise<AgentRunResult> {
-  const client = createMiniMaxClient()
-  const trajectory: AgentTrajectoryStep[] = []
-  let usedModuleTool = false
-  let fallbackModuleCandidates: ModuleCandidate[] = []
+  const loop = await runModuleAwareLoop({
+    systemPrompt: AGENT_SYSTEM_PROMPT,
+    userPrompt: `Prompt ID: ${promptId}\nPrompt Content:\n${promptContent}`,
+    promptContent,
+    promptId,
+    missingClientThought:
+      "MiniMax API key is unavailable, so the agent produced a graceful fallback analysis after a local module lookup.",
+    timeoutMs: MINIMAX_ANALYSIS_TIMEOUT_MS,
+  })
 
-  const messages: ChatCompletionMessageParam[] = [
-    { role: "system", content: AGENT_SYSTEM_PROMPT },
-    {
-      role: "user",
-      content: `Prompt ID: ${promptId}\nPrompt Content:\n${promptContent}`,
-    },
-  ]
+  let analysis: AgentAnalysisResult
 
-  if (!client) {
-    const fallbackQuery = deriveTitle(promptContent)
-    const toolResult = await searchPromptModules(fallbackQuery)
-    fallbackModuleCandidates = await fetchModuleCandidates(fallbackQuery)
-    usedModuleTool = true
+  if (loop.termination === "final") {
+    const jsonCandidate = extractJsonCandidate(loop.finalText)
+    const parsed = safeJsonParse<unknown>(jsonCandidate ?? loop.finalText, null)
+    const sanitizedThought = sanitizeModelReasoning(loop.finalText)
+    const finalThought =
+      sanitizedThought || "Finalized a structured analysis after tool-assisted reasoning."
 
-    pushTrajectoryStep(
-      trajectory,
-      "thought",
-      "MiniMax API key is unavailable, so the agent produced a graceful fallback analysis after a local module lookup."
-    )
-    pushTrajectoryStep(
-      trajectory,
-      "action",
-      `Executed ${SEARCH_PROMPT_MODULES_TOOL} with a fallback query derived from the prompt title.`,
-      SEARCH_PROMPT_MODULES_TOOL,
-      { query: fallbackQuery, promptId },
-      null
-    )
-    pushTrajectoryStep(
-      trajectory,
-      "observation",
-      toolResult,
-      null,
-      null,
-      buildToolObservationData(fallbackQuery, toolResult, fallbackModuleCandidates)
-    )
-
-    const finalThought = "Returned a fallback analysis because MiniMax was not configured, while still checking saved modules."
-    const analysis = createFallbackAnalysis(
-      promptContent,
-      finalThought,
-      fallbackModuleCandidates,
-      usedModuleTool
-    )
-
-    pushTrajectoryStep(
-      trajectory,
-      "thought",
-      `Finalized fallback analysis with suggested title "${analysis.suggestedTitle}" and risk "${analysis.riskLevel}".`
-    )
-
-    return {
-      analysis,
-      trajectory,
-      output: {
-        result: analysis,
-        meta: {
-          engine: MINIMAX_MODEL,
-          provider: "minimax",
-          transport: "openai-compat",
-          runType: "react_trajectory",
-        },
-      },
-    }
-  }
-
-  let iteration = 0
-
-  while (iteration < MAX_REACT_ITERATIONS) {
-    iteration += 1
-
-    const toolChoice: ChatCompletionToolChoiceOption = usedModuleTool
-      ? "auto"
-      : { type: "function", function: { name: SEARCH_PROMPT_MODULES_TOOL } }
-
-    const completion = await client.chat.completions.create({
-      model: MINIMAX_MODEL,
-      temperature: 0.2,
-      messages,
-      tools: AGENT_TOOLS,
-      tool_choice: toolChoice,
-    })
-
-    const message = completion.choices[0]?.message
-    if (!message) {
-      break
-    }
-
-    const toolCalls = message.tool_calls ?? []
-
-    if (toolCalls.length > 0) {
-      const assistantMessage: ChatCompletionAssistantMessageParam = {
-        role: "assistant",
-        content: message.content ?? null,
-        tool_calls: toolCalls,
-      }
-      messages.push(assistantMessage)
-
-      for (const toolCall of toolCalls) {
-        if (toolCall.type !== "function" || toolCall.function.name !== SEARCH_PROMPT_MODULES_TOOL) {
-          continue
-        }
-
-        const args = parseToolArguments(toolCall.function.arguments)
-        const query = ensureString(args.query, deriveTitle(promptContent))
-        usedModuleTool = true
-
-        pushTrajectoryStep(
-          trajectory,
-          "action",
-          `Requested reusable prompt modules using the query "${query}".`,
-          SEARCH_PROMPT_MODULES_TOOL,
-          { query, promptId, iteration },
-          null
-        )
-
-        let toolResult: string
-        try {
-          toolResult = await searchPromptModules(query)
-          fallbackModuleCandidates = await fetchModuleCandidates(query)
-        } catch (error) {
-          const message = error instanceof Error ? error.message : "Unknown module search failure."
-          toolResult = `Module search failed for query "${query}": ${message}`
-        }
-
-        pushTrajectoryStep(
-          trajectory,
-          "observation",
-          toolResult,
-          null,
-          null,
-          buildToolObservationData(query, toolResult, fallbackModuleCandidates)
-        )
-
-        const toolMessage: ChatCompletionToolMessageParam = {
-          role: "tool",
-          tool_call_id: toolCall.id,
-          content: toolResult,
-        }
-        messages.push(toolMessage)
-      }
-
-      continue
-    }
-
-    const finalText = stripCodeFences(extractMessageText(message.content))
-    const jsonCandidate = extractJsonCandidate(finalText)
-    const parsed = safeJsonParse<unknown>(jsonCandidate ?? finalText, null)
-    const sanitizedThought = sanitizeModelReasoning(finalText)
-    const finalThought = sanitizedThought || "Finalized a structured analysis after tool-assisted reasoning."
-    const analysis = normalizeAnalysis(
+    analysis = normalizeAnalysis(
       parsed,
       promptContent,
       finalThought,
-      fallbackModuleCandidates,
-      usedModuleTool
+      loop.fallbackModuleCandidates,
+      loop.usedModuleTool
     )
+  } else {
+    const fallbackThought =
+      loop.termination === "iteration_limit"
+        ? "The ReAct loop hit the iteration limit before MiniMax returned final JSON, so the agent emitted a safe fallback analysis."
+        : "Returned a fallback analysis because MiniMax was not configured, while still checking saved modules."
 
-    pushTrajectoryStep(
-      trajectory,
-      "thought",
-      `Finalized analysis with suggested title "${analysis.suggestedTitle}" and risk "${analysis.riskLevel}".`
+    analysis = createFallbackAnalysis(
+      promptContent,
+      fallbackThought,
+      loop.fallbackModuleCandidates,
+      loop.usedModuleTool
     )
-
-    return {
-      analysis,
-      trajectory,
-      output: {
-        result: analysis,
-        meta: {
-          engine: MINIMAX_MODEL,
-          provider: "minimax",
-          transport: "openai-compat",
-          runType: "react_trajectory",
-        },
-      },
-    }
   }
 
-  const iterationLimitThought =
-    "The ReAct loop hit the iteration limit before MiniMax returned final JSON, so the agent emitted a safe fallback analysis."
-  const analysis = createFallbackAnalysis(
-    promptContent,
-    iterationLimitThought,
-    fallbackModuleCandidates,
-    usedModuleTool
-  )
-
   pushTrajectoryStep(
-    trajectory,
+    loop.trajectory,
     "thought",
-    `Reached the iteration limit and returned fallback analysis with risk "${analysis.riskLevel}".`
+    `Finalized analysis with suggested title "${analysis.suggestedTitle}" and risk "${analysis.riskLevel}".`
   )
 
   return {
     analysis,
-    trajectory,
+    trajectory: loop.trajectory,
     output: {
       result: analysis,
       meta: {
@@ -803,6 +1007,74 @@ export async function analyzePromptWithAgent(
         provider: "minimax",
         transport: "openai-compat",
         runType: "react_trajectory",
+      },
+    },
+  }
+}
+
+export async function refactorPromptWithAgent(
+  promptContent: string,
+  promptId: string
+): Promise<PromptRefactorRunResult> {
+  const loop = await runModuleAwareLoop({
+    systemPrompt: REFACTOR_SYSTEM_PROMPT,
+    userPrompt: [
+      `Prompt ID: ${promptId}`,
+      "Task: Refactor this saved prompt into a cleaner draft, reusable variables, and extracted modules.",
+      "Prompt Content:",
+      promptContent,
+    ].join("\n"),
+    promptContent,
+    promptId,
+    missingClientThought:
+      "MiniMax API key is unavailable, so the agent produced a graceful fallback refactor proposal after a local module lookup.",
+    timeoutMs: MINIMAX_REFACTOR_TIMEOUT_MS,
+  })
+
+  let proposal: PromptRefactorResult
+
+  if (loop.termination === "final") {
+    const jsonCandidate = extractJsonCandidate(loop.finalText)
+    const parsed = safeJsonParse<unknown>(jsonCandidate ?? loop.finalText, null)
+    const sanitizedThought = sanitizeModelReasoning(loop.finalText)
+    const finalThought =
+      sanitizedThought || "Finalized a structured refactor proposal after tool-assisted reasoning."
+
+    proposal = normalizeRefactorResult(
+      parsed,
+      promptContent,
+      finalThought,
+      loop.fallbackModuleCandidates
+    )
+  } else {
+    const fallbackThought =
+      loop.termination === "iteration_limit"
+        ? "The ReAct loop hit the iteration limit before MiniMax returned final JSON, so the agent emitted a safe fallback refactor proposal."
+        : "Returned a fallback refactor proposal because MiniMax was not configured, while still checking saved modules."
+
+    proposal = createFallbackRefactor(
+      promptContent,
+      fallbackThought,
+      loop.fallbackModuleCandidates
+    )
+  }
+
+  pushTrajectoryStep(
+    loop.trajectory,
+    "thought",
+    `Finalized refactor proposal with ${proposal.extractedModules.length} reusable module suggestion(s).`
+  )
+
+  return {
+    proposal,
+    trajectory: loop.trajectory,
+    output: {
+      result: proposal,
+      meta: {
+        engine: MINIMAX_MODEL,
+        provider: "minimax",
+        transport: "openai-compat",
+        runType: "refactor_proposal",
       },
     },
   }

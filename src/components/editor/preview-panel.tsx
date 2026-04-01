@@ -2,24 +2,24 @@
 
 import { useMemo } from "react"
 import { Badge } from "@/components/ui/badge"
+import { extractPromptVariables, renderPromptTemplate } from "@/lib/prompt-render"
 
 interface PreviewPanelProps {
   content: string
   variables: { name: string; defaultValue: string }[]
 }
 
-const VAR_PATTERN = /\{\{(\w+)\}\}/g
-
 export function PreviewPanel({ content, variables }: PreviewPanelProps) {
   const rendered = useMemo(() => {
-    const varMap = new Map(variables.map((v) => [v.name, v.defaultValue || `[${v.name}]`]))
-    return content.replace(VAR_PATTERN, (_, name) => varMap.get(name) ?? `[${name}]`)
+    return renderPromptTemplate(
+      content,
+      Object.fromEntries(variables.map((variable) => [variable.name, variable.defaultValue || `[${variable.name}]`])),
+      (name) => `[${name}]`
+    )
   }, [content, variables])
 
   const varNames = useMemo(() => {
-    const names = new Set<string>()
-    for (const m of content.matchAll(VAR_PATTERN)) names.add(m[1])
-    return Array.from(names)
+    return extractPromptVariables(content)
   }, [content])
 
   if (!content) {

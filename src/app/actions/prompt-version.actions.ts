@@ -19,6 +19,7 @@ function deserializePromptVersion(row: {
   id: string
   promptId: string
   versionNumber: number
+  isBaseline: boolean
   changeSummary: string
   title: string
   description: string
@@ -36,6 +37,7 @@ function deserializePromptVersion(row: {
     id: row.id,
     promptId: row.promptId,
     versionNumber: row.versionNumber,
+    isBaseline: row.isBaseline,
     changeSummary: row.changeSummary,
     createdAt: row.createdAt.toISOString(),
     ...deserializePromptSnapshot(row),
@@ -92,6 +94,59 @@ export async function getPromptVersionsByPromptId(
       orderBy: { versionNumber: "desc" },
     })
     return { success: true, data: rows.map(deserializePromptVersion) }
+  } catch (error) {
+    return { success: false, error: (error as Error).message }
+  }
+}
+
+export async function getPromptBaselineVersion(
+  promptId: string
+): Promise<ActionResult<PromptVersion | null>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  try {
+    const row = await prisma.promptVersion.findFirst({
+      where: { promptId, isBaseline: true },
+      orderBy: { versionNumber: "desc" },
+    })
+
+    return { success: true, data: row ? deserializePromptVersion(row) : null }
+  } catch (error) {
+    return { success: false, error: (error as Error).message }
+  }
+}
+
+export async function setPromptVersionBaseline(
+  promptId: string,
+  versionId: string
+): Promise<ActionResult<PromptVersion>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const version = await tx.promptVersion.findUnique({ where: { id: versionId } })
+
+      if (!version || version.promptId !== promptId) {
+        throw new Error("Prompt version not found")
+      }
+
+      await tx.promptVersion.updateMany({
+        where: { promptId, isBaseline: true },
+        data: { isBaseline: false },
+      })
+
+      return tx.promptVersion.update({
+        where: { id: versionId },
+        data: { isBaseline: true },
+      })
+    })
+
+    revalidateAll()
+    return { success: true, data: deserializePromptVersion(result) }
   } catch (error) {
     return { success: false, error: (error as Error).message }
   }

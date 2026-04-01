@@ -7,6 +7,7 @@ import { LibraryBig, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PageHeader } from "@/components/layout/page-header"
 import { CollectionFormDialog } from "@/components/collections/collection-form-dialog"
 import { getCollections } from "@/app/actions/collection.actions"
 import { formatDate } from "@/lib/utils"
@@ -51,21 +52,32 @@ export default function CollectionsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <LibraryBig className="h-6 w-6" />
-          <h1 className="text-2xl font-bold">{t("title")}</h1>
-          <Badge variant="secondary">{collections.length}</Badge>
+    <div className="space-y-8">
+      <PageHeader
+        eyebrow={
+          <>
+            <LibraryBig className="h-3.5 w-3.5" />
+            {t("title")}
+          </>
+        }
+        title={t("title")}
+        description="Package prompts and modules into reusable systems so the best work can be rediscovered and reused quickly."
+        actions={
+          <Button onClick={() => setDialogOpen(true)} className="rounded-2xl">
+            <Plus className="mr-1 h-4 w-4" />
+            {t("newCollection")}
+          </Button>
+        }
+      >
+        <div className="chip-row">
+          <Badge variant="outline" className="rounded-full px-3 py-1">
+            {collections.length} collections
+          </Badge>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="mr-1 h-4 w-4" />
-          {t("newCollection")}
-        </Button>
-      </div>
+      </PageHeader>
 
       {collections.length === 0 ? (
-        <div className="rounded-lg border border-dashed py-12 text-center text-muted-foreground">
+        <div className="app-panel border-dashed py-14 text-center text-muted-foreground">
           <LibraryBig className="mx-auto mb-3 h-12 w-12 opacity-30" />
           <p>{t("empty")}</p>
         </div>
@@ -73,7 +85,7 @@ export default function CollectionsPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {collections.map((collection) => (
             <Link key={collection.id} href={`/collections/${collection.id}`}>
-              <Card className="h-full transition-colors hover:border-primary/40 hover:shadow-sm">
+              <Card className="h-full rounded-[1.75rem] border-border/70 bg-card/92 transition-all hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-[0_28px_80px_-40px_rgba(79,70,229,0.4)]">
                 <CardHeader>
                   <div className="flex items-start justify-between gap-3">
                     <div>

@@ -1,46 +1,50 @@
 "use client"
 
+import type { MouseEvent } from "react"
 import { useTransition } from "react"
 import { Link } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
-import { Star, Copy, Clock } from "lucide-react"
-import { Card, CardHeader, CardContent } from "@/components/ui/card"
+import { ArrowUpRight, Clock, Copy, Sparkles, Star } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { cn, formatDate, copyToClipboard } from "@/lib/utils"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { toggleFavorite, markPromptLastUsed } from "@/app/actions/prompt.actions"
+import { MODEL_OPTIONS, STATUS_OPTIONS } from "@/lib/constants"
+import { cn, copyToClipboard, formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 import type { Prompt } from "@/types/prompt"
-import { MODEL_OPTIONS, STATUS_OPTIONS } from "@/lib/constants"
 
 export function PromptCard({ prompt }: { prompt: Prompt }) {
   const tc = useTranslations("common")
   const [pending, startTransition] = useTransition()
 
-  const modelLabel = MODEL_OPTIONS.find((m) => m.value === prompt.model)?.label ?? prompt.model
-  const statusOption = STATUS_OPTIONS.find((s) => s.value === prompt.status)
+  const modelLabel = MODEL_OPTIONS.find((option) => option.value === prompt.model)?.label ?? prompt.model
+  const statusOption = STATUS_OPTIONS.find((option) => option.value === prompt.status)
 
-  const handleCopy = async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const handleCopy = async (event: MouseEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+
     const ok = await copyToClipboard(prompt.content)
-    if (ok) {
-      startTransition(async () => {
-        const result = await markPromptLastUsed(prompt.id)
-        if (!result.success) {
-          toast.error(result.error)
-        }
-      })
-      toast.success(tc("copied"))
+    if (!ok) {
+      toast.error("Failed to copy")
       return
     }
 
-    toast.error("Failed to copy")
+    startTransition(async () => {
+      const result = await markPromptLastUsed(prompt.id)
+      if (!result.success) {
+        toast.error(result.error)
+      }
+    })
+
+    toast.success(tc("copied"))
   }
 
-  const handleFavorite = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const handleFavorite = (event: MouseEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+
     startTransition(async () => {
       const result = await toggleFavorite(prompt.id)
       if (!result.success) {
@@ -50,66 +54,84 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
   }
 
   return (
-    <Link href={`/prompts/${prompt.id}`}>
-      <Card className={cn("group h-full transition-colors hover:border-primary/30 hover:shadow-sm", pending && "opacity-70")}>
-        <CardHeader className="pb-2">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="font-semibold text-sm leading-tight line-clamp-1">{prompt.title}</h3>
+    <Link href={`/prompts/${prompt.id}`} className="block h-full">
+      <Card
+        className={cn(
+          "group h-full rounded-[1.75rem] border-border/70 bg-card/92 shadow-[0_24px_70px_-44px_rgba(15,23,42,0.5)] transition-all duration-200 hover:-translate-y-1 hover:border-primary/25 hover:shadow-[0_30px_90px_-46px_rgba(79,70,229,0.45)]",
+          pending && "opacity-70"
+        )}
+      >
+        <CardHeader className="pb-0">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-primary/15 bg-primary/8 text-primary">
+                <Sparkles className="h-4 w-4" />
+              </span>
+              <div className="min-w-0">
+                <h3 className="line-clamp-1 text-base font-semibold leading-tight">{prompt.title}</h3>
+                <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className={cn("inline-block h-2 w-2 rounded-full", statusOption?.color)} />
+                  <span>{statusOption?.label}</span>
+                  <span>•</span>
+                  <span>{modelLabel}</span>
+                </div>
+              </div>
+            </div>
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 shrink-0"
+              className="h-9 w-9 rounded-2xl opacity-70 transition group-hover:opacity-100"
               onClick={handleFavorite}
               disabled={pending}
             >
               <Star
                 className={cn(
-                  "h-3.5 w-3.5",
+                  "h-4 w-4",
                   prompt.isFavorite ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"
                 )}
               />
             </Button>
           </div>
-          {prompt.description && (
-            <p className="text-xs text-muted-foreground line-clamp-2">{prompt.description}</p>
-          )}
         </CardHeader>
-        <CardContent className="pt-0 space-y-3">
-          {/* Tags */}
-          <div className="flex flex-wrap gap-1">
-            {prompt.tags.slice(0, 3).map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0">
+
+        <CardContent className="space-y-5 pt-4">
+          <p className="line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-muted-foreground">
+            {prompt.description || prompt.content}
+          </p>
+
+          <div className="chip-row">
+            {prompt.tags.slice(0, 4).map((tag) => (
+              <Badge key={tag} variant="outline" className="rounded-full border-primary/12 bg-background/75 px-3 py-1">
                 {tag}
               </Badge>
             ))}
-            {prompt.tags.length > 3 && (
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                +{prompt.tags.length - 3}
+            {prompt.tags.length > 4 ? (
+              <Badge variant="secondary" className="rounded-full px-3 py-1">
+                +{prompt.tags.length - 4}
               </Badge>
-            )}
+            ) : null}
           </div>
 
-          {/* Bottom row */}
-          <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-normal">
-                {modelLabel}
-              </Badge>
-              <span className={cn("inline-block h-1.5 w-1.5 rounded-full", statusOption?.color)} />
-              <span>{statusOption?.label}</span>
+          <div className="soft-divider" />
+
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Clock className="h-3.5 w-3.5" />
+              <span>{formatDate(prompt.updatedAt)}</span>
             </div>
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-9 w-9 rounded-2xl"
                 onClick={handleCopy}
                 disabled={pending}
               >
-                <Copy className="h-3 w-3" />
+                <Copy className="h-3.5 w-3.5" />
               </Button>
-              <Clock className="h-3 w-3" />
-              <span>{formatDate(prompt.updatedAt)}</span>
+              <span className="flex h-9 w-9 items-center justify-center rounded-2xl border border-transparent text-muted-foreground transition group-hover:border-primary/15 group-hover:bg-primary/8 group-hover:text-primary">
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </span>
             </div>
           </div>
         </CardContent>

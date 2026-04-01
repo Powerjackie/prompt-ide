@@ -326,3 +326,80 @@ export async function removeCollectionItem(
     return { success: false, error: (error as Error).message }
   }
 }
+
+export async function addModulesToCollection(
+  collectionId: string,
+  moduleIds: string[]
+): Promise<ActionResult<{ collectionId: string; addedCount: number; skippedCount: number }>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  try {
+    const uniqueModuleIds = Array.from(
+      new Set(moduleIds.filter((moduleId) => typeof moduleId === "string" && moduleId.trim()))
+    )
+
+    if (uniqueModuleIds.length === 0) {
+      return { success: false, error: "Select at least one module to add" }
+    }
+
+    const collection = await prisma.collection.findUnique({
+      where: { id: collectionId },
+      select: { id: true },
+    })
+
+    if (!collection) {
+      return { success: false, error: "Collection not found" }
+    }
+
+    const [existingItems, existingModules, latestItem] = await Promise.all([
+      prisma.collectionItem.findMany({
+        where: {
+          collectionId,
+          itemType: "module",
+          moduleId: { in: uniqueModuleIds },
+        },
+        select: { moduleId: true },
+      }),
+      prisma.module.findMany({
+        where: { id: { in: uniqueModuleIds } },
+        select: { id: true },
+      }),
+      prisma.collectionItem.findFirst({
+        where: { collectionId },
+        orderBy: { position: "desc" },
+        select: { position: true },
+      }),
+    ])
+
+    const existingModuleIds = new Set(existingItems.map((item) => item.moduleId).filter(Boolean))
+    const validModuleIds = existingModules.map((module) => module.id)
+    const moduleIdsToCreate = validModuleIds.filter((moduleId) => !existingModuleIds.has(moduleId))
+
+    if (moduleIdsToCreate.length > 0) {
+      await prisma.collectionItem.createMany({
+        data: moduleIdsToCreate.map((moduleId, index) => ({
+          collectionId,
+          itemType: "module",
+          promptId: null,
+          moduleId,
+          position: (latestItem?.position ?? 0) + index + 1,
+        })),
+      })
+    }
+
+    revalidateAll()
+
+    return {
+      success: true,
+      data: {
+        collectionId,
+        addedCount: moduleIdsToCreate.length,
+        skippedCount: uniqueModuleIds.length - moduleIdsToCreate.length,
+      },
+    }
+  } catch (error) {
+    return { success: false, error: (error as Error).message }
+  }
+}

@@ -1,15 +1,17 @@
 import { PrismaClient } from "../src/generated/prisma/client"
 import { PrismaLibSql } from "@prisma/adapter-libsql"
 import { readFileSync } from "fs"
-import { resolve, dirname } from "path"
+import { dirname, resolve } from "path"
 import { fileURLToPath } from "url"
 
-// Load .env from project root
 const __dir = dirname(fileURLToPath(import.meta.url))
 const envContent = readFileSync(resolve(__dir, "..", ".env"), "utf-8")
+
 for (const line of envContent.split("\n")) {
   const match = line.match(/^([^#=]+)=(.*)$/)
-  if (match) process.env[match[1].trim()] = match[2].trim().replace(/^"|"$/g, "")
+  if (match) {
+    process.env[match[1].trim()] = match[2].trim().replace(/^"|"$/g, "")
+  }
 }
 
 const adapter = new PrismaLibSql({ url: process.env.DATABASE_URL! })
@@ -50,7 +52,11 @@ Output format:
     notes: "Works well with Python, JS, and TypeScript. Test with Go next.",
     variables: JSON.stringify([
       { name: "language", description: "Programming language", defaultValue: "Python" },
-      { name: "focus_areas", description: "Review focus", defaultValue: "security, performance" },
+      {
+        name: "focus_areas",
+        description: "Review focus",
+        defaultValue: "security, performance",
+      },
       { name: "code", description: "Code to review", defaultValue: "" },
     ]),
   },
@@ -77,7 +83,11 @@ Use professional workplace language. Keep it concise.`,
     isFavorite: false,
     notes: "",
     variables: JSON.stringify([
-      { name: "work_items", description: "Bullet-point list of work done this week", defaultValue: "" },
+      {
+        name: "work_items",
+        description: "Bullet-point list of work done this week",
+        defaultValue: "",
+      },
     ]),
   },
   {
@@ -112,7 +122,11 @@ Generate:
       { name: "path", description: "API path", defaultValue: "/api/v1/users" },
       { name: "description", description: "What this endpoint does", defaultValue: "" },
       { name: "auth_type", description: "Authentication type", defaultValue: "Bearer token" },
-      { name: "request_body", description: "JSON request body example", defaultValue: "{}" },
+      {
+        name: "request_body",
+        description: "JSON request body example",
+        defaultValue: "{}",
+      },
     ]),
   },
   {
@@ -181,25 +195,29 @@ const seedModules = [
   {
     title: "Expert Role",
     type: "role",
-    content: "You are a {{domain}} expert with {{years}} years of experience. You provide precise, actionable advice based on industry best practices.",
+    content:
+      "You are a {{domain}} expert with {{years}} years of experience. You provide precise, actionable advice based on industry best practices.",
     tags: JSON.stringify(["role", "expert"]),
   },
   {
     title: "Structured Output",
     type: "output_format",
-    content: "Format your response as:\n1. **Summary** (2-3 sentences)\n2. **Details** (bullet points)\n3. **Action Items** (numbered list)\n4. **Notes** (if applicable)",
+    content:
+      "Format your response as:\n1. **Summary** (2-3 sentences)\n2. **Details** (bullet points)\n3. **Action Items** (numbered list)\n4. **Notes** (if applicable)",
     tags: JSON.stringify(["format", "structure"]),
   },
   {
     title: "No Hallucination Constraint",
     type: "constraint",
-    content: "Only use information explicitly provided in the input. If you are unsure or the information is insufficient, clearly state what is missing rather than guessing or fabricating information.",
+    content:
+      "Only use information explicitly provided in the input. If you are unsure or the information is insufficient, clearly state what is missing rather than guessing or fabricating information.",
     tags: JSON.stringify(["constraint", "safety"]),
   },
   {
     title: "Self-Check Module",
     type: "self_check",
-    content: "Before providing your final answer, verify:\n- [ ] All claims are supported by the provided input\n- [ ] The output format matches the requirements\n- [ ] No sensitive information is included\n- [ ] The response is complete and actionable",
+    content:
+      "Before providing your final answer, verify:\n- [ ] All claims are supported by the provided input\n- [ ] The output format matches the requirements\n- [ ] No sensitive information is included\n- [ ] The response is complete and actionable",
     tags: JSON.stringify(["self-check", "quality"]),
   },
 ]
@@ -207,29 +225,238 @@ const seedModules = [
 async function main() {
   console.log("Seeding database...")
 
-  // Check if already seeded
   const existingPrompts = await prisma.prompt.count()
   if (existingPrompts > 0) {
     console.log(`Database already has ${existingPrompts} prompts. Skipping seed.`)
     return
   }
 
+  const createdPrompts = []
   for (const prompt of seedPrompts) {
-    await prisma.prompt.create({ data: prompt })
+    createdPrompts.push(await prisma.prompt.create({ data: prompt }))
   }
-  console.log(`  ✓ ${seedPrompts.length} prompts`)
+  console.log(`  Created ${createdPrompts.length} prompts`)
 
-  for (const mod of seedModules) {
-    await prisma.module.create({ data: mod })
+  const createdModules = []
+  for (const moduleSeed of seedModules) {
+    createdModules.push(await prisma.module.create({ data: moduleSeed }))
   }
-  console.log(`  ✓ ${seedModules.length} modules`)
+  console.log(`  Created ${createdModules.length} modules`)
 
-  console.log("Seeding complete!")
+  const entryPrompt = createdPrompts[0]
+  const starterCollection = await prisma.collection.create({
+    data: {
+      title: "Prompt Engineering Starter Pack",
+      description: "A clean starter pack that links a production prompt with reusable guidance modules.",
+      type: "toolkit",
+    },
+  })
+
+  await prisma.collectionItem.createMany({
+    data: [
+      {
+        collectionId: starterCollection.id,
+        itemType: "prompt",
+        promptId: entryPrompt.id,
+        position: 0,
+      },
+      {
+        collectionId: starterCollection.id,
+        itemType: "module",
+        moduleId: createdModules[0].id,
+        position: 1,
+      },
+    ],
+  })
+
+  const baselineVersion = await prisma.promptVersion.create({
+    data: {
+      promptId: entryPrompt.id,
+      versionNumber: 1,
+      isBaseline: true,
+      changeSummary: "Initial production baseline",
+      title: entryPrompt.title,
+      description: entryPrompt.description,
+      content: entryPrompt.content,
+      status: entryPrompt.status,
+      source: entryPrompt.source,
+      model: entryPrompt.model,
+      category: entryPrompt.category,
+      tags: entryPrompt.tags,
+      notes: entryPrompt.notes,
+      variables: entryPrompt.variables,
+    },
+  })
+
+  await prisma.benchmarkRun.create({
+    data: {
+      promptId: entryPrompt.id,
+      promptVersionId: baselineVersion.id,
+      evaluator: "MiniMax-M2.7",
+      input: entryPrompt.content,
+      summary: "This prompt is stable, structured, and suitable as a reusable production baseline.",
+      overallScore: 88,
+      clarityScore: 90,
+      reusabilityScore: 86,
+      controllabilityScore: 87,
+      deploymentReadinessScore: 89,
+      improvementSuggestions: JSON.stringify([
+        "Add a stricter section on edge-case handling.",
+        "Parameterize reviewer tone for different audiences.",
+      ]),
+      recommendedForProduction: true,
+      rawOutput: JSON.stringify({
+        overallScore: 88,
+        clarityScore: 90,
+        reusabilityScore: 86,
+        controllabilityScore: 87,
+        deploymentReadinessScore: 89,
+        summary:
+          "This prompt is stable, structured, and suitable as a reusable production baseline.",
+        improvementSuggestions: [
+          "Add a stricter section on edge-case handling.",
+          "Parameterize reviewer tone for different audiences.",
+        ],
+        recommendedForProduction: true,
+      }),
+    },
+  })
+
+  const seededSkill = await prisma.skill.create({
+    data: {
+      name: "Code Review Skill",
+      description:
+        "A reusable capability shell for structured code review with clear scoring and issue reporting.",
+      goal: "Turn source code and review focus areas into a production-ready review report.",
+      status: "active",
+      entryPromptId: entryPrompt.id,
+      collectionId: starterCollection.id,
+      recommendedModel: "universal",
+      inputSchema: JSON.stringify({
+        language: "Programming language under review",
+        focus_areas: "Areas that deserve extra attention",
+        code: "Source code to inspect",
+      }),
+      outputSchema: JSON.stringify({
+        review_summary: "Short summary of quality and risks",
+        issues: "Structured list of problems with severity and line references",
+        recommendations: "Actionable next steps",
+      }),
+      notes: "Use as the default demonstration capability for smoke and manual milestone checks.",
+    },
+  })
+
+  await prisma.setting.upsert({
+    where: { key: "skill-run-state" },
+    create: {
+      key: "skill-run-state",
+      value: JSON.stringify({
+        recentValuesBySkillId: {
+          [seededSkill.id]: {
+            language: "TypeScript",
+            focus_areas: "security, readability",
+            code: "export function sum(a: number, b: number) { return a + b }",
+          },
+        },
+        presetsBySkillId: {
+          [seededSkill.id]: [
+            {
+              id: "seed-preset-ts-review",
+              name: "TypeScript review",
+              values: {
+                language: "TypeScript",
+                focus_areas: "security, readability",
+                code: "export function sum(a: number, b: number) { return a + b }",
+              },
+              updatedAt: new Date().toISOString(),
+            },
+          ],
+        },
+        recentRunsBySkillId: {
+          [seededSkill.id]: [
+            {
+              id: "seed-run-code-review",
+              values: {
+                language: "TypeScript",
+                focus_areas: "security, readability",
+                code: "export function sum(a: number, b: number) { return a + b }",
+              },
+              renderedPrompt: entryPrompt.content
+                .replaceAll("{{language}}", "TypeScript")
+                .replaceAll("{{focus_areas}}", "security, readability")
+                .replaceAll(
+                  "{{code}}",
+                  "export function sum(a: number, b: number) { return a + b }"
+                ),
+              summary: "Recent validation run confirms the skill is stable for lightweight code review prompts.",
+              riskLevel: "low",
+              confidence: 0.84,
+              createdAt: new Date().toISOString(),
+            },
+          ],
+        },
+      }),
+    },
+    update: {
+      value: JSON.stringify({
+        recentValuesBySkillId: {
+          [seededSkill.id]: {
+            language: "TypeScript",
+            focus_areas: "security, readability",
+            code: "export function sum(a: number, b: number) { return a + b }",
+          },
+        },
+        presetsBySkillId: {
+          [seededSkill.id]: [
+            {
+              id: "seed-preset-ts-review",
+              name: "TypeScript review",
+              values: {
+                language: "TypeScript",
+                focus_areas: "security, readability",
+                code: "export function sum(a: number, b: number) { return a + b }",
+              },
+              updatedAt: new Date().toISOString(),
+            },
+          ],
+        },
+        recentRunsBySkillId: {
+          [seededSkill.id]: [
+            {
+              id: "seed-run-code-review",
+              values: {
+                language: "TypeScript",
+                focus_areas: "security, readability",
+                code: "export function sum(a: number, b: number) { return a + b }",
+              },
+              renderedPrompt: entryPrompt.content
+                .replaceAll("{{language}}", "TypeScript")
+                .replaceAll("{{focus_areas}}", "security, readability")
+                .replaceAll(
+                  "{{code}}",
+                  "export function sum(a: number, b: number) { return a + b }"
+                ),
+              summary: "Recent validation run confirms the skill is stable for lightweight code review prompts.",
+              riskLevel: "low",
+              confidence: 0.84,
+              createdAt: new Date().toISOString(),
+            },
+          ],
+        },
+      }),
+    },
+  })
+
+  console.log("  Created 1 collection")
+  console.log("  Created 1 baseline prompt version")
+  console.log("  Created 1 benchmark run")
+  console.log("  Created 1 skill with runner state")
+  console.log("Seeding complete.")
 }
 
 main()
-  .catch((e) => {
-    console.error(e)
+  .catch((error) => {
+    console.error(error)
     process.exit(1)
   })
   .finally(() => prisma.$disconnect())

@@ -25,11 +25,14 @@ import {
   FlaskConical,
   LayoutDashboard,
   LibraryBig,
+  Layers3,
 } from "lucide-react"
 import { getPrompts, type SerializedPrompt } from "@/app/actions/prompt.actions"
 import { getModules, type SerializedModule } from "@/app/actions/module.actions"
 import { getCollections } from "@/app/actions/collection.actions"
+import { getSkills } from "@/app/actions/skill.actions"
 import type { Collection } from "@/types/collection"
+import type { Skill } from "@/types/skill"
 
 const PAGES = [
   { nameKey: "home", href: "/", icon: LayoutDashboard },
@@ -38,6 +41,7 @@ const PAGES = [
   { nameKey: "inbox", href: "/inbox", icon: Inbox },
   { nameKey: "modules", href: "/modules", icon: Puzzle },
   { nameKey: "collections", href: "/collections", icon: LibraryBig },
+  { nameKey: "skills", href: "/skills", icon: Layers3 },
   { nameKey: "favorites", href: "/favorites", icon: Star },
   { nameKey: "archive", href: "/archive", icon: Archive },
   { nameKey: "tags", href: "/tags", icon: Tags },
@@ -51,6 +55,7 @@ export function SearchDialog() {
   const [prompts, setPrompts] = useState<SerializedPrompt[]>([])
   const [modules, setModules] = useState<SerializedModule[]>([])
   const [collections, setCollections] = useState<Collection[]>([])
+  const [skills, setSkills] = useState<Skill[]>([])
   const t = useTranslations("search")
   const tn = useTranslations("nav")
   const tc = useTranslations("common")
@@ -66,6 +71,9 @@ export function SearchDialog() {
     })
     getCollections().then((result) => {
       if (result.success) setCollections(result.data)
+    })
+    getSkills().then((result) => {
+      if (result.success) setSkills(result.data)
     })
   }, [open])
 
@@ -153,6 +161,25 @@ export function SearchDialog() {
                       <div className="text-sm truncate">{collection.title}</div>
                       <div className="text-xs text-muted-foreground truncate">
                         {collection.description || tn(`collections`)}
+                      </div>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </>
+          )}
+
+          {skills.length > 0 && (
+            <>
+              <CommandSeparator />
+              <CommandGroup heading={t("skills")}>
+                {skills.map((skill) => (
+                  <CommandItem key={skill.id} onSelect={() => navigate(`/skills/${skill.id}`)}>
+                    <Layers3 className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm truncate">{skill.name}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {skill.goal || skill.description || tn("skills")}
                       </div>
                     </div>
                   </CommandItem>

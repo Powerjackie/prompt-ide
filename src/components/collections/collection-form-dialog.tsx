@@ -25,10 +25,17 @@ import { createCollection, updateCollection } from "@/app/actions/collection.act
 import { toast } from "sonner"
 import type { Collection, CollectionType } from "@/types/collection"
 
+interface CollectionDraftValues {
+  title?: string
+  description?: string
+  type?: CollectionType
+}
+
 interface CollectionFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialCollection?: Collection | null
+  initialDraft?: CollectionDraftValues | null
   onSaved: (collection: Collection) => void
 }
 
@@ -36,15 +43,20 @@ const COLLECTION_TYPES: CollectionType[] = ["workflow", "toolkit", "learning"]
 
 function CollectionFormContent({
   initialCollection,
+  initialDraft,
   onOpenChange,
   onSaved,
 }: Omit<CollectionFormDialogProps, "open">) {
   const t = useTranslations("collections.form")
   const tc = useTranslations("common")
   const [pending, startTransition] = useTransition()
-  const [title, setTitle] = useState(initialCollection?.title ?? "")
-  const [description, setDescription] = useState(initialCollection?.description ?? "")
-  const [type, setType] = useState<CollectionType>(initialCollection?.type ?? "workflow")
+  const [title, setTitle] = useState(initialCollection?.title ?? initialDraft?.title ?? "")
+  const [description, setDescription] = useState(
+    initialCollection?.description ?? initialDraft?.description ?? ""
+  )
+  const [type, setType] = useState<CollectionType>(
+    initialCollection?.type ?? initialDraft?.type ?? "workflow"
+  )
   const mode = initialCollection ? "edit" : "create"
 
   const handleSubmit = () => {
@@ -142,9 +154,12 @@ export function CollectionFormDialog({
   open,
   onOpenChange,
   initialCollection,
+  initialDraft,
   onSaved,
 }: CollectionFormDialogProps) {
-  const dialogKey = `${initialCollection?.id ?? "new"}-${open ? "open" : "closed"}`
+  const dialogKey = `${initialCollection?.id ?? initialDraft?.title ?? "new"}-${
+    open ? "open" : "closed"
+  }`
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -153,6 +168,7 @@ export function CollectionFormDialog({
           key={dialogKey}
           onOpenChange={onOpenChange}
           initialCollection={initialCollection}
+          initialDraft={initialDraft}
           onSaved={onSaved}
         />
       ) : null}
