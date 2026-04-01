@@ -12,9 +12,11 @@ The product is now explicitly positioned as a private prompt R&D workbench for a
 - Not in scope: marketplace, public prompt gallery, social feed, payments, team permissions
 - Current milestone status:
   - `PromptVersion` history is live
+  - `PromptVersion` baseline selection is live
   - `BenchmarkRun` scorecards are live
   - `Collections` / prompt packs are live
-  - Next stretch milestone is `Agent-Assisted Refactor`
+  - `Agent-Assisted Refactor` is live for saved prompts
+  - Refactor acceptance now auto-runs benchmark comparison against a baseline or previous version
 
 ## Tech Stack
 
@@ -41,7 +43,7 @@ The product is now explicitly positioned as a private prompt R&D workbench for a
 
 - `Prompt`: current working copy
 - `PromptVersion`: immutable prompt snapshots
-- `AgentHistory`: reasoning traces and serialized agent runs
+- `AgentHistory`: reasoning traces and serialized agent runs, including refactor proposals
 - `BenchmarkRun`: MiniMax evaluator scorecards
 - `Collection` + `CollectionItem`: reusable solution packs
 - `Setting`: serialized app settings
@@ -90,6 +92,7 @@ The Prisma schema now defines eight models.
 - Fields:
   - `promptId`
   - `versionNumber`
+  - `isBaseline`
   - `changeSummary`
   - snapshot payload: `title`, `description`, `content`, `status`, `source`, `model`, `category`, `tags`, `notes`, `variables`
   - `createdAt`
@@ -146,7 +149,9 @@ The Prisma schema now defines eight models.
   - `output`
   - `trajectory`
   - `createdAt`
-- Current MiniMax runs use `type: "react_trajectory"`
+- Current MiniMax runs use:
+  - `type: "react_trajectory"` for analysis
+  - `type: "refactor_proposal"` for saved-prompt refactor proposals
 
 ### `Setting`
 
@@ -169,6 +174,7 @@ Behavior:
 2. The snapshot payload is serialized.
 3. A new `PromptVersion` row is created automatically.
 4. If snapshot fields changed, stale `Prompt.agentAnalysis` is cleared and `needsReanalysis` is set to `true`.
+5. Baseline selection is user-controlled and never moves automatically on save or restore.
 
 ### Prompt Restore -> New Current Working Copy
 
@@ -199,6 +205,23 @@ Behavior:
 4. `AgentHistory` receives `output` and `trajectory`.
 5. UI updates immediately from the returned `analysis` and `trajectory`.
 
+### Saved Prompt Refactor
+
+Source files:
+
+- `src/agent/llm-agent.ts`
+- `src/app/actions/agent.actions.ts`
+- `src/app/actions/agent-history.actions.ts`
+
+Behavior:
+
+1. UI calls `runPromptRefactor(content, promptId)`.
+2. MiniMax executes a module-aware ReAct refactor loop.
+3. `AgentHistory` receives `type: "refactor_proposal"`, `output`, and `trajectory`.
+4. The UI hydrates the latest refactor proposal from `AgentHistory`.
+5. Applying draft or variables routes through existing prompt update actions, which creates a new `PromptVersion` and marks analysis as stale.
+6. Creating modules from a refactor proposal writes new `Module` rows only for the selected suggestions.
+
 ### Playground Analysis
 
 Source file:
@@ -222,8 +245,35 @@ Behavior:
 
 1. UI selects the latest saved `PromptVersion`.
 2. `runPromptBenchmark(promptId, promptVersionId)` calls MiniMax as a dedicated evaluator.
-3. Scores are persisted in `BenchmarkRun`.
-4. Comparison uses `compareBenchmarkRuns(leftId, rightId)`.
+3. Benchmark runs are de-duplicated per `PromptVersion` by default; reloading or re-opening the page should reuse the latest saved run instead of writing duplicates.
+4. Scores are persisted in `BenchmarkRun`.
+5. Comparison uses `compareBenchmarkRuns(leftId, rightId)`.
+
+### Prompt Evolution Comparison
+
+Source files:
+
+- `src/app/actions/agent.actions.ts`
+- `src/app/actions/benchmark.actions.ts`
+- `src/components/agent/refactor-panel.tsx`
+- `src/components/prompts/benchmark-panel.tsx`
+
+Behavior:
+
+1. User accepts a refactor draft or refactor variables.
+2. The prompt update creates a new `PromptVersion`.
+3. The server resolves the comparison target:
+   - baseline version if one exists
+   - otherwise the previous version
+4. `runPromptEvolutionComparison(promptId, candidateVersionId, comparisonVersionId)` ensures both versions have benchmark runs.
+5. The refactor UI shows the delta summary immediately after acceptance.
+6. The refactor UI also shows a field-level draft diff against the current working copy before acceptance.
+7. Prompt detail `BenchmarkPanel` can now surface the latest refactor-triggered evolution comparison directly.
+8. `getLatestPromptEvolutionComparison(promptId, strategy)` is read-only on page load; it reconstructs the latest compare view only when both required benchmark runs already exist, so detail-page refreshes do not silently trigger new MiniMax benchmark writes.
+9. `BenchmarkPanel` lets the user switch the evolution compare target between:
+   - baseline version
+   - previous version
+   when those targets exist.
 
 ### Collections / Packs
 
@@ -237,7 +287,10 @@ Behavior:
 
 1. User creates a `Collection`.
 2. User adds ordered `CollectionItem` rows for prompts or modules.
-3. Collections become reusable personal solution packs.
+3. Refactor-created modules can be bulk-added into an existing collection from `RefactorPanel`.
+4. If no suitable collection exists yet, `RefactorPanel` can open the existing collection-creation dialog and immediately add the new modules after save.
+5. The create-collection dialog can be prefilled from the refactor proposal summary and cleaned draft title.
+6. Collections become reusable personal solution packs.
 
 ## UI Wiring
 
@@ -247,14 +300,21 @@ Behavior:
 - Shows:
   - current prompt content
   - latest agent analysis
+  - latest saved refactor proposal
+  - analysis/refactor mode switch
   - trajectory timeline
   - version history panel
   - benchmark scorecard panel
+  - benchmark evolution summary when a refactor acceptance just produced one
 
 ### Editor
 
 - `src/components/editor/editor-layout.tsx`
-- Saved prompts now expose a `Versions` tab with restore + diff support.
+- Saved prompts now expose:
+  - a `Versions` tab with restore + diff support
+  - an Agent area with `Analysis` and `Refactor` modes
+  - refactor acceptance that auto-runs benchmark comparison
+  - refactor draft-vs-current diffing before acceptance
 
 ### Collections
 
@@ -273,6 +333,8 @@ Behavior:
 - Agent history actions: `src/app/actions/agent-history.actions.ts`
 - Agent actions: `src/app/actions/agent.actions.ts`
 - MiniMax runtime: `src/agent/llm-agent.ts`
+- Refactor types: `src/types/refactor.ts`
+- Refactor UI: `src/components/agent/refactor-panel.tsx`
 - Prompt snapshot helpers: `src/lib/prompt-version.ts`
 - Prompt detail UI: `src/app/[locale]/prompts/[id]/page.tsx`
 - Editor UI: `src/components/editor/editor-layout.tsx`
@@ -282,23 +344,37 @@ Behavior:
 ## Current Agent Status
 
 - Saved prompts use persisted MiniMax ReAct analysis.
+- Saved prompts also support persisted MiniMax refactor proposals.
+- Saved prompts support explicit baseline versioning.
+- Saved prompt refactor acceptance auto-compares the new version against a baseline or previous version.
+- Saved prompt refactor now exposes a field-level draft diff before acceptance.
+- Refactor-created modules can be added directly into existing collections from the refactor UI.
+- Refactor-created modules can also be routed into a newly created collection without leaving the refactor workflow.
 - Playground uses stateless MiniMax ReAct analysis.
 - The only live tool in the ReAct loop is `search_prompt_modules`.
 - Trajectories are rendered through:
   - `src/components/agent/analysis-panel.tsx`
   - `src/components/agent/trajectory-timeline.tsx`
+- Refactor results are rendered through:
+  - `src/components/agent/refactor-panel.tsx`
 
 ## Next Milestone
 
-The next implementation target is `Agent-Assisted Refactor`.
+The core of `Prompt Evolution Loop v1` is now live:
 
-Expected direction:
+1. `Refactor`
+2. `Accept`
+3. `Auto Benchmark Compare`
+4. `Decide`
+5. `Package` via existing collection quick add
 
-1. analyze the current prompt and suggest reusable module extraction
-2. suggest variable slots and parameterization improvements
-3. generate a cleaned prompt draft
-4. keep using `AgentHistory` for proposal traces
-5. only persist changes when the user accepts them
+The next logical implementation target is either:
+
+1. `Prompt Evolution Loop v1.1`
+   - persist evolution comparison context beyond the immediate refactor session if desired
+   - improve collection creation defaults and naming heuristics directly from refactor output
+2. `Skill Layer MVP`
+   - add a lightweight capability layer above `Prompt` / `Module` / `Collection`
 
 ## Guardrails For Future Agents
 
@@ -310,3 +386,27 @@ Expected direction:
 - Keep `BenchmarkRun` separate from `AgentHistory`.
 - Keep Playground stateless.
 - Update this file and `AGENT_DESIGN.md` whenever schema or agent contracts change.
+
+## Living Document Protocol
+
+### Write-Through Rule (MANDATORY)
+From this point forward, any agent operating on this codebase MUST follow this protocol:
+
+**Any time you modify any of the following, you MUST autonomously update `AI_HANDOVER.md` and/or `AGENT_DESIGN.md` in the same commit:**
+
+- Database schema changes (new tables, columns, indexes, migrations)
+- New Server Action patterns or changes to existing ones
+- Changes to the trajectory JSON structure
+- New agent capabilities or workflow changes
+- API endpoint additions or modifications
+
+**The external memory (`AI_HANDOVER.md` / `AGENT_DESIGN.md`) must always reflect 100% of the actual codebase reality. Stale documentation is treated as a bug.**
+
+### Git Commit Discipline (MANDATORY)
+For meaningful project changes, agents should maintain intentional Git hygiene:
+
+1. Stage only the files relevant to the current task
+2. Create a clear commit message describing the change
+3. If the task includes schema changes, server action changes, trajectory changes, or agent workflow changes, the commit message should explicitly mention the documentation update
+
+**No undocumented architectural changes. No unrelated files in the same commit. Documentation and implementation must stay synchronized.**
