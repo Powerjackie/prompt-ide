@@ -15,6 +15,7 @@ The product is now explicitly positioned as a private prompt R&D workbench for a
   - `PromptVersion` baseline selection is live
   - `BenchmarkRun` scorecards are live
   - `Collections` / prompt packs are live
+  - `Skills` capability shells are live
   - `Agent-Assisted Refactor` is live for saved prompts
   - Refactor acceptance now auto-runs benchmark comparison against a baseline or previous version
 
@@ -46,6 +47,7 @@ The product is now explicitly positioned as a private prompt R&D workbench for a
 - `AgentHistory`: reasoning traces and serialized agent runs, including refactor proposals
 - `BenchmarkRun`: MiniMax evaluator scorecards
 - `Collection` + `CollectionItem`: reusable solution packs
+- `Skill`: capability layer above prompt/module/collection
 - `Setting`: serialized app settings
 
 ### Write-Through Protocol
@@ -54,19 +56,19 @@ If you change schema, server action patterns, or agent contracts, you must updat
 
 ## Security
 
-The app is globally protected through cookie-based auth in `src/middleware.ts`.
+The app is globally protected through cookie-based auth in `src/proxy.ts`.
 
 ### Mechanism
 
 - Login page: `src/app/[locale]/login/page.tsx`
 - Auth server action: `src/app/actions/auth.actions.ts`
-- Guard: `src/middleware.ts`
+- Guard: `src/proxy.ts`
 - Secret source: `.env` `ADMIN_PASSWORD`
 
 ### Auth Flow
 
 1. A user visits any protected route.
-2. `src/middleware.ts` checks `auth_token` before handing off to `next-intl`.
+2. `src/proxy.ts` checks `auth_token` before handing off to `next-intl`.
 3. `/login`, localized login routes, static assets, and API paths are exempt.
 4. If the cookie is missing or invalid, the user is redirected to `/<locale>/login`.
 5. `loginAction` compares the submitted password with `process.env.ADMIN_PASSWORD`.
@@ -74,7 +76,7 @@ The app is globally protected through cookie-based auth in `src/middleware.ts`.
 
 ## Database Schema Snapshot
 
-The Prisma schema now defines eight models.
+The Prisma schema now defines nine models.
 
 ### `Prompt`
 
@@ -139,6 +141,27 @@ The Prisma schema now defines eight models.
   - `module`
 - Stores `position` for stable list ordering
 
+### `Skill`
+
+- Capability shell built on top of a saved entry prompt
+- Fields:
+  - `name`
+  - `description`
+  - `goal`
+  - `status`
+  - `entryPromptId`
+  - `collectionId`
+  - `recommendedModel`
+  - `inputSchema`
+  - `outputSchema`
+  - `notes`
+  - `createdAt`
+  - `updatedAt`
+- Purpose:
+  - turn a strong prompt into a reusable capability definition
+  - optionally attach a collection pack
+  - expose simple input/output contracts without adding a workflow runtime
+
 ### `AgentHistory`
 
 - Durable reasoning log for MiniMax runs
@@ -157,6 +180,10 @@ The Prisma schema now defines eight models.
 
 - Key/value settings table
 - `value` stores serialized JSON
+- Also stores lightweight skill runner state under `key = "skill-run-state"`:
+  - `recentValuesBySkillId`
+  - `presetsBySkillId`
+  - `recentRunsBySkillId`
 
 ## Major Data Flows
 
@@ -292,6 +319,30 @@ Behavior:
 5. The create-collection dialog can be prefilled from the refactor proposal summary and cleaned draft title.
 6. Collections become reusable personal solution packs.
 
+### Skills
+
+Source files:
+
+- `src/app/actions/skill.actions.ts`
+- `src/app/[locale]/skills/page.tsx`
+- `src/app/[locale]/skills/[id]/page.tsx`
+- `src/app/[locale]/skills/new/page.tsx`
+
+Behavior:
+
+1. A skill is created from a saved prompt or through the dedicated skill form.
+2. `entryPromptId` links the capability to the prompt that should be used as its main execution entry.
+3. `collectionId` optionally links the skill to an existing reusable pack.
+4. `inputSchema` and `outputSchema` store lightweight JSON contracts.
+5. Skill detail surfaces the latest benchmark run for the entry prompt.
+6. Skills now expose a dedicated run surface that parameterizes the entry prompt with schema values.
+7. Running a skill uses stateless MiniMax analysis against the rendered prompt and does not create a separate persistence model.
+8. Skill Run now persists:
+  - the most recent input values for each skill
+  - up to 8 named input presets per skill
+  - up to 5 recent stateless run summaries per skill
+  in `Setting` rather than a dedicated new table.
+
 ## UI Wiring
 
 ### Prompt Detail
@@ -322,6 +373,58 @@ Behavior:
 - `src/app/[locale]/collections/[id]/page.tsx`
 - Sidebar and search dialog now include `Collections`.
 
+### Skills
+
+- `src/app/[locale]/skills/page.tsx`
+- `src/app/[locale]/skills/[id]/page.tsx`
+- `src/app/[locale]/skills/[id]/run/page.tsx`
+- `src/app/[locale]/skills/new/page.tsx`
+- Sidebar and search dialog now include `Skills`.
+- Prompt detail can create or open a skill directly from the current saved prompt.
+- Skill detail surfaces the current baseline version chosen on the entry prompt.
+- Skill detail now also surfaces recent stateless skill-run summaries so the capability detail page can act as a lightweight operational dashboard.
+- Skill detail now includes a unified capability-health summary that combines:
+  - baseline presence
+  - latest benchmark signal
+  - latest recent-run validation signal
+  so a user can judge reuse readiness from one panel instead of cross-reading separate cards.
+- Skill run now mirrors that capability-health context in the runner itself, so a user can see baseline, benchmark, and recent validation readiness while executing the skill instead of leaving the page.
+- `getSkills()` now returns a derived capability-health summary for each skill, so the list page can expose readiness before a user opens the detail view.
+- Skill cards now surface three live health signals:
+  - baseline anchor
+  - latest benchmark score
+  - latest validation-run risk
+  plus a derived `ready` / `watch` / `setup` state.
+- Skills list is now a lightweight management surface rather than a passive gallery:
+  - users can filter by `ready` / `watch` / `setup`
+  - users can sort by health priority or recent updates
+  - filtered empty states explicitly guide the user back to the full capability set
+- Skills list filtering and sorting are now URL-synced:
+  - `health=all|ready|watch|setup`
+  - `sort=health|updated|production`
+  so refresh, share links, and browser history preserve the current management view.
+- `production` sort is derived, not persisted, and prioritizes:
+  - readiness state
+  - benchmark recommendation
+  - benchmark score
+  - recent validation-run recency
+  - prompt update time
+- Skills list now also includes two lightweight operational affordances:
+  - overview filter cards that make `all / ready / watch / setup` feel like first-class management states
+  - a priority queue that highlights the next `watch/setup` capabilities that most need baseline, benchmark, or live validation attention
+- The priority queue now includes a direct next-step CTA for each attention reason:
+  - `needsBaseline` -> entry prompt `#versions`
+  - `needsBenchmark` -> entry prompt `#benchmark`
+  - `needsValidation` -> skill runner
+  - `needsIteration` -> entry prompt `#agent`
+- Skill run lets the user fill inputs, preview the rendered prompt, and run stateless MiniMax validation before using the prompt elsewhere.
+- Skill run also restores recent values and lets the user save/delete named presets without changing Prisma schema boundaries.
+- Skill run now shows recent run history cards with rendered-prompt preview, risk, confidence, and input-count summary.
+- Skill run recent-run cards are now replayable: a user can reload that run's inputs into the form or convert the run directly into a named preset.
+- Skill run recent-run cards can now also replay the stored configuration immediately, rerunning stateless MiniMax analysis without retyping the form.
+- Skill detail recent-run cards now link directly into the runner with a selected `run` context, so the runner can hydrate that run's saved inputs on arrival.
+- Recent run cards on both the skill detail page and the runner can now copy that run's rendered prompt directly for manual reuse outside the app.
+
 ## Important Code Locations
 
 - Prisma client: `src/lib/prisma.ts`
@@ -330,6 +433,7 @@ Behavior:
 - Module actions: `src/app/actions/module.actions.ts`
 - Benchmark actions: `src/app/actions/benchmark.actions.ts`
 - Collection actions: `src/app/actions/collection.actions.ts`
+- Skill actions: `src/app/actions/skill.actions.ts`
 - Agent history actions: `src/app/actions/agent-history.actions.ts`
 - Agent actions: `src/app/actions/agent.actions.ts`
 - MiniMax runtime: `src/agent/llm-agent.ts`
@@ -340,6 +444,8 @@ Behavior:
 - Editor UI: `src/components/editor/editor-layout.tsx`
 - Collections UI: `src/app/[locale]/collections/page.tsx`
 - Collection detail UI: `src/app/[locale]/collections/[id]/page.tsx`
+- Skills UI: `src/app/[locale]/skills/page.tsx`
+- Skill detail UI: `src/app/[locale]/skills/[id]/page.tsx`
 
 ## Current Agent Status
 
@@ -350,6 +456,8 @@ Behavior:
 - Saved prompt refactor now exposes a field-level draft diff before acceptance.
 - Refactor-created modules can be added directly into existing collections from the refactor UI.
 - Refactor-created modules can also be routed into a newly created collection without leaving the refactor workflow.
+- Skills now provide a lightweight capability layer over saved prompts and optional collections.
+- Skills can be created directly from saved prompts and carry input/output schema contracts.
 - Playground uses stateless MiniMax ReAct analysis.
 - The only live tool in the ReAct loop is `search_prompt_modules`.
 - Trajectories are rendered through:
@@ -360,21 +468,27 @@ Behavior:
 
 ## Next Milestone
 
-The core of `Prompt Evolution Loop v1` is now live:
+This repository is currently in a milestone-closure phase.
 
-1. `Refactor`
-2. `Accept`
-3. `Auto Benchmark Compare`
-4. `Decide`
-5. `Package` via existing collection quick add
+The goal of the current closure is:
 
-The next logical implementation target is either:
+1. stabilize the already-shipped prompt and skill workflows
+2. keep `dev.db` as a clean seeded sample rather than a testing scratchpad
+3. preserve a passing quality gate:
+   - `npm run lint`
+   - `npm run build`
+   - `npm run smoke:browser`
+4. lock current product boundaries before the next platform milestone
 
-1. `Prompt Evolution Loop v1.1`
-   - persist evolution comparison context beyond the immediate refactor session if desired
-   - improve collection creation defaults and naming heuristics directly from refactor output
-2. `Skill Layer MVP`
-   - add a lightweight capability layer above `Prompt` / `Module` / `Collection`
+The next implementation milestone is **Docker containerization and VPS deployment**.
+
+That next milestone should focus on:
+
+- production Docker image
+- SQLite volume persistence
+- reverse proxy guidance
+- health checks
+- deployment instructions for a single AMD64 Ubuntu VPS
 
 ## Guardrails For Future Agents
 
