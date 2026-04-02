@@ -72,6 +72,7 @@ Prompt IDE now ships a minimal single-host deployment setup based on:
 - `compose.yaml` for the app container plus an on-demand schema sync service
 - named-volume SQLite persistence mounted at `/app/data`
 - `/api/health` readiness probe that checks Prisma + SQLite availability
+- `deploy/backup.sh` and `deploy/restore.sh` for SQLite cold-backup and restore
 - `deploy/update.sh` for the recommended server-side update flow
 
 ### Production Environment
@@ -111,17 +112,54 @@ The recommended update flow for this repo is server-side source checkout plus re
 
 The script performs:
 
+- `PROMPT_IDE_BACKUP_KIND=preupdate ./deploy/backup.sh`
 - `git pull --ff-only`
 - `docker compose --profile ops build app schema`
 - `docker compose --profile ops run --rm schema`
 - `docker compose up -d --wait app`
+
+### Backup And Restore
+
+The default backup strategy for this deployment is:
+
+- backup directory outside the repo: `/srv/prompt-ide-backups`
+- daily cold backup at `03:30`
+- keep the last 7 days of `daily-*` backups
+- keep `preupdate-*` and `pre-restore-*` backups until you clean them up manually
+- run the backup scripts as the same VPS operator that already manages Docker and can write `/srv/prompt-ide-backups`
+
+Manual backup:
+
+```bash
+PROMPT_IDE_BACKUP_KIND=manual ./deploy/backup.sh
+```
+
+Daily backup via cron:
+
+```cron
+30 3 * * * cd /srv/prompt-ide && PROMPT_IDE_BACKUP_KIND=daily ./deploy/backup.sh >> /var/log/prompt-ide-backup.log 2>&1
+```
+
+Restore from a specific backup:
+
+```bash
+./deploy/restore.sh /srv/prompt-ide-backups/daily-YYYY-MM-DD-HHMMSS.db
+```
+
+`restore.sh` always creates a `pre-restore-*` rescue snapshot before it overwrites the active database. After a restore, verify:
+
+- `curl http://127.0.0.1:<published-port>/api/health`
+- admin login
+- prompt list visibility
+- one known prompt still exists
+- creating and saving a temporary prompt still works
 
 ### Persistence And Scope
 
 - SQLite data lives in the named volume declared by `compose.yaml`
 - container health is driven by `/api/health`, which verifies both Prisma queryability and SQLite storage writability
 - the deployment setup is intentionally single-host and single-volume
-- reverse proxy / TLS termination is still expected to be handled outside this repo
+- reverse proxy / TLS is still handled outside this repo, but this deployment baseline has already been exercised successfully behind Nginx and Cloudflare
 - this is a deployment baseline, not a clustered or multi-instance topology
 
 ## Database Commands
@@ -191,4 +229,5 @@ The repository now ships a first production-oriented deployment baseline:
 - core product capabilities are implemented and locally validated
 - the current focus is stability, regression safety, and credible self-hosting
 - Docker / Compose assets now exist in-repo for a single-host VPS path
-- reverse proxy, TLS, backups, and host hardening remain infrastructure follow-up work
+- reverse proxy / TLS and backup / restore are now covered by the current baseline
+- off-host backup replication and host hardening remain infrastructure follow-up work
