@@ -27,6 +27,7 @@ import {
   LibraryBig,
   Layers3,
 } from "lucide-react"
+import { useAuthz } from "@/components/auth/authz-provider"
 import { getPrompts, type SerializedPrompt } from "@/app/actions/prompt.actions"
 import { getModules, type SerializedModule } from "@/app/actions/module.actions"
 import { getCollections } from "@/app/actions/collection.actions"
@@ -52,6 +53,7 @@ const PAGES = [
 export function SearchDialog() {
   const [open, setOpen] = useState(false)
   const router = useRouter()
+  const { canManageSettings } = useAuthz()
   const [prompts, setPrompts] = useState<SerializedPrompt[]>([])
   const [modules, setModules] = useState<SerializedModule[]>([])
   const [collections, setCollections] = useState<Collection[]>([])
@@ -81,6 +83,10 @@ export function SearchDialog() {
     () => prompts.filter((p) => p.status !== "archived"),
     [prompts]
   )
+  const visiblePages = useMemo(
+    () => (canManageSettings ? PAGES : PAGES.filter((page) => page.href !== "/settings")),
+    [canManageSettings]
+  )
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -99,14 +105,19 @@ export function SearchDialog() {
   }
 
   return (
-    <CommandDialog open={open} onOpenChange={setOpen}>
+    <CommandDialog
+      open={open}
+      onOpenChange={setOpen}
+      title={t("dialogTitle")}
+      description={t("dialogDescription")}
+    >
       <Command>
         <CommandInput placeholder={t("placeholder")} />
         <CommandList>
           <CommandEmpty>{tc("noResults")}</CommandEmpty>
 
           <CommandGroup heading={t("pages")}>
-            {PAGES.map((page) => (
+            {visiblePages.map((page) => (
               <CommandItem key={page.href} onSelect={() => navigate(page.href)}>
                 <page.icon className="h-4 w-4 mr-2 text-muted-foreground" />
                 {tn(page.nameKey)}

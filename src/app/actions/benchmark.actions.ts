@@ -3,7 +3,7 @@
 import { ensureAuthenticated } from "@/lib/action-auth"
 import { prisma } from "@/lib/prisma"
 import { deserializePromptSnapshot } from "@/lib/prompt-version"
-import { evaluatePromptBenchmark } from "@/agent/llm-agent"
+import { evaluatePromptBenchmark, type NarrationLocale } from "@/agent/llm-agent"
 import { revalidatePath } from "next/cache"
 import type {
   BenchmarkComparison,
@@ -81,7 +81,8 @@ async function findLatestBenchmarkRunForVersion(promptId: string, promptVersionI
 
 async function ensureBenchmarkRunForVersion(
   promptId: string,
-  promptVersionId: string
+  promptVersionId: string,
+  locale?: NarrationLocale
 ): Promise<BenchmarkRun> {
   const existing = await findLatestBenchmarkRunForVersion(promptId, promptVersionId)
   if (existing) {
@@ -97,7 +98,12 @@ async function ensureBenchmarkRunForVersion(
   }
 
   const snapshot = deserializePromptSnapshot(version)
-  const evaluation = await evaluatePromptBenchmark(snapshot, promptId, version.versionNumber)
+  const evaluation = await evaluatePromptBenchmark(
+    snapshot,
+    promptId,
+    version.versionNumber,
+    locale
+  )
 
   const row = await prisma.benchmarkRun.create({
     data: {
@@ -136,8 +142,29 @@ function createComparisonSummary(
   strategy: PromptEvolutionComparison["strategy"],
   comparison: BenchmarkRun,
   candidate: BenchmarkRun,
-  deltas: PromptEvolutionComparison["deltas"]
+  deltas: PromptEvolutionComparison["deltas"],
+  locale: NarrationLocale
 ) {
+  if (locale === "zh") {
+    const target =
+      strategy === "baseline"
+        ? `基线 v${comparison.promptVersionNumber}`
+        : `上一版 v${comparison.promptVersionNumber}`
+    const direction =
+      deltas.overallScore > 0
+        ? "有所提升"
+        : deltas.overallScore < 0
+          ? "有所下降"
+          : "基本持平"
+    const production = candidate.recommendedForProduction
+      ? "MiniMax 建议将当前候选版本提升到生产环境。"
+      : "MiniMax 仍建议在进入生产前继续迭代。"
+
+    return `与 ${target} 相比，当前候选版本的整体得分${direction} ${Math.abs(
+      deltas.overallScore
+    )} 分。${production}`
+  }
+
   const target =
     strategy === "baseline"
       ? `baseline v${comparison.promptVersionNumber}`
@@ -210,7 +237,8 @@ export async function getBenchmarkRunsByPromptId(
 
 export async function runPromptBenchmark(
   promptId: string,
-  promptVersionId?: string
+  promptVersionId?: string,
+  locale?: NarrationLocale
 ): Promise<ActionResult<BenchmarkRun>> {
   if (!(await ensureAuthenticated())) {
     return { success: false, error: "Unauthorized" }
@@ -230,7 +258,7 @@ export async function runPromptBenchmark(
       return { success: false, error: "Prompt version not found" }
     }
 
-    const row = await ensureBenchmarkRunForVersion(promptId, version.id)
+    const row = await ensureBenchmarkRunForVersion(promptId, version.id, locale)
     revalidateAll()
     return { success: true, data: row }
   } catch (error) {
@@ -292,7 +320,8 @@ export async function compareBenchmarkRuns(
 export async function runPromptEvolutionComparison(
   promptId: string,
   candidateVersionId: string,
-  comparisonVersionId: string
+  comparisonVersionId: string,
+  locale: NarrationLocale = "zh"
 ): Promise<ActionResult<PromptEvolutionComparison>> {
   if (!(await ensureAuthenticated())) {
     return { success: false, error: "Unauthorized" }
@@ -320,8 +349,8 @@ export async function runPromptEvolutionComparison(
     }
 
     const [candidateRun, comparisonRun] = await Promise.all([
-      ensureBenchmarkRunForVersion(promptId, candidateVersionId),
-      ensureBenchmarkRunForVersion(promptId, comparisonVersionId),
+      ensureBenchmarkRunForVersion(promptId, candidateVersionId, locale),
+      ensureBenchmarkRunForVersion(promptId, comparisonVersionId, locale),
     ])
 
     const deltas = {
@@ -346,7 +375,8 @@ export async function runPromptEvolutionComparison(
           comparisonVersion.isBaseline ? "baseline" : "previous_version",
           comparisonRun,
           candidateRun,
-          deltas
+          deltas,
+          locale
         ),
       },
     }
@@ -357,7 +387,8 @@ export async function runPromptEvolutionComparison(
 
 export async function getLatestPromptEvolutionComparison(
   promptId: string,
-  strategy: PromptEvolutionComparisonRequestStrategy = "auto"
+  strategy: PromptEvolutionComparisonRequestStrategy = "auto",
+  locale: NarrationLocale = "zh"
 ): Promise<ActionResult<PromptEvolutionComparison | null>> {
   if (!(await ensureAuthenticated())) {
     return { success: false, error: "Unauthorized" }
@@ -425,7 +456,8 @@ export async function getLatestPromptEvolutionComparison(
           resolvedStrategy,
           comparisonRun,
           candidateRun,
-          deltas
+          deltas,
+          locale
         ),
       },
     }

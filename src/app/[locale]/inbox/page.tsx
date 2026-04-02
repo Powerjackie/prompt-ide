@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionHeader } from "@/components/layout/section-header"
+import { useAuthz } from "@/components/auth/authz-provider"
 import { usePrompts } from "@/hooks/use-prompts"
 import {
   setPromptStatus,
@@ -21,6 +22,7 @@ import { toast } from "sonner"
 export default function InboxPage() {
   const t = useTranslations("inbox")
   const tc = useTranslations("common")
+  const { canDeleteAssets } = useAuthz()
   const { prompts: allPrompts, loading, refetch } = usePrompts()
   const [pending, startTransition] = useTransition()
 
@@ -47,13 +49,13 @@ export default function InboxPage() {
           </>
         }
         title={t("quickCapture")}
-        description="Use the inbox as a low-friction capture layer, then promote the best items when they are ready."
+        description={t("pageDescription")}
       />
 
       <div className="app-panel p-6">
         <SectionHeader
           title={t("quickCapture")}
-          description="Paste rough ideas fast so they enter the workflow before you lose them."
+          description={t("captureDescription")}
         />
         <div className="mt-5">
           <QuickCapture onCaptured={refetch} />
@@ -141,7 +143,7 @@ export default function InboxPage() {
                   onClick={async () => {
                     const ok = await copyToClipboard(p.content)
                     if (!ok) {
-                      toast.error("Failed to copy")
+                      toast.error(tc("copyFailed"))
                       return
                     }
                     startTransition(async () => {
@@ -175,25 +177,27 @@ export default function InboxPage() {
                 >
                   <Archive className="h-3 w-3 mr-1" /> {tc("archive")}
                 </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-7 text-xs text-destructive hover:text-destructive"
-                  disabled={pending}
-                  onClick={() => {
-                    startTransition(async () => {
-                      const result = await deletePromptAction(p.id)
-                      if (result.success) {
-                        toast.success(tc("deleted"))
-                        refetch()
-                      } else {
-                        toast.error(result.error)
-                      }
-                    })
-                  }}
-                >
-                  <Trash2 className="h-3 w-3 mr-1" /> {tc("delete")}
-                </Button>
+                {canDeleteAssets ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 text-xs text-destructive hover:text-destructive"
+                    disabled={pending}
+                    onClick={() => {
+                      startTransition(async () => {
+                        const result = await deletePromptAction(p.id)
+                        if (result.success) {
+                          toast.success(tc("deleted"))
+                          refetch()
+                        } else {
+                          toast.error(result.error)
+                        }
+                      })
+                    }}
+                  >
+                    <Trash2 className="h-3 w-3 mr-1" /> {tc("delete")}
+                  </Button>
+                ) : null}
               </div>
             </div>
           ))}

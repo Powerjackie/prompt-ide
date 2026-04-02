@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { ArrowLeft, LibraryBig, Plus, Trash2, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useAuthz } from "@/components/auth/authz-provider"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   AlertDialog,
@@ -47,6 +48,7 @@ export default function CollectionDetailPage({
   const router = useRouter()
   const t = useTranslations("collections")
   const tc = useTranslations("common")
+  const { canDeleteAssets } = useAuthz()
   const [collection, setCollection] = useState<Collection | null>(null)
   const [items, setItems] = useState<CollectionItem[]>([])
   const [prompts, setPrompts] = useState<SerializedPrompt[]>([])
@@ -222,24 +224,26 @@ export default function CollectionDetailPage({
             <Pencil className="mr-1 h-4 w-4" />
             {tc("edit")}
           </Button>
-          <AlertDialog>
-            <AlertDialogTrigger render={<Button size="sm" variant="destructive" />}>
-              <Trash2 className="mr-1 h-4 w-4" />
-              {tc("delete")}
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t("deleteTitle")}</AlertDialogTitle>
-                <AlertDialogDescription>{t("deleteDescription")}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDeleteCollection}>
-                  {tc("delete")}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          {canDeleteAssets ? (
+            <AlertDialog>
+              <AlertDialogTrigger render={<Button size="sm" variant="destructive" />}>
+                <Trash2 className="mr-1 h-4 w-4" />
+                {tc("delete")}
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("deleteTitle")}</AlertDialogTitle>
+                  <AlertDialogDescription>{t("deleteDescription")}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteCollection}>
+                    {tc("delete")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : null}
         </div>
       </div>
 
@@ -274,15 +278,17 @@ export default function CollectionDetailPage({
                       {t("itemPosition", { position: item.position })} · {formatDate(item.createdAt)}
                     </p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive hover:text-destructive"
-                    onClick={() => handleRemoveItem(item.id)}
-                  >
-                    <Trash2 className="mr-1 h-4 w-4" />
-                    {tc("delete")}
-                  </Button>
+                  {canDeleteAssets ? (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => handleRemoveItem(item.id)}
+                    >
+                      <Trash2 className="mr-1 h-4 w-4" />
+                      {tc("delete")}
+                    </Button>
+                  ) : null}
                 </div>
               ))
             )}

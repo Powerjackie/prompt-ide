@@ -5,7 +5,9 @@ import { useTranslations } from "next-intl"
 import { Archive, RotateCcw, Trash2, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { useAuthz } from "@/components/auth/authz-provider"
 import { usePrompts } from "@/hooks/use-prompts"
+import { PageHeader } from "@/components/layout/page-header"
 import {
   setPromptStatus,
   deletePrompt as deletePromptAction,
@@ -17,6 +19,7 @@ import { Link } from "@/i18n/navigation"
 export default function ArchivePage() {
   const t = useTranslations("archive")
   const tc = useTranslations("common")
+  const { canDeleteAssets } = useAuthz()
   const { prompts: allPrompts, loading, refetch } = usePrompts()
   const [pending, startTransition] = useTransition()
 
@@ -34,15 +37,16 @@ export default function ArchivePage() {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div className="flex items-center gap-2">
-        <Archive className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <Badge variant="secondary">{archived.length}</Badge>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        description={t("pageDescription")}
+        actions={<Badge variant="secondary">{t("countLabel", { count: archived.length })}</Badge>}
+      />
 
       {archived.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="app-panel py-14 text-center text-muted-foreground">
           <Archive className="h-12 w-12 mx-auto mb-3 opacity-30" />
           <p>{t("empty")}</p>
         </div>
@@ -51,7 +55,7 @@ export default function ArchivePage() {
           {archived.map((p) => (
             <div
               key={p.id}
-              className="border rounded-lg p-4 hover:bg-accent/30 transition-colors"
+              className="app-panel space-y-3 rounded-[1.75rem] p-5 transition-colors hover:border-primary/20 hover:bg-accent/20"
             >
               <div className="flex items-start justify-between">
                 <div className="min-w-0 flex-1">
@@ -87,25 +91,27 @@ export default function ArchivePage() {
                 >
                   <RotateCcw className="h-3 w-3 mr-1" /> {tc("restore")}
                 </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-7 text-xs text-destructive hover:text-destructive"
-                  disabled={pending}
-                  onClick={() => {
-                    startTransition(async () => {
-                      const result = await deletePromptAction(p.id)
-                      if (result.success) {
-                        toast.success(t("permanentlyDeleted"))
-                        refetch()
-                      } else {
-                        toast.error(result.error)
-                      }
-                    })
-                  }}
-                >
-                  <Trash2 className="h-3 w-3 mr-1" /> {tc("deleteForever")}
-                </Button>
+                {canDeleteAssets ? (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 text-xs text-destructive hover:text-destructive"
+                    disabled={pending}
+                    onClick={() => {
+                      startTransition(async () => {
+                        const result = await deletePromptAction(p.id)
+                        if (result.success) {
+                          toast.success(t("permanentlyDeleted"))
+                          refetch()
+                        } else {
+                          toast.error(result.error)
+                        }
+                      })
+                    }}
+                  >
+                    <Trash2 className="h-3 w-3 mr-1" /> {tc("deleteForever")}
+                  </Button>
+                ) : null}
               </div>
             </div>
           ))}

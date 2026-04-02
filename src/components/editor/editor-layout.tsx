@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo, useTransition } from "react"
 import { useRouter } from "@/i18n/navigation"
 import { Link } from "@/i18n/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { ArrowLeft, Save, Eye, Puzzle, Bot, History } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -111,6 +111,7 @@ interface EditorFormProps {
 
 function EditorForm({ promptId, existing }: EditorFormProps) {
   const router = useRouter()
+  const locale = useLocale() as "zh" | "en"
   const t = useTranslations("editor")
   const tc = useTranslations("common")
   const ta = useTranslations("agent")
@@ -250,7 +251,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
 
     setAnalyzing(true)
     startTransition(async () => {
-      const result = await runAgentAnalysis(content, savedPrompt.id)
+      const result = await runAgentAnalysis(content, savedPrompt.id, locale)
       if (result.success) {
         setAnalysis(result.data.analysis)
         setTrajectory(result.data.trajectory)
@@ -271,7 +272,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
       }
       setAnalyzing(false)
     })
-  }, [content, dirty, savedPrompt, startTransition, ta])
+  }, [content, dirty, locale, savedPrompt, startTransition, ta])
 
   const handleRefactorApplied = useCallback(
     (updatedPrompt: SerializedPrompt, mode: "draft" | "variables") => {
@@ -330,11 +331,11 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
         eyebrow={
           <>
             <Bot className="h-3.5 w-3.5" />
-            Workspace
+            {t("workspaceEyebrow")}
           </>
         }
         title={isEdit ? t("editPrompt") : t("newPrompt")}
-        description="Shape prompt content, review live structure, and run the MiniMax agent without leaving the workspace."
+        description={t("workspaceDescription")}
         actions={
           <>
             <Button variant="ghost" size="sm" asChild className="rounded-2xl">
@@ -357,30 +358,29 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
             </span>
           ) : null}
           <span className="rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs text-muted-foreground">
-            {variables.length} variables
+            {t("variablesSummary", { count: variables.length })}
           </span>
         </div>
       </PageHeader>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(380px,0.92fr)] xl:items-start">
         {/* Left: Metadata + Editor */}
-        <div className="space-y-4">
-          <div className="app-panel p-5">
+        <div className="space-y-6">
+          <div className="app-panel p-6">
             <SectionHeader
-              title="Prompt Metadata"
-              description="Keep title, intent, model, and tags aligned with the draft you are evolving."
+              title={t("metadataTitle")}
+              description={t("metadataDescription")}
             />
             <div className="mt-5">
               <MetadataForm values={meta} onChange={handleMetaChange} />
             </div>
           </div>
 
-          <div className="app-panel space-y-3 p-5">
+          <div className="app-panel space-y-4 p-6">
             <SectionHeader
               title={t("contentLabel")}
-              description="Write, restructure, and prepare the prompt body that powers the workbench."
+              description={t("contentDescription")}
             />
-            <label className="text-sm font-medium">{t("contentLabel")}</label>
             <PromptEditor
               value={content}
               onChange={handleContentChange}
@@ -390,15 +390,21 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
         </div>
 
         {/* Right: Preview / Agent / Modules tabs */}
-        <div className="app-panel flex min-h-[680px] flex-col overflow-hidden p-5 xl:sticky xl:top-6 xl:max-h-[calc(100vh-7rem)]">
+        <div className="app-panel flex min-h-[680px] flex-col overflow-hidden p-6 xl:self-start xl:max-h-[min(920px,calc(100vh-8rem))] dark:shadow-[0_28px_92px_-42px_rgba(0,0,0,0.88),0_0_24px_-20px_rgba(79,246,255,0.4)]">
+          <div className="mb-4">
+            <SectionHeader
+              title={t("toolsTitle")}
+              description={t("toolsDescription")}
+            />
+          </div>
           <Tabs defaultValue="preview" className="flex h-full min-h-0 flex-col">
-            <TabsList className="rounded-2xl bg-muted/45 p-1">
-              <TabsTrigger value="preview">
-                <Eye className="h-3.5 w-3.5 mr-1" /> {t("preview")}
-              </TabsTrigger>
-              <TabsTrigger value="agent">
-                <Bot className="h-3.5 w-3.5 mr-1" /> Agent
-              </TabsTrigger>
+            <TabsList className="rounded-2xl border border-border/60 bg-muted/45 p-1 dark:border-primary/10 dark:bg-background/60">
+                <TabsTrigger value="preview">
+                  <Eye className="h-3.5 w-3.5 mr-1" /> {t("preview")}
+                </TabsTrigger>
+                <TabsTrigger value="agent">
+                  <Bot className="h-3.5 w-3.5 mr-1" /> {t("agentTab")}
+                </TabsTrigger>
               {savedPrompt?.id && (
                 <TabsTrigger value="versions">
                   <History className="h-3.5 w-3.5 mr-1" /> {t("versionsTab")}
@@ -409,18 +415,18 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="mt-4 min-h-0 flex-1 overflow-hidden">
-              <div className="h-full overflow-y-auto pr-1">
+              <div className="h-full overflow-y-auto rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
                 <PreviewPanel content={content} variables={variables} />
               </div>
             </TabsContent>
             <TabsContent value="agent" className="mt-4 min-h-0 flex-1 overflow-hidden">
               <Tabs defaultValue="analysis" className="flex h-full min-h-0 flex-col">
-                <TabsList variant="line" className="rounded-2xl bg-muted/45 p-1">
+                <TabsList variant="line" className="rounded-2xl border border-border/60 bg-muted/45 p-1 dark:border-primary/10 dark:bg-background/60">
                   <TabsTrigger value="analysis">{ta("modes.analysis")}</TabsTrigger>
                   <TabsTrigger value="refactor">{ta("modes.refactor")}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="analysis" className="mt-4 min-h-0 flex-1 overflow-hidden">
-                  <div className="h-full overflow-y-auto pr-1">
+                  <div className="h-full overflow-y-auto rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
                     <AnalysisPanel
                       analysis={analysis}
                       trajectory={trajectory}
@@ -432,7 +438,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
                   </div>
                 </TabsContent>
                 <TabsContent value="refactor" className="mt-4 min-h-0 flex-1 overflow-hidden">
-                  <div className="h-full overflow-y-auto pr-1">
+                  <div className="h-full overflow-y-auto rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
                     <RefactorPanel
                       promptId={savedPrompt?.id}
                       promptContent={content}
@@ -453,7 +459,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
             </TabsContent>
             {savedPrompt?.id && (
               <TabsContent value="versions" className="mt-4 min-h-0 flex-1 overflow-hidden">
-                <div className="h-full overflow-y-auto pr-1">
+                <div className="h-full overflow-y-auto rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
                   <VersionHistoryPanel
                     promptId={savedPrompt.id}
                     currentSnapshot={currentSnapshot}
@@ -471,7 +477,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
               </TabsContent>
             )}
             <TabsContent value="modules" className="mt-4 min-h-0 flex-1 overflow-hidden">
-              <div className="h-full overflow-y-auto pr-1">
+              <div className="h-full overflow-y-auto rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
                 <ModuleInserter onInsert={handleInsertModule} />
               </div>
             </TabsContent>

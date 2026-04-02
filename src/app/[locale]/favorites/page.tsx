@@ -6,6 +6,7 @@ import { Star } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { usePrompts } from "@/hooks/use-prompts"
 import { PromptCard } from "@/components/prompts/prompt-card"
+import { PageHeader } from "@/components/layout/page-header"
 
 export default function FavoritesPage() {
   const t = useTranslations("favorites")
@@ -25,14 +26,15 @@ export default function FavoritesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Star className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <Badge variant="secondary">{favorites.length}</Badge>
-      </div>
+      <PageHeader
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        description={t("pageDescription")}
+        actions={<Badge variant="secondary">{t("countLabel", { count: favorites.length })}</Badge>}
+      />
 
       {favorites.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="app-panel py-14 text-center text-muted-foreground">
           <Star className="h-12 w-12 mx-auto mb-3 opacity-30" />
           <p>{t("empty")}</p>
         </div>

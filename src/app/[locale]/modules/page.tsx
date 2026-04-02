@@ -6,6 +6,7 @@ import { Puzzle, Plus, PenSquare, Trash2, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { PageHeader } from "@/components/layout/page-header"
+import { useAuthz } from "@/components/auth/authz-provider"
 import { useModules } from "@/hooks/use-modules"
 import { useModuleUIStore } from "@/stores/module-store"
 import { deleteModule as deleteModuleAction } from "@/app/actions/module.actions"
@@ -18,6 +19,7 @@ import { toast } from "sonner"
 export default function ModulesPage() {
   const t = useTranslations("modules")
   const tc = useTranslations("common")
+  const { canDeleteAssets } = useAuthz()
   const { modules, loading, refetch } = useModules()
   const { activeFilter, setActiveFilter } = useModuleUIStore()
   const [pending, startTransition] = useTransition()
@@ -69,7 +71,7 @@ export default function ModulesPage() {
           </>
         }
         title={t("title")}
-        description="Maintain the reusable roles, goals, constraints, and formats that power stronger prompt systems."
+        description={t("pageDescription")}
         actions={
           <Button onClick={openCreate} className="rounded-2xl">
             <Plus className="mr-1 h-4 w-4" />
@@ -79,7 +81,7 @@ export default function ModulesPage() {
       >
         <div className="chip-row">
           <Badge variant="outline" className="rounded-full px-3 py-1">
-            {modules.length} assets
+            {t("assetCount", { count: modules.length })}
           </Badge>
         </div>
       </PageHeader>
@@ -102,7 +104,7 @@ export default function ModulesPage() {
               className="cursor-pointer"
               onClick={() => setActiveFilter(mt.value)}
             >
-              {mt.label} ({count})
+              {t(mt.value)} ({count})
             </Badge>
           )
         })}
@@ -116,7 +118,7 @@ export default function ModulesPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filtered.map((m) => {
-            const typeLabel = MODULE_TYPES.find((mt) => mt.value === m.type)?.label ?? m.type
+            const typeLabel = t(m.type)
             return (
               <div
                 key={m.id}
@@ -168,14 +170,16 @@ export default function ModulesPage() {
                   >
                     <Copy className="h-3 w-3 mr-1" /> {tc("copy")}
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 text-xs text-destructive hover:text-destructive"
-                    onClick={() => handleDelete(m.id)}
-                  >
-                    <Trash2 className="h-3 w-3 mr-1" /> {tc("delete")}
-                  </Button>
+                  {canDeleteAssets ? (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 text-xs text-destructive hover:text-destructive"
+                      onClick={() => handleDelete(m.id)}
+                    >
+                      <Trash2 className="h-3 w-3 mr-1" /> {tc("delete")}
+                    </Button>
+                  ) : null}
                 </div>
               </div>
             )

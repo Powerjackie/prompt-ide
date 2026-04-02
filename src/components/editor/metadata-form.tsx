@@ -36,6 +36,9 @@ interface MetadataFormProps {
 export function MetadataForm({ values, onChange }: MetadataFormProps) {
   const t = useTranslations("editor")
   const tp = useTranslations("prompts")
+  const tm = useTranslations("models")
+  const ts = useTranslations("status")
+  const tcg = useTranslations("categories")
   const [tagInput, setTagInput] = useState("")
 
   const update = <K extends keyof MetadataValues>(key: K, val: MetadataValues[K]) => {
@@ -63,6 +66,7 @@ export function MetadataForm({ values, onChange }: MetadataFormProps) {
           value={values.title}
           onChange={(e) => update("title", e.target.value)}
           placeholder={t("titlePlaceholder")}
+          className="rounded-2xl"
         />
       </div>
 
@@ -73,6 +77,7 @@ export function MetadataForm({ values, onChange }: MetadataFormProps) {
           value={values.description}
           onChange={(e) => update("description", e.target.value)}
           placeholder={t("descriptionPlaceholder")}
+          className="rounded-2xl"
         />
       </div>
 
@@ -80,13 +85,13 @@ export function MetadataForm({ values, onChange }: MetadataFormProps) {
         <div className="space-y-1.5">
           <Label>{tp("model")}</Label>
           <Select value={values.model} onValueChange={(v) => v && update("model", v as ModelType)}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full rounded-2xl">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {MODEL_OPTIONS.map((m) => (
                 <SelectItem key={m.value} value={m.value}>
-                  {m.label}
+                  {tm(m.value)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -96,13 +101,13 @@ export function MetadataForm({ values, onChange }: MetadataFormProps) {
         <div className="space-y-1.5">
           <Label>{tp("status")}</Label>
           <Select value={values.status} onValueChange={(v) => v && update("status", v as PromptStatus)}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full rounded-2xl">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {STATUS_OPTIONS.map((s) => (
                 <SelectItem key={s.value} value={s.value}>
-                  {s.label}
+                  {ts(s.value)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -112,13 +117,13 @@ export function MetadataForm({ values, onChange }: MetadataFormProps) {
         <div className="space-y-1.5">
           <Label>{tp("category")}</Label>
           <Select value={values.category} onValueChange={(v) => v && update("category", v)}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full rounded-2xl">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {CATEGORY_OPTIONS.map((c) => (
                 <SelectItem key={c} value={c}>
-                  {c}
+                  {tcg(c)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -133,32 +138,36 @@ export function MetadataForm({ values, onChange }: MetadataFormProps) {
           value={values.source}
           onChange={(e) => update("source", e.target.value)}
           placeholder={t("sourcePlaceholder")}
+          className="rounded-2xl"
         />
       </div>
 
       <div className="space-y-1.5">
         <Label>{t("tagsLabel")}</Label>
-        <div className="flex flex-wrap gap-1.5 mb-1.5">
-          {values.tags.map((tag) => (
-            <Badge key={tag} variant="secondary" className="gap-1">
-              {tag}
-              <button onClick={() => removeTag(tag)} className="hover:text-destructive">
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
+        <div className="rounded-[1.5rem] border border-border/70 bg-muted/25 p-3">
+          <div className="mb-2 flex min-h-8 flex-wrap gap-1.5">
+            {values.tags.map((tag) => (
+              <Badge key={tag} variant="secondary" className="gap-1 rounded-full">
+                {tag}
+                <button type="button" onClick={() => removeTag(tag)} className="hover:text-destructive">
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+          <Input
+            value={tagInput}
+            onChange={(e) => setTagInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === ",") {
+                e.preventDefault()
+                addTag(tagInput)
+              }
+            }}
+            placeholder={t("tagsPlaceholder")}
+            className="rounded-2xl border-border/70 bg-background/80"
+          />
         </div>
-        <Input
-          value={tagInput}
-          onChange={(e) => setTagInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === ",") {
-              e.preventDefault()
-              addTag(tagInput)
-            }
-          }}
-          placeholder={t("tagsPlaceholder")}
-        />
       </div>
 
       <div className="space-y-1.5">
@@ -168,7 +177,7 @@ export function MetadataForm({ values, onChange }: MetadataFormProps) {
           value={values.notes}
           onChange={(e) => update("notes", e.target.value)}
           placeholder={t("notesPlaceholder")}
-          className="min-h-[60px]"
+          className="min-h-[92px] rounded-[1.5rem]"
         />
       </div>
     </div>

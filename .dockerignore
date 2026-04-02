@@ -1,0 +1,17 @@
+.git
+.next
+.env*
+node_modules
+scripts/
+dev.db
+dev.db-journal
+*.md
+*.log
+coverage
+docs/
+output/
+playwright-report/
+test-results/
+tests/
+.playwright*/
+prompt-ide_v*.tar

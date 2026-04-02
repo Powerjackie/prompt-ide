@@ -2,24 +2,28 @@
 
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import { AUTH_COOKIE_MAX_AGE, AUTH_COOKIE_NAME, buildAuthToken } from "@/lib/auth"
+import { AUTH_COOKIE_MAX_AGE, AUTH_COOKIE_NAME, buildAuthToken, resolveRoleForPassword } from "@/lib/auth"
 import type { AuthActionState } from "@/types/auth"
 
 export async function loginAction(
   _prevState: AuthActionState,
   formData: FormData
 ): Promise<AuthActionState> {
-  const configuredPassword = process.env.ADMIN_PASSWORD
-  if (!configuredPassword) {
+  if (!process.env.ADMIN_PASSWORD) {
     return { error: "configError" }
   }
 
   const password = formData.get("password")
-  if (typeof password !== "string" || password !== configuredPassword) {
+  if (typeof password !== "string") {
     return { error: "invalidPassword" }
   }
 
-  const authToken = await buildAuthToken()
+  const role = resolveRoleForPassword(password)
+  if (!role) {
+    return { error: "invalidPassword" }
+  }
+
+  const authToken = await buildAuthToken(role)
   if (!authToken) {
     return { error: "configError" }
   }
@@ -34,4 +38,14 @@ export async function loginAction(
   })
 
   redirect("/")
+}
+
+export async function logoutAction(formData: FormData) {
+  const localeValue = formData.get("locale")
+  const locale = localeValue === "zh" ? "zh" : "en"
+
+  const cookieStore = await cookies()
+  cookieStore.delete(AUTH_COOKIE_NAME)
+
+  redirect(`/${locale}/login`)
 }

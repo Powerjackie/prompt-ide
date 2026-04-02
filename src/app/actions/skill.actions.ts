@@ -1,6 +1,6 @@
 "use server"
 
-import { ensureAuthenticated } from "@/lib/action-auth"
+import { AUTH_ERRORS, ensureAdmin, ensureAuthenticated } from "@/lib/action-auth"
 import { prisma } from "@/lib/prisma"
 import { deriveSkillHealth } from "@/lib/skill-health"
 import { revalidatePath } from "next/cache"
@@ -92,6 +92,16 @@ async function saveSkillRunStateStore(state: SkillRunStateStore) {
       value: JSON.stringify(state),
     },
   })
+}
+
+function pruneSkillRunStateEntries(state: SkillRunStateStore, skillIds: string[]) {
+  for (const skillId of skillIds) {
+    delete state.recentValuesBySkillId[skillId]
+    delete state.presetsBySkillId[skillId]
+    delete state.recentRunsBySkillId[skillId]
+  }
+
+  return state
 }
 
 function deserializeBenchmarkRun(row: {
@@ -643,12 +653,14 @@ export async function updateSkill(
 }
 
 export async function deleteSkill(id: string): Promise<ActionResult<{ id: string }>> {
-  if (!(await ensureAuthenticated())) {
-    return { success: false, error: "Unauthorized" }
+  if (!(await ensureAdmin())) {
+    return { success: false, error: AUTH_ERRORS.adminRequired }
   }
 
   try {
     await prisma.skill.delete({ where: { id } })
+    const state = await getSkillRunStateStore()
+    await saveSkillRunStateStore(pruneSkillRunStateEntries(state, [id]))
     revalidateAll()
     return { success: true, data: { id } }
   } catch (error) {

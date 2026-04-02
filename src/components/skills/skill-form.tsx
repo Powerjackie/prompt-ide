@@ -43,6 +43,7 @@ export function SkillForm({
 }: SkillFormProps) {
   const t = useTranslations("skills")
   const tc = useTranslations("common")
+  const tm = useTranslations("models")
   const router = useRouter()
   const [pending, startTransition] = useTransition()
 
@@ -209,7 +210,7 @@ export function SkillForm({
               <SelectContent>
                 {MODEL_OPTIONS.map((model) => (
                   <SelectItem key={model.value} value={model.value}>
-                    {model.label}
+                    {tm(model.value)}
                   </SelectItem>
                 ))}
               </SelectContent>

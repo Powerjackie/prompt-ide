@@ -1,3 +1,23 @@
+export type AuthRole = "admin" | "member"
+
+export interface AuthSession {
+  role: AuthRole
+}
+
+export interface AuthzSnapshot {
+  isAuthenticated: boolean
+  role: AuthRole | null
+  canDeleteAssets: boolean
+  canManageSettings: boolean
+}
+
+export const guestAuthzSnapshot: AuthzSnapshot = {
+  isAuthenticated: false,
+  role: null,
+  canDeleteAssets: false,
+  canManageSettings: false,
+}
+
 export type AuthActionError = "invalidPassword" | "configError" | null
 
 export interface AuthActionState {

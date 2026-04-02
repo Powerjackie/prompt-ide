@@ -94,12 +94,11 @@ The project is no longer a prompt notebook. It is now a private system for:
 
 ## Next Milestone
 
-The next milestone is **Docker containerization and VPS deployment**.
+The next milestone is **pre-Docker sanitization and standalone optimization**, followed by production containerization.
 
 It will focus on:
 
-- production Dockerfile
-- SQLite volume persistence
-- Nginx reverse proxy guidance
-- health check endpoint
-- deployment docs for a low-cost AMD64 Ubuntu VPS
+- codebase cleanup before container work
+- strict Docker context boundaries
+- standalone-optimized production output
+- a fresh, intentional containerization pass after the cleanup

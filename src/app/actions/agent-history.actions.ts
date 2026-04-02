@@ -4,16 +4,10 @@ import { ensureAuthenticated } from "@/lib/action-auth"
 import { prisma } from "@/lib/prisma"
 import type { AgentHistoryType, AgentRunOutput, AgentTrajectoryStep } from "@/types/agent"
 import type { PromptRefactorRunOutput } from "@/types/refactor"
-import { revalidatePath } from "next/cache"
 
-// ─── Response type ───────────────────────────────────────────────
 type ActionResult<T = unknown> =
   | { success: true; data: T }
   | { success: false; error: string }
-
-function revalidateAll() {
-  revalidatePath("/[locale]", "layout")
-}
 
 function deserializeHistory(row: {
   id: string
@@ -37,7 +31,6 @@ function deserializeHistory(row: {
 
 export type SerializedAgentHistory = ReturnType<typeof deserializeHistory>
 
-// ─── Queries ─────────────────────────────────────────────────────
 export async function getHistoryByPromptId(
   promptId: string,
   type?: AgentHistoryType
@@ -54,50 +47,8 @@ export async function getHistoryByPromptId(
       },
       orderBy: { createdAt: "desc" },
     })
+
     return { success: true, data: rows.map(deserializeHistory) }
-  } catch (e) {
-    return { success: false, error: (e as Error).message }
-  }
-}
-
-// ─── Mutations ───────────────────────────────────────────────────
-export async function createAgentHistory(data: {
-  promptId: string
-  type?: string
-  input: string
-  output: Record<string, unknown>
-  trajectory?: unknown[]
-}): Promise<ActionResult<SerializedAgentHistory>> {
-  if (!(await ensureAuthenticated())) {
-    return { success: false, error: "Unauthorized" }
-  }
-
-  try {
-    const row = await prisma.agentHistory.create({
-      data: {
-        promptId: data.promptId,
-        type: data.type ?? "rule_analysis",
-        input: data.input,
-        output: JSON.stringify(data.output),
-        trajectory: JSON.stringify(data.trajectory ?? []),
-      },
-    })
-    revalidateAll()
-    return { success: true, data: deserializeHistory(row) }
-  } catch (e) {
-    return { success: false, error: (e as Error).message }
-  }
-}
-
-export async function deleteAgentHistory(id: string): Promise<ActionResult<{ id: string }>> {
-  if (!(await ensureAuthenticated())) {
-    return { success: false, error: "Unauthorized" }
-  }
-
-  try {
-    await prisma.agentHistory.delete({ where: { id } })
-    revalidateAll()
-    return { success: true, data: { id } }
   } catch (e) {
     return { success: false, error: (e as Error).message }
   }

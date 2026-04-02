@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState, useTransition } from "react"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { Gauge, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -50,6 +50,7 @@ export function BenchmarkPanel({
   versions,
   evolutionComparison = null,
 }: BenchmarkPanelProps) {
+  const locale = useLocale() as "zh" | "en"
   const t = useTranslations("benchmark")
   const [runs, setRuns] = useState<BenchmarkRun[]>([])
   const [loading, setLoading] = useState(true)
@@ -131,7 +132,11 @@ export function BenchmarkPanel({
       }
 
       setLoadingEvolution(true)
-      const result = await getLatestPromptEvolutionComparison(promptId, selectedEvolutionStrategy)
+      const result = await getLatestPromptEvolutionComparison(
+        promptId,
+        selectedEvolutionStrategy,
+        locale
+      )
       if (cancelled) return
 
       if (result.success) {
@@ -148,7 +153,7 @@ export function BenchmarkPanel({
     return () => {
       cancelled = true
     }
-  }, [hasBaseline, hasPreviousVersion, latestVersion, promptId, selectedEvolutionStrategy])
+  }, [hasBaseline, hasPreviousVersion, latestVersion, locale, promptId, selectedEvolutionStrategy])
 
   const activeComparison =
     leftRunId && rightRunId && leftRunId !== rightRunId ? comparison : null
@@ -172,7 +177,7 @@ export function BenchmarkPanel({
     }
 
     startBenchmarkTransition(async () => {
-      const result = await runPromptBenchmark(promptId, latestVersion.id)
+      const result = await runPromptBenchmark(promptId, latestVersion.id, locale)
       if (!result.success) {
         toast.error(result.error)
         return

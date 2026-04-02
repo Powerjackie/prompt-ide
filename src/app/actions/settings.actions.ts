@@ -1,6 +1,6 @@
 "use server"
 
-import { ensureAuthenticated } from "@/lib/action-auth"
+import { AUTH_ERRORS, ensureAdmin } from "@/lib/action-auth"
 import { prisma } from "@/lib/prisma"
 import type { AppSettings } from "@/types/settings"
 
@@ -31,8 +31,8 @@ const defaultSettings: AppSettings = {
 }
 
 export async function getSettings(): Promise<ActionResult<AppSettings>> {
-  if (!(await ensureAuthenticated())) {
-    return { success: false, error: "Unauthorized" }
+  if (!(await ensureAdmin())) {
+    return { success: false, error: AUTH_ERRORS.adminRequired }
   }
 
   try {
@@ -47,8 +47,8 @@ export async function getSettings(): Promise<ActionResult<AppSettings>> {
 export async function updateSettings(
   data: Partial<AppSettings>
 ): Promise<ActionResult<AppSettings>> {
-  if (!(await ensureAuthenticated())) {
-    return { success: false, error: "Unauthorized" }
+  if (!(await ensureAdmin())) {
+    return { success: false, error: AUTH_ERRORS.adminRequired }
   }
 
   try {
@@ -71,8 +71,8 @@ export async function updateSettings(
 export async function updateAgentSettings(
   data: Partial<AppSettings["agent"]>
 ): Promise<ActionResult<AppSettings>> {
-  if (!(await ensureAuthenticated())) {
-    return { success: false, error: "Unauthorized" }
+  if (!(await ensureAdmin())) {
+    return { success: false, error: AUTH_ERRORS.adminRequired }
   }
 
   try {
@@ -96,8 +96,8 @@ export async function updateAgentSettings(
 }
 
 export async function resetSettings(): Promise<ActionResult<AppSettings>> {
-  if (!(await ensureAuthenticated())) {
-    return { success: false, error: "Unauthorized" }
+  if (!(await ensureAdmin())) {
+    return { success: false, error: AUTH_ERRORS.adminRequired }
   }
 
   try {

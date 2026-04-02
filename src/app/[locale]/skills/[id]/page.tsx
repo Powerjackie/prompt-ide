@@ -40,6 +40,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionHeader } from "@/components/layout/section-header"
+import { useAuthz } from "@/components/auth/authz-provider"
 import { SkillForm } from "@/components/skills/skill-form"
 import { attachCollectionToSkill, deleteSkill, getSkillById } from "@/app/actions/skill.actions"
 import { getCollections } from "@/app/actions/collection.actions"
@@ -60,7 +61,9 @@ export default function SkillDetailPage({
   const { id } = use(params)
   const router = useRouter()
   const t = useTranslations("skills")
+  const tr = useTranslations("agent.risk")
   const tc = useTranslations("common")
+  const { canDeleteAssets } = useAuthz()
   const [detail, setDetail] = useState<SkillDetail | null>(null)
   const [prompts, setPrompts] = useState<SerializedPrompt[]>([])
   const [collections, setCollections] = useState<Collection[]>([])
@@ -206,22 +209,24 @@ export default function SkillDetailPage({
                 {t("runAction")}
               </Link>
             </Button>
-            <AlertDialog>
-              <AlertDialogTrigger render={<Button size="sm" variant="destructive" className="rounded-2xl" />}>
-                <Trash2 className="mr-1 h-4 w-4" />
-                {tc("delete")}
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t("deleteTitle")}</AlertDialogTitle>
-                  <AlertDialogDescription>{t("deleteDescription")}</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>{tc("delete")}</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            {canDeleteAssets ? (
+              <AlertDialog>
+                <AlertDialogTrigger render={<Button size="sm" variant="destructive" className="rounded-2xl" />}>
+                  <Trash2 className="mr-1 h-4 w-4" />
+                  {tc("delete")}
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("deleteTitle")}</AlertDialogTitle>
+                    <AlertDialogDescription>{t("deleteDescription")}</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>{tc("delete")}</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : null}
           </>
         }
       >
@@ -313,7 +318,9 @@ export default function SkillDetailPage({
                     {t("health.recentRunTitle")}
                   </div>
                   <p className="mt-3 text-lg font-semibold text-foreground">
-                    {latestRun ? t("recentRunRisk", { level: latestRun.riskLevel }) : t("health.missing")}
+                    {latestRun
+                      ? t("recentRunRisk", { level: tr(latestRun.riskLevel) })
+                      : t("health.missing")}
                   </p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {latestRun
@@ -520,7 +527,7 @@ export default function SkillDetailPage({
                     <p className="text-sm leading-6">{run.summary}</p>
                     <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                       <Badge variant="outline" className="rounded-full px-2.5 py-0.5 text-[11px]">
-                        {t("recentRunRisk", { level: run.riskLevel })}
+                        {t("recentRunRisk", { level: tr(run.riskLevel) })}
                       </Badge>
                       <Badge variant="outline" className="rounded-full px-2.5 py-0.5 text-[11px]">
                         {t("recentRunConfidence", { confidence: Math.round(run.confidence * 100) })}

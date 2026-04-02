@@ -7,6 +7,7 @@
     "delete": "删除",
     "cancel": "取消",
     "copy": "复制",
+    "copyFailed": "复制失败",
     "copied": "已复制",
     "edit": "编辑",
     "back": "返回",
@@ -23,6 +24,7 @@
     "unfavorite": "取消收藏",
     "deleteForever": "永久删除",
     "deleted": "已删除",
+    "reset": "重置",
     "newPrompt": "新建提示词",
     "unsavedChanges": "（有未保存修改）",
     "titleRequired": "标题不能为空",
@@ -45,7 +47,14 @@
     "tags": "标签",
     "playground": "实验场",
     "settings": "设置",
-    "collapse": "收起"
+    "collapse": "收起",
+    "brandTagline": "以发现为先的提示词工作台",
+    "promptsSubtitle": "工作台",
+    "playgroundSubtitle": "MiniMax 实验室",
+    "sidebarPitchTitle": "Prompt 研发",
+    "sidebarPitchDescription": "把捕获、分析、重构、评测与打包整合进同一套个人工作流。",
+    "toggleTheme": "切换主题",
+    "logout": "退出登录"
   },
   "home": {
     "title": "首页",
@@ -55,10 +64,26 @@
     "modules": "模块",
     "quickCapture": "快速捕获",
     "recentPrompts": "最近提示词",
-    "tags": "标签"
+    "tags": "标签",
+    "eyebrow": "Prompt 研发",
+    "description": "在一个以发现为先的工作台里构建、分析、评测并打包提示词。",
+    "recentDescription": "快速回到你最近处理过的提示词资产。",
+    "inboxDescription": "快速捕获待整理的想法，再把最好的条目推进到正式工作流。",
+    "inboxEmpty": "收件箱目前还是空的。",
+    "collectionsDescription": "把提示词和模块整理成可复用的能力包。",
+    "modulesDescription": "管理你的角色、约束、风格与输出格式模块。",
+    "statsHints": {
+      "recentAssets": "{count} 个最近资产",
+      "inbox": "先捕获，再逐步打磨",
+      "favorites": "你的常用提示词书架",
+      "modules": "可复用的构建积木"
+    }
   },
   "prompts": {
     "title": "提示词",
+    "libraryEyebrow": "提示词库",
+    "libraryDescription": "更快发现你的提示词资产，在不同状态之间切换，并把最值得复用的条目放在手边。",
+    "filtersDescription": "把搜索、筛选和标签一起用起来，更顺畅地穿梭于提示词库。",
     "promptContent": "提示词内容",
     "variables": "变量",
     "notes": "备注",
@@ -82,6 +107,23 @@
     "recentlyCreated": "最近创建",
     "alphabetical": "按字母排序",
     "startWriting": "开始输入以查看预览。",
+    "emptyFilteredDescription": "试着放宽搜索条件，或清除当前筛选。",
+    "listHeaders": {
+      "prompt": "提示词",
+      "status": "状态",
+      "tags": "标签",
+      "updated": "更新时间"
+    },
+    "detailDescription": "通过分析、重构、版本化与 benchmark 对比，持续打磨这条提示词。",
+    "variablesHeaders": {
+      "name": "名称",
+      "description": "说明",
+      "default": "默认值"
+    },
+    "detailVersionsDescription": "跟踪不可变快照、比较改动，并标记当前最值得信赖的基线版本。",
+    "detailBenchmarkTitle": "Benchmark 演化",
+    "detailBenchmarkDescription": "查看最新评测卡，并对照基线或上一版本观察这条提示词的演化情况。",
+    "detailAgentDescription": "把分析与重构放在主内容流里查看，避免长结果把侧边区域越拉越长。",
     "versions": {
       "title": "版本历史",
       "description": "每次保存都会生成一个不可变快照，方便比较与回滚。",
@@ -134,11 +176,40 @@
     "notesLabel": "备注",
     "notesPlaceholder": "关于这个提示词的个人备注...",
     "promptUpdated": "提示词已更新",
-    "promptCreated": "提示词已创建"
+    "promptCreated": "提示词已创建",
+    "agentTab": "Agent",
+    "workspaceEyebrow": "工作台",
+    "workspaceDescription": "在同一空间里完善提示词、检查变量，并驱动 MiniMax Agent 分析与重构。",
+    "variablesSummary": "{count} 个变量",
+    "metadataTitle": "提示词元数据",
+    "metadataDescription": "让标题、意图、模型与标签始终和你正在演化的草稿保持一致。",
+    "contentDescription": "把主提示词写成可维护、可复用、便于评测的工作版本。",
+    "toolsTitle": "工作台工具",
+    "toolsDescription": "在预览、Agent、版本与模块之间切换，继续推进这条提示词的演化闭环。",
+    "canvasTitle": "Prompt 画布",
+    "canvasDescription": "像在真正的提示词工作区里一样撰写、整理并迭代你的主内容。",
+    "canvasCharacters": "{count} 个字符",
+    "canvasLines": "{count} 行",
+    "canvasPlaceholdersEnabled": "已启用占位符",
+    "canvasPlaceholderHint": "使用 {{variable}} 表示动态输入位。",
+    "previewLiveTitle": "实时预览",
+    "previewEmptyTitle": "开始输入后即可查看预览",
+    "previewEmptyDescription": "系统会根据当前内容与变量，渲染一份更贴近最终执行态的 Prompt 预览。",
+    "previewVariablesTitle": "变量",
+    "previewRenderedTitle": "渲染后的 Prompt",
+    "previewRenderedDescription": "这里会展示替换变量后的 Prompt 结果。",
+    "previewModeBadge": "实时",
+    "previewStats": {
+      "characters": "字符",
+      "words": "词数",
+      "variables": "变量"
+    }
   },
   "inbox": {
     "title": "收件箱",
     "quickCapture": "快速捕获",
+    "pageDescription": "把收件箱当作低摩擦的捕获层，等条目成熟后再提升到正式工作流。",
+    "captureDescription": "快速贴入粗糙想法，让它们先进入流程，再慢慢打磨。",
     "captureTitle": "标题（可选）",
     "captureTitlePlaceholder": "快速标题...",
     "captureContent": "提示词内容 *",
@@ -150,6 +221,8 @@
   "modules": {
     "title": "模块",
     "newModule": "新建模块",
+    "pageDescription": "维护角色、目标、约束与格式等可复用模块，构建更强的提示词系统。",
+    "assetCount": "{count} 个资产",
     "editModule": "编辑模块",
     "moduleTitle": "标题 *",
     "moduleTitlePlaceholder": "模块标题",
@@ -160,37 +233,117 @@
     "moduleCreated": "模块已创建",
     "moduleDeleted": "模块已删除",
     "insert": "插入",
+    "inserterEmpty": "还没有可插入的模块。先到模块页创建一些模块吧。",
     "noModules": "还没有模块。先创建一个开始吧。",
     "all": "全部",
     "role": "角色",
     "goal": "目标",
     "constraint": "约束",
     "outputFormat": "输出格式",
+    "output_format": "输出格式",
     "style": "风格",
-    "selfCheck": "自检"
+    "selfCheck": "自检",
+    "self_check": "自检"
   },
   "favorites": {
+    "eyebrow": "常用提示词",
     "title": "收藏",
+    "pageDescription": "把你最常回访的提示词集中在这里，让经过验证的资产随手可用。",
+    "countLabel": "{count} 条收藏",
     "empty": "还没有收藏。给提示词加星即可加入这里。"
   },
   "archive": {
+    "eyebrow": "归档仓",
     "title": "归档",
+    "pageDescription": "查看已经退出主工作流的提示词，需要时再恢复，或在确认后永久删除。",
+    "countLabel": "{count} 条归档",
     "empty": "暂无归档提示词。",
     "permanentlyDeleted": "已永久删除"
   },
   "tags": {
+    "eyebrow": "标签索引",
     "title": "标签",
+    "pageDescription": "从标签维度浏览 Prompt 与 Module 的分布，快速跳进你需要的那一组资产。",
+    "countLabel": "{count} 个标签",
     "empty": "还没有标签。给提示词或模块添加标签吧。",
     "promptCount": "{count} 条提示词",
     "moduleCount": "{count} 个模块"
   },
   "playground": {
+    "eyebrow": "Agent 实验室",
     "title": "Agent 实验场",
     "description": "粘贴任意提示词文本，查看 Agent 如何分析它。这是用于测试分类、风险检测、变量提取和相似性匹配的沙箱。",
-    "promptContent": "提示词内容",
     "placeholder": "在这里粘贴提示词进行分析...",
     "analyze": "分析",
-    "results": "分析结果"
+    "results": "分析结果",
+    "resultsDescription": "MiniMax 会即时检查当前输入，并返回一份无状态分析，不会写入历史。",
+    "signals": {
+      "variables": "变量",
+      "risk": "风险",
+      "similar": "相似提示词",
+      "trajectory": "轨迹"
+    },
+    "brief": {
+      "title": "实验说明",
+      "description": "适合在这里快速试探一个 Prompt 的结构、风险和变量，再决定是否进入正式工作流。",
+      "stateless": "本次运行是无状态的：不会写入 Prompt、AgentHistory 或 Benchmark 数据。"
+    },
+    "workspace": {
+      "title": "Prompt 输入区",
+      "description": "粘贴或起草一个 Prompt，立刻检查它的可复用性与风险。",
+      "mode": "无状态",
+      "characters": "{count} 个字符",
+      "lines": "{count} 行",
+      "ready": "可以开始分析",
+      "waiting": "先输入一点内容",
+      "clear": "清空"
+    },
+    "templates": {
+      "title": "快速实验模板",
+      "description": "载入一个起步 Prompt，马上观察 Agent 如何分类、提取变量并识别风险。",
+      "loaded": "已载入",
+      "writing": {
+        "title": "写作助手",
+        "description": "测试把粗糙笔记改写成更完整表达的 Prompt。",
+        "content": "你现在是一位高级写作助手。请把下面的粗略笔记改写成面向 {{audience}} 的文章开头，整体语气保持 {{tone}}，控制在 {{word_limit}} 字以内，并以一个明确的下一步行动收尾。"
+      },
+      "translation": {
+        "title": "翻译 Prompt",
+        "description": "适合测试术语保持、双语转换和本地化说明。",
+        "content": "请把下面的产品公告从 {{source_language}} 翻译成 {{target_language}}。保留项目符号结构，不要改动产品名，并标记任何可能需要本地化复核的表达。"
+      },
+      "support": {
+        "title": "客服回复",
+        "description": "测试 Prompt 是否能兼顾同理心、政策边界与下一步建议。",
+        "content": "你是一名客户支持专员。请使用冷静、共情的语气回复下面的用户问题。说明可能的根因，给出最安全的下一步建议，并指出任何适用的政策限制。"
+      },
+      "code": {
+        "title": "代码评审",
+        "description": "测试偏工程化的 Prompt，重点看 bug、回归与测试缺口。",
+        "content": "请像资深工程师一样审查下面的代码改动。优先指出 bug、行为回归和缺失的测试，然后再列出中等风险问题，最后补充任何阻碍合并的开放问题。"
+      }
+    },
+    "outputs": {
+      "title": "你将看到什么",
+      "description": "每次运行都会返回一份结构化读数，帮助你判断这个 Prompt 该如何继续迭代。",
+      "suggestions": "建议方向",
+      "suggestionsDescription": "推荐的分类、模型和状态，帮助你先判断这类 Prompt 应该进入哪条工作流。",
+      "variables": "变量提取",
+      "variablesDescription": "识别潜在占位符和输入槽位，帮助你把一次性 Prompt 升级成可复用版本。",
+      "risk": "风险信号",
+      "riskDescription": "给出风险等级以及具体原因，例如敏感内容、提示注入模式或结构复杂度。",
+      "trajectory": "ReAct 轨迹",
+      "trajectoryDescription": "展示 MiniMax 的 thought / action / observation 轨迹，帮助你理解它如何得出这次分析。"
+    },
+    "resultsState": {
+      "running": "分析中",
+      "live": "实时结果",
+      "idle": "等待输入"
+    },
+    "emptyState": {
+      "title": "准备开始下一次 Prompt 实验",
+      "description": "从左侧粘贴一段草稿，或载入一个快速实验模板，立即检查它的变量、风险信号、相似提示词和可见的 ReAct 轨迹。"
+    }
   },
   "settings": {
     "title": "设置",
@@ -214,19 +367,87 @@
     "deep": "深入",
     "dataSection": "数据",
     "exportData": "导出数据",
-    "exportDataDesc": "下载所有提示词、模块和设置为 JSON",
+    "exportDataDesc": "将当前提示词、模块和设置导出为一个可恢复的 JSON 快照。",
     "export": "导出",
     "exported": "数据已导出",
     "importData": "导入数据",
-    "importDataDesc": "从之前导出的 JSON 文件恢复",
+    "importDataDesc": "从之前导出的 JSON 文件恢复提示词、模块与工作台设置。",
     "import": "导入",
-    "importSuccess": "数据已导入，正在重新加载...",
+    "importSuccess": "已导入 {prompts} 条提示词和 {modules} 个模块。",
     "importError": "导入文件失败",
     "invalidFile": "无效的导出文件",
     "resetSettings": "重置设置",
-    "resetSettingsDesc": "恢复默认设置（不会删除数据）",
+    "resetSettingsDesc": "恢复工作台默认行为，但不会删除任何提示词、模块或技能数据。",
     "reset": "重置",
-    "resetDone": "设置已恢复默认值"
+    "resetDone": "设置已恢复默认值",
+    "eyebrow": "设置控制台",
+    "description": "统一管理工作台默认行为、Agent 策略阈值，以及数据导入导出操作。",
+    "accessDeniedTitle": "需要管理员权限",
+    "accessDeniedDescription": "这个页面会修改整个工作台的全局行为，仅管理员可访问。",
+    "accessDeniedBody": "请使用管理员密码登录后再调整默认值、恢复操作或 Agent 级设置。",
+    "summary": {
+      "theme": "主题：{value}",
+      "view": "视图：{value}",
+      "model": "模型：{value}",
+      "status": "状态：{value}",
+      "provider": "Provider：{value}",
+      "depth": "深度：{value}"
+    },
+    "workspaceDefaultsTitle": "工作台默认项",
+    "workspaceDefaultsDescription": "这些设置会决定新建提示词时的默认行为，以及工作台的基础偏好。",
+    "themeLabel": "主题",
+    "themeDescription": "选择应用默认外观，或跟随系统主题自动切换。",
+    "themeOptions": {
+      "light": "浅色",
+      "dark": "深色",
+      "system": "跟随系统"
+    },
+    "defaultViewDescription": "决定提示词列表默认以卡片还是列表方式打开。",
+    "defaultModelDescription": "设置新提示词默认推荐的模型标签。",
+    "defaultStatus": "默认状态",
+    "defaultStatusDescription": "新建提示词时默认进入的工作流状态。",
+    "agentControlsTitle": "Agent 控制项",
+    "agentControlsDescription": "调整 MiniMax Agent 的默认行为、分析深度与风险阈值，确保分析链条符合你的工作方式。",
+    "analyzeOnPaste": "粘贴即分析",
+    "analyzeOnPasteDesc": "在工作台中粘贴新内容后立即触发分析，适合高频捕获场景。",
+    "providerLabel": "Agent 提供方",
+    "providerDescription": "选择当前工作台使用的 Agent provider 标签与策略配置。",
+    "providers": {
+      "minimax": "MiniMax",
+      "openai": "OpenAI",
+      "claude": "Claude",
+      "gemini": "Gemini",
+      "zhipu": "智谱",
+      "mock": "模拟"
+    },
+    "analysisDepthDescription": "控制 Agent 在默认情况下采用多快或多深入的分析模式。",
+    "riskThreshold": "风险阈值",
+    "riskThresholdDescription": "决定系统对风险级别的默认敏感度以及何时触发更严格的提示。",
+    "riskOptions": {
+      "low": "低风险",
+      "medium": "中风险",
+      "high": "高风险"
+    },
+    "confidenceThreshold": "置信度阈值",
+    "confidenceThresholdDescription": "控制系统在什么置信度以上才将 Agent 的结果视为更可靠的建议。",
+    "similarityThreshold": "相似度阈值",
+    "similarityThresholdDescription": "决定系统在检测近似提示词时使用的匹配敏感度。",
+    "thresholdHint": "请输入 0 到 1 之间的数值，可精确到两位小数。",
+    "thresholdValidation": "请输入 0 到 1 之间的有效数值。",
+    "saving": "保存中...",
+    "dataRecoveryTitle": "数据与恢复",
+    "dataRecoveryDescription": "使用 JSON 快照完成导出、导入与恢复，让当前工作台状态更容易迁移和备份。",
+    "importing": "导入中...",
+    "footnotes": {
+      "defaultsTitle": "默认值会影响新工作流",
+      "defaultsDescription": "这些设置会直接影响新建提示词、列表打开方式与默认推荐模型。",
+      "agentTitle": "Agent 策略全局生效",
+      "agentDescription": "MiniMax 的分析深度、自动分析行为与模块提取开关都会使用这里的默认值。",
+      "thresholdsTitle": "阈值决定信号敏感度",
+      "thresholdsDescription": "更高的阈值意味着系统会更保守地给出结论或认定相似候选。",
+      "dataTitle": "导入导出是快照级操作",
+      "dataDescription": "导入会恢复提示词、模块与设置；重置设置不会删除已有业务数据。"
+    }
   },
   "search": {
     "placeholder": "搜索提示词、模块、页面...",
@@ -234,9 +455,10 @@
     "prompts": "提示词",
     "modules": "模块",
     "collections": "合集",
-    "skills": "技能"
+    "skills": "技能",
+    "dialogTitle": "命令面板",
+    "dialogDescription": "搜索一个命令并立即执行。"
   },
-
   "skills": {
     "title": "技能",
     "description": "把最强的 Prompt 包装成可复用能力，明确目标、输入输出 schema，并可绑定合集资源包。",
@@ -536,6 +758,8 @@
   "collections": {
     "title": "合集",
     "newCollection": "新建合集",
+    "pageDescription": "把提示词和模块打包成可复用系统，让最好的方案更容易被再次发现和复用。",
+    "countLabel": "{count} 个合集",
     "empty": "还没有任何合集。先创建一个，把 Prompt 和 Module 组织成可复用方案包。",
     "noDescription": "暂无描述。",
     "itemCount": "{count} 个条目",
@@ -587,7 +811,16 @@
   "login": {
     "eyebrow": "访问保护",
     "title": "登录",
-    "description": "请输入管理员密码以解锁 Prompt IDE。",
+    "description": "请输入工作台密码以解锁 Prompt IDE。",
+    "discoveryTitle": "发现工作台",
+    "discoveryDescription": "捕获提示词、比较版本、查看 benchmark 改进，并把模块打包进可复用合集。",
+    "agentTitle": "MiniMax Agent",
+    "agentDescription": "在同一个专注工作区里分析、重构并评测提示词，持续推动迭代。",
+    "highlights": {
+      "promptCapture": "提示词捕获",
+      "versionCompare": "版本对比",
+      "skillOperations": "技能运维"
+    },
     "passwordLabel": "密码",
     "passwordPlaceholder": "输入密码",
     "submit": "解锁",
@@ -769,6 +1002,18 @@
     "inbox": "收件箱",
     "production": "生产",
     "archived": "已归档"
+  },
+  "categories": {
+    "code": "代码",
+    "writing": "写作",
+    "data": "数据",
+    "marketing": "营销",
+    "education": "教育",
+    "design": "设计",
+    "research": "研究",
+    "productivity": "效率",
+    "communication": "沟通",
+    "general": "通用"
   },
   "models": {
     "universal": "通用",

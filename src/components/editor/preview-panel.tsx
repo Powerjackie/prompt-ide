@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
+import { useTranslations } from "next-intl"
 import { Badge } from "@/components/ui/badge"
 import { extractPromptVariables, renderPromptTemplate } from "@/lib/prompt-render"
 
@@ -10,6 +11,7 @@ interface PreviewPanelProps {
 }
 
 export function PreviewPanel({ content, variables }: PreviewPanelProps) {
+  const t = useTranslations("editor")
   const rendered = useMemo(() => {
     return renderPromptTemplate(
       content,
@@ -24,29 +26,61 @@ export function PreviewPanel({ content, variables }: PreviewPanelProps) {
 
   if (!content) {
     return (
-      <div className="text-center py-12 text-muted-foreground text-sm">
-        Start writing to see a preview.
+      <div className="flex min-h-[320px] flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-border/70 bg-muted/15 px-6 py-12 text-center dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.82))]">
+        <div className="mb-3 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground dark:border-primary/12 dark:bg-background/70">
+          {t("previewLiveTitle")}
+        </div>
+        <p className="text-base font-semibold tracking-tight">{t("previewEmptyTitle")}</p>
+        <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+          {t("previewEmptyDescription")}
+        </p>
       </div>
     )
   }
 
   return (
     <div className="space-y-4">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-2xl border border-border/70 bg-muted/20 px-3 py-2 dark:border-primary/12 dark:bg-background/60">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{t("previewStats.characters")}</p>
+          <p className="mt-1 text-lg font-semibold tracking-tight">{content.length}</p>
+        </div>
+        <div className="rounded-2xl border border-border/70 bg-muted/20 px-3 py-2 dark:border-primary/12 dark:bg-background/60">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{t("previewStats.words")}</p>
+          <p className="mt-1 text-lg font-semibold tracking-tight">~{Math.ceil(content.split(/\s+/).filter(Boolean).length)}</p>
+        </div>
+        <div className="rounded-2xl border border-border/70 bg-muted/20 px-3 py-2 dark:border-primary/12 dark:bg-background/60">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{t("previewStats.variables")}</p>
+          <p className="mt-1 text-lg font-semibold tracking-tight">{varNames.length}</p>
+        </div>
+      </div>
+
       {varNames.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          <span className="text-xs text-muted-foreground mr-1">Variables:</span>
+        <div className="rounded-[1.5rem] border border-border/70 bg-muted/15 p-3 dark:border-primary/12 dark:bg-background/58">
+          <span className="mb-2 block text-xs font-medium text-muted-foreground">{t("previewVariablesTitle")}</span>
+          <div className="flex flex-wrap gap-1.5">
           {varNames.map((v) => (
-            <Badge key={v} variant="outline" className="text-[10px] font-mono">
+            <Badge key={v} variant="outline" className="rounded-full text-[10px] font-mono dark:border-primary/18 dark:bg-background/60">
               {`{{${v}}}`}
             </Badge>
           ))}
+          </div>
         </div>
       )}
-      <div className="bg-muted/50 rounded-md p-4">
-        <pre className="whitespace-pre-wrap font-mono text-sm">{rendered}</pre>
-      </div>
-      <div className="text-xs text-muted-foreground">
-        {content.length} characters &middot; ~{Math.ceil(content.split(/\s+/).length)} words
+
+      <div className="rounded-[1.5rem] border border-border/70 bg-muted/20 p-4 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.74),rgba(17,22,37,0.88))]">
+        <div className="mb-3 flex items-center justify-between gap-3 border-b border-border/60 pb-3">
+          <div>
+            <p className="text-sm font-semibold tracking-tight">{t("previewRenderedTitle")}</p>
+            <p className="text-xs text-muted-foreground">
+              {t("previewRenderedDescription")}
+            </p>
+          </div>
+          <div className="rounded-full border border-border/70 bg-background/80 px-3 py-1 text-[11px] font-medium text-muted-foreground dark:border-primary/12 dark:bg-background/70">
+            {t("previewModeBadge")}
+          </div>
+        </div>
+        <pre className="whitespace-pre-wrap font-mono text-sm leading-7">{rendered}</pre>
       </div>
     </div>
   )

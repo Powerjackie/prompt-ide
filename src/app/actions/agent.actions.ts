@@ -50,7 +50,8 @@ async function resolvePromptEvolutionVersions(promptId: string) {
 
 export async function runAgentAnalysis(
   promptContent: string,
-  promptId: string
+  promptId: string,
+  locale?: "zh" | "en"
 ): Promise<
   ActionResult<{
     analysis: Awaited<ReturnType<typeof analyzePromptWithAgent>>["analysis"]
@@ -63,7 +64,7 @@ export async function runAgentAnalysis(
   }
 
   try {
-    const result = await analyzePromptWithAgent(promptContent, promptId)
+    const result = await analyzePromptWithAgent(promptContent, promptId, locale)
 
     const history = await prisma.agentHistory.create({
       data: {
@@ -101,7 +102,8 @@ export async function runAgentAnalysis(
 }
 
 export async function runStatelessAgentAnalysis(
-  content: string
+  content: string,
+  locale?: "zh" | "en"
 ): Promise<
   ActionResult<{
     analysis: Awaited<ReturnType<typeof analyzePromptWithAgent>>["analysis"]
@@ -113,7 +115,7 @@ export async function runStatelessAgentAnalysis(
   }
 
   try {
-    const result = await analyzePromptWithAgent(content, "playground-ephemeral")
+    const result = await analyzePromptWithAgent(content, "playground-ephemeral", locale)
 
     return {
       success: true,
@@ -152,7 +154,8 @@ async function loadStoredRefactorProposal(
 
 export async function runPromptRefactor(
   promptContent: string,
-  promptId: string
+  promptId: string,
+  locale?: "zh" | "en"
 ): Promise<
   ActionResult<{
     proposal: PromptRefactorResult
@@ -165,7 +168,7 @@ export async function runPromptRefactor(
   }
 
   try {
-    const result = await refactorPromptWithAgent(promptContent, promptId)
+    const result = await refactorPromptWithAgent(promptContent, promptId, locale)
 
     const history = await prisma.agentHistory.create({
       data: {

@@ -3,7 +3,6 @@ import type { Variable } from "./prompt"
 export type TrajectoryPhase = "thought" | "action" | "observation"
 
 export type AgentHistoryType =
-  | "rule_analysis"
   | "react_trajectory"
   | "chat"
   | "refactor_proposal"

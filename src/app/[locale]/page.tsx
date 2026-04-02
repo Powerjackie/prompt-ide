@@ -64,16 +64,16 @@ export default function HomePage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-7">
       <PageHeader
         eyebrow={
           <>
             <Sparkles className="h-3.5 w-3.5" />
-            Prompt R&amp;D
+            {t("eyebrow")}
           </>
         }
         title={t("title")}
-        description="Build, analyze, benchmark, and package prompts inside a discovery-first workbench designed for iteration."
+        description={t("description")}
         actions={
           <>
             <Button asChild className="rounded-2xl">
@@ -95,7 +95,7 @@ export default function HomePage() {
           {topTags.length > 0 ? (
             topTags.map(([tag, count]) => (
               <Link key={tag} href={`/prompts?tag=${tag}`}>
-                <Badge variant="outline" className="rounded-full border-primary/15 bg-background/70 px-3 py-1 hover:border-primary/30 hover:bg-primary/8">
+                <Badge variant="outline" className="rounded-full border-primary/15 bg-background/70 px-3 py-1 hover:border-primary/30 hover:bg-primary/8 dark:border-primary/18 dark:bg-background/65 dark:hover:border-primary/28 dark:hover:bg-primary/10">
                   {tag} ({count})
                 </Badge>
               </Link>
@@ -113,33 +113,33 @@ export default function HomePage() {
           label={t("totalPrompts")}
           value={activePrompts.length}
           icon={<FileText className="h-5 w-5" />}
-          hint={`${recentPrompts.length} recent assets`}
+          hint={t("statsHints.recentAssets", { count: recentPrompts.length })}
         />
         <StatsTile
           label={t("inInbox")}
           value={inboxPrompts.length}
           icon={<Inbox className="h-5 w-5" />}
-          hint="Capture first, refine later"
+          hint={t("statsHints.inbox")}
         />
         <StatsTile
           label={t("favorites")}
           value={favoritePrompts.length}
           icon={<Star className="h-5 w-5" />}
-          hint="Your reusable prompt shelf"
+          hint={t("statsHints.favorites")}
         />
         <StatsTile
           label={t("modules")}
           value={modules.length}
           icon={<Puzzle className="h-5 w-5" />}
-          hint="Reusable building blocks"
+          hint={t("statsHints.modules")}
         />
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[1.45fr_0.95fr]">
-        <section className="space-y-4">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.95fr)] xl:items-start">
+        <section className="app-panel space-y-5 p-5 lg:p-6">
           <SectionHeader
             title={t("recentPrompts")}
-            description="Jump back into the prompts you have touched most recently."
+            description={t("recentDescription")}
             action={
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/prompts">
@@ -156,11 +156,11 @@ export default function HomePage() {
           </div>
         </section>
 
-        <div className="space-y-6">
-          <section className="app-panel p-5">
-            <SectionHeader
+        <div className="space-y-5">
+          <section className="app-panel space-y-5 p-5 lg:p-6">
+          <SectionHeader
               title={tn("inbox")}
-              description="Fast capture items waiting to be promoted into production-ready prompts."
+              description={t("inboxDescription")}
               action={
                 <Button variant="ghost" size="sm" asChild>
                   <Link href="/inbox">
@@ -170,13 +170,13 @@ export default function HomePage() {
                 </Button>
               }
             />
-            <div className="mt-4 space-y-3">
+            <div className="space-y-3">
               {inboxPrompts.length > 0 ? (
                 inboxPrompts.slice(0, 3).map((prompt) => (
                   <Link
                     key={prompt.id}
                     href={`/prompts/${prompt.id}`}
-                    className="block rounded-2xl border border-border/70 bg-background/70 p-4 transition hover:-translate-y-0.5 hover:border-primary/20 hover:bg-card"
+                    className="block rounded-2xl border border-border/70 bg-background/70 p-4 transition hover:-translate-y-0.5 hover:border-primary/20 hover:bg-card dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))] dark:hover:border-primary/24 dark:hover:bg-[linear-gradient(180deg,rgba(17,22,37,0.92),rgba(21,27,46,0.92))]"
                   >
                     <div className="line-clamp-1 font-medium">{prompt.title}</div>
                     {prompt.description ? (
@@ -188,7 +188,7 @@ export default function HomePage() {
                 ))
               ) : (
                 <div className="rounded-2xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-                  {tn("inbox")} is clear for now.
+                  {t("inboxEmpty")}
                 </div>
               )}
             </div>
@@ -197,28 +197,28 @@ export default function HomePage() {
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-1">
             <Link
               href="/collections"
-              className="app-panel flex items-center justify-between gap-4 p-5 transition hover:-translate-y-0.5 hover:border-primary/20"
+              className="app-panel flex items-center justify-between gap-4 p-5 transition hover:-translate-y-0.5 hover:border-primary/20 dark:hover:border-primary/24 dark:hover:shadow-[0_24px_60px_-36px_rgba(79,246,255,0.35)]"
             >
               <div>
                 <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                   {tn("collections")}
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Group prompts and modules into reusable packs.
+                  {t("collectionsDescription")}
                 </p>
               </div>
               <LibraryBig className="h-6 w-6 text-primary" />
             </Link>
             <Link
               href="/modules"
-              className="app-panel flex items-center justify-between gap-4 p-5 transition hover:-translate-y-0.5 hover:border-primary/20"
+              className="app-panel flex items-center justify-between gap-4 p-5 transition hover:-translate-y-0.5 hover:border-primary/20 dark:hover:border-primary/24 dark:hover:shadow-[0_24px_60px_-36px_rgba(79,246,255,0.35)]"
             >
               <div>
                 <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                   {tn("modules")}
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Maintain the reusable ingredients behind your best prompts.
+                  {t("modulesDescription")}
                 </p>
               </div>
               <Puzzle className="h-6 w-6 text-primary" />

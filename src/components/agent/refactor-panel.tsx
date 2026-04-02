@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "@/i18n/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { Bot, CheckSquare, FilePenLine, Puzzle, Sparkles, Variable } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -60,6 +60,7 @@ export function RefactorPanel({
   onPromptApplied,
   onEvolutionComparisonReady,
 }: RefactorPanelProps) {
+  const locale = useLocale() as "zh" | "en"
   const t = useTranslations("agent.refactor")
   const [proposal, setProposal] = useState<PromptRefactorResult | null>(null)
   const [trajectory, setTrajectory] = useState<AgentTrajectoryStep[] | null>(null)
@@ -219,7 +220,8 @@ export function RefactorPanel({
     const result = await runPromptEvolutionComparison(
       nextPromptId,
       latestVersionId,
-      comparisonVersionId
+      comparisonVersionId,
+      locale
     )
     if (result.success) {
       setEvolutionComparison(result.data)
@@ -246,7 +248,7 @@ export function RefactorPanel({
     setRunning(true)
     setEvolutionComparison(null)
     onEvolutionComparisonReady?.(null)
-    const result = await runPromptRefactor(promptContent, promptId)
+    const result = await runPromptRefactor(promptContent, promptId, locale)
     if (result.success) {
       setProposal(result.data.proposal)
       setTrajectory(result.data.trajectory)

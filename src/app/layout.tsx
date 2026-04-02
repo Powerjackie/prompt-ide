@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Prompt IDE",
   description: "Personal Prompt IDE & Asset Library",
+  other: {
+    google: "notranslate",
+  },
 }
 
 export default function RootLayout({
@@ -24,10 +27,14 @@ export default function RootLayout({
 }>) {
   return (
     <html
+      lang="en"
+      translate="no"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="h-full overflow-hidden">{children}</body>
+      <body className="h-full overflow-hidden notranslate" translate="no">
+        {children}
+      </body>
     </html>
   )
 }

@@ -1,6 +1,6 @@
 "use server"
 
-import { ensureAuthenticated } from "@/lib/action-auth"
+import { AUTH_ERRORS, ensureAdmin, ensureAuthenticated } from "@/lib/action-auth"
 import { prisma } from "@/lib/prisma"
 import { buildChangeSummary, deserializePromptSnapshot, serializePromptSnapshot } from "@/lib/prompt-version"
 import { revalidatePath } from "next/cache"
@@ -16,6 +16,40 @@ type ActionResult<T = unknown> =
 // ─── Helpers ─────────────────────────────────────────────────────
 function revalidateAll() {
   revalidatePath("/[locale]", "layout")
+}
+
+const SKILL_RUN_STATE_KEY = "skill-run-state"
+
+async function removeSkillRunStateEntries(skillIds: string[]) {
+  if (skillIds.length === 0) {
+    return
+  }
+
+  const row = await prisma.setting.findUnique({ where: { key: SKILL_RUN_STATE_KEY } })
+  if (!row) {
+    return
+  }
+
+  try {
+    const parsed = JSON.parse(row.value) as {
+      recentValuesBySkillId?: Record<string, unknown>
+      presetsBySkillId?: Record<string, unknown>
+      recentRunsBySkillId?: Record<string, unknown>
+    }
+
+    for (const skillId of skillIds) {
+      delete parsed.recentValuesBySkillId?.[skillId]
+      delete parsed.presetsBySkillId?.[skillId]
+      delete parsed.recentRunsBySkillId?.[skillId]
+    }
+
+    await prisma.setting.update({
+      where: { key: SKILL_RUN_STATE_KEY },
+      data: { value: JSON.stringify(parsed) },
+    })
+  } catch {
+    // Ignore malformed auxiliary state instead of blocking prompt deletion.
+  }
 }
 
 const SNAPSHOT_FIELDS = [
@@ -277,12 +311,18 @@ export async function updatePrompt(
 }
 
 export async function deletePrompt(id: string): Promise<ActionResult<{ id: string }>> {
-  if (!(await ensureAuthenticated())) {
-    return { success: false, error: "Unauthorized" }
+  if (!(await ensureAdmin())) {
+    return { success: false, error: AUTH_ERRORS.adminRequired }
   }
 
   try {
+    const linkedSkills = await prisma.skill.findMany({
+      where: { entryPromptId: id },
+      select: { id: true },
+    })
+
     await prisma.prompt.delete({ where: { id } })
+    await removeSkillRunStateEntries(linkedSkills.map((skill) => skill.id))
     revalidateAll()
     return { success: true, data: { id } }
   } catch (e) {

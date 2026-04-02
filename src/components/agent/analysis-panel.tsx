@@ -78,6 +78,7 @@ export function AnalysisPanel({
   const t = useTranslations("agent")
   const tr = useTranslations("agent.risk")
   const loadingText = analyzingLabel ?? t("analyzing")
+  const riskLabel = analysis ? tr(analysis.riskLevel) : ""
 
   if (!analysis) {
     return (
@@ -168,7 +169,11 @@ export function AnalysisPanel({
 
       if (normalizedKey === "summaryRisk") {
         return t("summaryRisk", {
-          level: String(part.params?.level ?? analysis.riskLevel),
+          level:
+            typeof part.params?.level === "string" &&
+            hasMessage(messages, ["agent", "risk", String(part.params.level)])
+              ? tr(String(part.params.level))
+              : riskLabel,
         })
       }
 
@@ -219,7 +224,7 @@ export function AnalysisPanel({
           <span className="text-sm font-medium">{t("riskLevel")}</span>
         </div>
         <Badge className={cn("text-xs", RISK_COLORS[analysis.riskLevel])}>
-          {tr(analysis.riskLevel)}
+          {riskLabel}
         </Badge>
         {analysis.reasons.length > 0 ? (
           <ul className="mt-1 space-y-0.5 text-xs text-muted-foreground">

@@ -37,6 +37,8 @@ export function PromptFiltersBar({
 }: Props) {
   const t = useTranslations("prompts")
   const tc = useTranslations("common")
+  const tm = useTranslations("models")
+  const ts = useTranslations("status")
 
   const featuredTags = useMemo(() => allTags.slice(0, 8), [allTags])
   const hasFilters =
@@ -53,7 +55,7 @@ export function PromptFiltersBar({
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder={tc("search")}
-              className="h-12 rounded-2xl border-border/70 bg-background/80 pl-11"
+              className="h-12 rounded-2xl border-border/70 bg-background/80 pl-11 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.76),rgba(17,22,37,0.88))] dark:focus-visible:border-primary/28 dark:focus-visible:ring-primary/15"
               value={filters.search}
               onChange={(event) => updateFilter("search", event.target.value)}
             />
@@ -64,14 +66,14 @@ export function PromptFiltersBar({
               value={filters.status}
               onValueChange={(value) => updateFilter("status", value as PromptFilters["status"])}
             >
-              <SelectTrigger className="h-11 min-w-36 rounded-2xl bg-background/80">
+              <SelectTrigger className="h-11 min-w-36 rounded-2xl bg-background/80 dark:border-primary/12 dark:bg-background/68">
                 <SelectValue placeholder={t("status")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allStatus")}</SelectItem>
                 {STATUS_OPTIONS.map((status) => (
                   <SelectItem key={status.value} value={status.value}>
-                    {status.label}
+                    {ts(status.value)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -81,14 +83,14 @@ export function PromptFiltersBar({
               value={filters.model}
               onValueChange={(value) => updateFilter("model", value as PromptFilters["model"])}
             >
-              <SelectTrigger className="h-11 min-w-36 rounded-2xl bg-background/80">
+              <SelectTrigger className="h-11 min-w-36 rounded-2xl bg-background/80 dark:border-primary/12 dark:bg-background/68">
                 <SelectValue placeholder={t("model")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("allModels")}</SelectItem>
                 {MODEL_OPTIONS.map((model) => (
                   <SelectItem key={model.value} value={model.value}>
-                    {model.label}
+                    {tm(model.value)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -98,7 +100,7 @@ export function PromptFiltersBar({
               value={filters.sort}
               onValueChange={(value) => updateFilter("sort", value as PromptFilters["sort"])}
             >
-              <SelectTrigger className="h-11 min-w-40 rounded-2xl bg-background/80">
+              <SelectTrigger className="h-11 min-w-40 rounded-2xl bg-background/80 dark:border-primary/12 dark:bg-background/68">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -112,17 +114,17 @@ export function PromptFiltersBar({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" className="rounded-full px-3 py-1">
+          <Badge variant="outline" className="rounded-full px-3 py-1 dark:border-primary/18 dark:bg-background/68">
             <SlidersHorizontal className="mr-1 h-3.5 w-3.5" />
             {tc("promptCount", { count: resultCount })}
           </Badge>
           {hasFilters ? (
             <Button variant="ghost" className="rounded-2xl" onClick={resetFilters}>
               <X className="mr-1 h-4 w-4" />
-              Reset
+              {tc("reset")}
             </Button>
           ) : null}
-          <div className="flex items-center rounded-2xl border border-border/70 bg-background/80 p-1">
+          <div className="flex items-center rounded-2xl border border-border/70 bg-background/80 p-1 dark:border-primary/12 dark:bg-background/68">
             <Button
               variant={view === "card" ? "secondary" : "ghost"}
               size="icon"

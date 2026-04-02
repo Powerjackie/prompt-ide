@@ -1,6 +1,6 @@
 "use server"
 
-import { ensureAuthenticated } from "@/lib/action-auth"
+import { AUTH_ERRORS, ensureAdmin, ensureAuthenticated } from "@/lib/action-auth"
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 
@@ -133,8 +133,8 @@ export async function updateModule(
 }
 
 export async function deleteModule(id: string): Promise<ActionResult<{ id: string }>> {
-  if (!(await ensureAuthenticated())) {
-    return { success: false, error: "Unauthorized" }
+  if (!(await ensureAdmin())) {
+    return { success: false, error: AUTH_ERRORS.adminRequired }
   }
 
   try {

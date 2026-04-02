@@ -2,7 +2,7 @@
 
 import { use, useCallback, useEffect, useState, useTransition } from "react"
 import { Link, useRouter } from "@/i18n/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import {
   Archive,
   ArrowLeft,
@@ -49,9 +49,10 @@ import { AnalysisPanel } from "@/components/agent/analysis-panel"
 import { RefactorPanel } from "@/components/agent/refactor-panel"
 import { BenchmarkPanel } from "@/components/prompts/benchmark-panel"
 import { VersionHistoryPanel } from "@/components/prompts/version-history-panel"
+import { useAuthz } from "@/components/auth/authz-provider"
 import { getLatestPromptEvolutionComparison } from "@/app/actions/benchmark.actions"
 import { createSkillFromPrompt } from "@/app/actions/skill.actions"
-import { MODEL_OPTIONS, STATUS_OPTIONS } from "@/lib/constants"
+import { STATUS_OPTIONS } from "@/lib/constants"
 import { cn, copyToClipboard, formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 import type { AgentTrajectoryStep } from "@/types/agent"
@@ -80,10 +81,13 @@ export default function PromptDetailPage({
 }) {
   const { id } = use(params)
   const router = useRouter()
+  const locale = useLocale() as "zh" | "en"
   const t = useTranslations("prompts")
   const tc = useTranslations("common")
   const ta = useTranslations("agent")
-  const th = useTranslations("home")
+  const tm = useTranslations("models")
+  const ts = useTranslations("status")
+  const { canDeleteAssets } = useAuthz()
 
   const [prompt, setPrompt] = useState<SerializedPrompt | null>(null)
   const [versions, setVersions] = useState<PromptVersion[]>([])
@@ -99,7 +103,7 @@ export default function PromptDetailPage({
   const refreshVersions = useCallback(async () => {
     const [versionsResult, evolutionResult] = await Promise.all([
       getPromptVersionsByPromptId(id),
-      getLatestPromptEvolutionComparison(id),
+      getLatestPromptEvolutionComparison(id, "auto", locale),
     ])
 
     if (versionsResult.success) {
@@ -113,7 +117,7 @@ export default function PromptDetailPage({
     } else {
       toast.error(evolutionResult.error)
     }
-  }, [id])
+  }, [id, locale])
 
   useEffect(() => {
     let cancelled = false
@@ -126,7 +130,7 @@ export default function PromptDetailPage({
         getPromptById(id),
         getHistoryByPromptId(id, "react_trajectory"),
         getPromptVersionsByPromptId(id),
-        getLatestPromptEvolutionComparison(id),
+        getLatestPromptEvolutionComparison(id, "auto", locale),
       ])
 
       if (cancelled) return
@@ -169,14 +173,14 @@ export default function PromptDetailPage({
     return () => {
       cancelled = true
     }
-  }, [id])
+  }, [id, locale])
 
   const handleAnalyze = useCallback(async () => {
     if (!prompt) return
 
     setAnalyzing(true)
     startTransition(async () => {
-      const result = await runAgentAnalysis(prompt.content, prompt.id)
+      const result = await runAgentAnalysis(prompt.content, prompt.id, locale)
       if (result.success) {
         setTrajectory(result.data.trajectory)
         setPrompt((current) =>
@@ -197,7 +201,7 @@ export default function PromptDetailPage({
 
       setAnalyzing(false)
     })
-  }, [prompt, startTransition, ta])
+  }, [locale, prompt, startTransition, ta])
 
   const handleRefactorApplied = useCallback(
     (updatedPrompt: SerializedPrompt) => {
@@ -227,14 +231,14 @@ export default function PromptDetailPage({
     )
   }
 
-  const modelLabel = MODEL_OPTIONS.find((model) => model.value === prompt.model)?.label ?? prompt.model
+  const modelLabel = tm(prompt.model)
   const statusOption = STATUS_OPTIONS.find((status) => status.value === prompt.status)
   const currentSnapshot = createPromptSnapshot(prompt)
 
   const handleCopy = async () => {
     const ok = await copyToClipboard(prompt.content)
     if (!ok) {
-      toast.error("Failed to copy")
+      toast.error(tc("copyFailed"))
       return
     }
 
@@ -339,11 +343,11 @@ export default function PromptDetailPage({
         eyebrow={
           <>
             <ArrowUpRight className="h-3.5 w-3.5" />
-            {statusOption?.label}
+            {statusOption ? ts(statusOption.value) : prompt.status}
           </>
         }
         title={prompt.title}
-        description={prompt.description || "Evolve this prompt through analysis, refactor, versioning, and benchmark comparison."}
+        description={prompt.description || t("detailDescription")}
         actions={
           <>
             <Button variant="ghost" size="sm" asChild className="rounded-2xl">
@@ -396,22 +400,24 @@ export default function PromptDetailPage({
                 {tc("restore")}
               </Button>
             )}
-            <AlertDialog>
-              <AlertDialogTrigger render={<Button size="sm" variant="destructive" className="rounded-2xl" />}>
-                <Trash2 className="mr-1 h-4 w-4" />
-                {tc("delete")}
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t("deleteConfirmTitle")}</AlertDialogTitle>
-                  <AlertDialogDescription>{t("deleteConfirmDesc")}</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>{tc("delete")}</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            {canDeleteAssets ? (
+              <AlertDialog>
+                <AlertDialogTrigger render={<Button size="sm" variant="destructive" className="rounded-2xl" />}>
+                  <Trash2 className="mr-1 h-4 w-4" />
+                  {tc("delete")}
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("deleteConfirmTitle")}</AlertDialogTitle>
+                    <AlertDialogDescription>{t("deleteConfirmDesc")}</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>{tc("delete")}</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            ) : null}
           </>
         }
       >
@@ -437,7 +443,7 @@ export default function PromptDetailPage({
               </Button>
             </CardHeader>
             <CardContent>
-              <pre className="max-h-[36rem] overflow-y-auto whitespace-pre-wrap rounded-[1.5rem] border border-border/60 bg-muted/40 p-5 font-mono text-sm leading-7">
+              <pre className="max-h-[36rem] overflow-y-auto whitespace-pre-wrap rounded-[1.5rem] border border-border/60 bg-muted/40 p-5 font-mono text-sm leading-7 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
                 {prompt.content}
               </pre>
             </CardContent>
@@ -451,9 +457,9 @@ export default function PromptDetailPage({
               <CardContent>
                 <div className="overflow-hidden rounded-[1.5rem] border border-border/70">
                   <div className="grid grid-cols-3 gap-4 bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground">
-                    <div>Name</div>
-                    <div>Description</div>
-                    <div>Default</div>
+                    <div>{t("variablesHeaders.name")}</div>
+                    <div>{t("variablesHeaders.description")}</div>
+                    <div>{t("variablesHeaders.default")}</div>
                   </div>
                   {prompt.variables.map((variable) => (
                     <div
@@ -484,7 +490,7 @@ export default function PromptDetailPage({
           <section id="versions" className="app-panel scroll-mt-24 p-6">
             <SectionHeader
               title={t("versions.title")}
-              description="Track immutable snapshots, compare changes, and mark the strongest baseline."
+              description={t("detailVersionsDescription")}
             />
             <div className="mt-5">
               <VersionHistoryPanel
@@ -502,8 +508,8 @@ export default function PromptDetailPage({
 
           <section id="benchmark" className="app-panel scroll-mt-24 p-6">
             <SectionHeader
-              title="Benchmark Evolution"
-              description="Inspect the latest scorecard and compare how this prompt evolves against baseline or previous versions."
+              title={t("detailBenchmarkTitle")}
+              description={t("detailBenchmarkDescription")}
             />
             <div className="mt-5">
               <BenchmarkPanel
@@ -518,11 +524,11 @@ export default function PromptDetailPage({
           <section id="agent" className="app-panel scroll-mt-24 p-6">
             <SectionHeader
               title={ta("title")}
-              description="Keep analysis and refactor inside the main reading flow so long outputs never stretch a secondary rail."
+              description={t("detailAgentDescription")}
             />
             <div className="mt-5">
               <Tabs defaultValue="analysis" className="space-y-4">
-                <TabsList variant="line" className="rounded-2xl bg-muted/45 p-1">
+                <TabsList variant="line" className="rounded-2xl bg-muted/45 p-1 dark:border dark:border-primary/10 dark:bg-background/60">
                   <TabsTrigger value="analysis">{ta("modes.analysis")}</TabsTrigger>
                   <TabsTrigger value="refactor">{ta("modes.refactor")}</TabsTrigger>
                 </TabsList>
@@ -568,7 +574,7 @@ export default function PromptDetailPage({
                   <span
                     className={cn("inline-block h-2 w-2 rounded-full", statusOption?.color)}
                   />
-                  <span>{statusOption?.label}</span>
+                  <span>{statusOption ? ts(statusOption.value) : prompt.status}</span>
                 </div>
               </div>
               <Separator />
@@ -606,14 +612,14 @@ export default function PromptDetailPage({
 
           <Card className="app-panel">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">{th("tags")}</CardTitle>
+              <CardTitle className="text-sm">{t("versions.fields.tags")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-1.5">
                 {prompt.tags.length > 0 ? (
                   prompt.tags.map((tag) => (
                     <Link key={tag} href={`/prompts?tag=${tag}`}>
-                      <Badge variant="secondary" className="cursor-pointer">
+                      <Badge variant="secondary" className="cursor-pointer dark:bg-primary/10 dark:text-primary">
                         {tag}
                       </Badge>
                     </Link>

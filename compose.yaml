@@ -1,0 +1,53 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    env_file:
+      - .env
+    environment:
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      MEMBER_PASSWORD: ${MEMBER_PASSWORD:-}
+      MINIMAX_API_KEY: ${MINIMAX_API_KEY}
+      DATABASE_URL: ${DATABASE_URL:-file:/app/data/prompt-ide.db}
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+      NEXT_TELEMETRY_DISABLED: 1
+      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${NEXT_SERVER_ACTIONS_ENCRYPTION_KEY:-}
+    ports:
+      - "${PROMPT_IDE_PORT:-3000}:3000"
+    volumes:
+      - prompt-ide-data:/app/data
+    init: true
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/api/health').then(async (res)=>{let body=null;try{body=await res.json()}catch{}process.exit(res.ok&&body?.ok===true?0:1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  schema:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: schema
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-file:/app/data/prompt-ide.db}
+    volumes:
+      - prompt-ide-data:/app/data
+    profiles:
+      - ops
+
+volumes:
+  prompt-ide-data:

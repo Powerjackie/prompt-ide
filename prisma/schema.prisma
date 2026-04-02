@@ -55,7 +55,7 @@ model AgentHistory {
   id         String @id @default(cuid())
   promptId   String
   prompt     Prompt @relation(fields: [promptId], references: [id], onDelete: Cascade)
-  type       String @default("rule_analysis") // rule_analysis | react_trajectory | refactor_proposal | chat
+  type       String @default("react_trajectory") // react_trajectory | refactor_proposal | chat
   input      String // The prompt content that was analyzed
   output     String // Full result as JSON
   trajectory String @default("[]") // JSON array — rule reasons, ReAct thoughts/actions, or chat messages

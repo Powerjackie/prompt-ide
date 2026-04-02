@@ -33,10 +33,10 @@ const HEALTH_PRIORITY: Record<SkillHealthState, number> = {
 }
 
 const FILTER_CARD_VARIANTS: Record<SkillHealthFilter, string> = {
-  all: "border-primary/20 bg-primary/6 text-foreground",
-  ready: "border-primary/20 bg-primary/8 text-foreground",
-  watch: "border-chart-3/25 bg-chart-3/8 text-foreground",
-  setup: "border-border/70 bg-background/70 text-foreground",
+  all: "border-primary/20 bg-primary/6 text-foreground dark:border-primary/28 dark:bg-primary/10 dark:shadow-[0_18px_44px_-30px_rgba(79,246,255,0.38)]",
+  ready: "border-primary/20 bg-primary/8 text-foreground dark:border-primary/30 dark:bg-primary/12 dark:shadow-[0_18px_44px_-30px_rgba(79,246,255,0.42)]",
+  watch: "border-chart-3/25 bg-chart-3/8 text-foreground dark:border-chart-5/24 dark:bg-chart-5/10 dark:shadow-[0_18px_44px_-30px_rgba(255,79,216,0.3)]",
+  setup: "border-border/70 bg-background/70 text-foreground dark:border-chart-2/22 dark:bg-chart-2/10 dark:shadow-[0_18px_44px_-30px_rgba(106,124,255,0.28)]",
 }
 
 function getPriorityAction(skill: SkillListItem) {
@@ -287,7 +287,7 @@ export default function SkillsPage() {
                   "rounded-[1.75rem] border p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_48px_-36px_rgba(79,70,229,0.5)]",
                   active
                     ? FILTER_CARD_VARIANTS[card.key]
-                    : "border-border/60 bg-card/75 text-foreground hover:border-primary/15 hover:bg-card",
+                    : "border-border/60 bg-card/75 text-foreground hover:border-primary/15 hover:bg-card dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(17,22,37,0.9),rgba(21,27,46,0.86))] dark:hover:border-primary/24 dark:hover:shadow-[0_22px_54px_-36px_rgba(79,246,255,0.4)]",
                 )}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -319,7 +319,7 @@ export default function SkillsPage() {
       ) : (
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-            <div className="app-panel flex flex-col gap-4 rounded-[2rem] border-border/60 bg-card/85 p-5">
+            <div className="app-panel flex flex-col gap-4 rounded-[2rem] border-border/60 bg-card/85 p-5 dark:border-primary/12">
               <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
@@ -391,7 +391,7 @@ export default function SkillsPage() {
               </div>
             </div>
 
-            <div className="app-panel flex flex-col gap-4 rounded-[2rem] border-border/60 bg-card/85 p-5">
+            <div className="app-panel flex flex-col gap-4 rounded-[2rem] border-border/60 bg-card/85 p-5 dark:border-primary/12">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                   <TriangleAlert className="h-3.5 w-3.5" />
@@ -409,7 +409,7 @@ export default function SkillsPage() {
                     return (
                       <div
                         key={skill.id}
-                        className="rounded-[1.5rem] border border-border/60 bg-muted/25 p-4"
+                        className="rounded-[1.5rem] border border-border/60 bg-muted/25 p-4 dark:border-primary/12 dark:bg-background/58"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="space-y-1">
@@ -427,7 +427,7 @@ export default function SkillsPage() {
                           <span>
                             {t("entryPrompt")}: {skill.entryPrompt.title}
                           </span>
-                          <span className="text-border">•</span>
+                          <span className="text-border">·</span>
                           <span>
                             {t("updated")}: {formatDate(skill.updatedAt)}
                           </span>
@@ -464,7 +464,7 @@ export default function SkillsPage() {
             </div>
           </div>
 
-          <div className="app-panel flex flex-col gap-4 rounded-[2rem] border-border/60 bg-card/85 p-5">
+          <div className="app-panel flex flex-col gap-4 rounded-[2rem] border-border/60 bg-card/85 p-5 dark:border-primary/12">
             {visibleSkills.length === 0 ? (
               <div className="rounded-[1.75rem] border border-dashed border-border/70 py-14 text-center text-muted-foreground">
                 <Sparkles className="mx-auto mb-3 h-12 w-12 opacity-30" />

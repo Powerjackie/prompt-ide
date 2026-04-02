@@ -29,7 +29,7 @@ export function AppShell({ children }: AppShellProps) {
   if (isAuthRoute) {
     return (
       <div className="auth-shell">
-        <div className="relative z-10 w-full max-w-md">{children}</div>
+        <div className="relative z-10 w-full max-w-[1080px]">{children}</div>
         <Toaster />
       </div>
     )
@@ -37,13 +37,19 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="app-shell">
-      <div className="app-shell__grid">
-        <Sidebar />
-        <div className="app-shell__content">
-          <TopBar />
-          <main className="app-main">
-            <div className={cn("app-main__inner")}>{children}</div>
-          </main>
+      <div className="app-shell__viewport">
+        <div className="app-shell__grid">
+          <div className="app-shell__sidebar-frame">
+            <Sidebar />
+          </div>
+          <div className="app-shell__main-frame">
+            <div className="app-shell__content">
+              <TopBar />
+              <main className="app-main">
+                <div className={cn("app-main__inner")}>{children}</div>
+              </main>
+            </div>
+          </div>
         </div>
       </div>
       <SearchDialog />

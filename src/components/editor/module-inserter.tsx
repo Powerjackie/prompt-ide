@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useModules } from "@/hooks/use-modules"
 import { MODULE_TYPES } from "@/lib/constants"
 import { Button } from "@/components/ui/button"
@@ -12,6 +13,7 @@ interface ModuleInserterProps {
 }
 
 export function ModuleInserter({ onInsert }: ModuleInserterProps) {
+  const t = useTranslations("modules")
   const { modules, loading } = useModules()
   const [filter, setFilter] = useState<string>("all")
 
@@ -33,28 +35,28 @@ export function ModuleInserter({ onInsert }: ModuleInserterProps) {
           className="cursor-pointer text-[10px]"
           onClick={() => setFilter("all")}
         >
-          All
+          {t("all")}
         </Badge>
-        {MODULE_TYPES.map((t) => (
+        {MODULE_TYPES.map((moduleType) => (
           <Badge
-            key={t.value}
-            variant={filter === t.value ? "default" : "outline"}
+            key={moduleType.value}
+            variant={filter === moduleType.value ? "default" : "outline"}
             className="cursor-pointer text-[10px]"
-            onClick={() => setFilter(t.value)}
+            onClick={() => setFilter(moduleType.value)}
           >
-            {t.label}
+            {t(moduleType.value)}
           </Badge>
         ))}
       </div>
 
       {filtered.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-6">
-          No modules found. Create modules in the Modules page.
+          {t("inserterEmpty")}
         </p>
       ) : (
         <div className="space-y-2 max-h-[400px] overflow-y-auto">
           {filtered.map((m) => {
-            const typeLabel = MODULE_TYPES.find((t) => t.value === m.type)?.label ?? m.type
+            const typeLabel = t(m.type)
             return (
               <div
                 key={m.id}
@@ -73,7 +75,7 @@ export function ModuleInserter({ onInsert }: ModuleInserterProps) {
                     className="h-6 text-xs"
                     onClick={() => onInsert(m.content)}
                   >
-                    <Plus className="h-3 w-3 mr-1" /> Insert
+                    <Plus className="h-3 w-3 mr-1" /> {t("insert")}
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground line-clamp-2 font-mono">

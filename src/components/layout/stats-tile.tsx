@@ -18,7 +18,7 @@ export function StatsTile({ label, value, icon, hint, className }: StatsTileProp
           <div className="metric-tile__label">{label}</div>
         </div>
         {icon ? (
-          <div className="rounded-2xl border border-primary/15 bg-primary/8 p-3 text-primary">
+          <div className="rounded-2xl border border-primary/15 bg-primary/8 p-3 text-primary dark:border-primary/28 dark:bg-primary/14 dark:shadow-[0_0_30px_-16px_rgba(79,246,255,0.82)]">
             {icon}
           </div>
         ) : null}

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { usePrompts } from "@/hooks/use-prompts"
 import { useModules } from "@/hooks/use-modules"
 import { Link } from "@/i18n/navigation"
+import { PageHeader } from "@/components/layout/page-header"
 
 export default function TagsPage() {
   const t = useTranslations("tags")
@@ -50,14 +51,15 @@ export default function TagsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Tags className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <Badge variant="secondary">{tagCounts.length}</Badge>
-      </div>
+      <PageHeader
+        eyebrow={t("eyebrow")}
+        title={t("title")}
+        description={t("pageDescription")}
+        actions={<Badge variant="secondary">{t("countLabel", { count: tagCounts.length })}</Badge>}
+      />
 
       {tagCounts.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="app-panel py-14 text-center text-muted-foreground">
           <Tags className="h-12 w-12 mx-auto mb-3 opacity-30" />
           <p>{t("empty")}</p>
         </div>
@@ -67,7 +69,7 @@ export default function TagsPage() {
             <Link
               key={tag}
               href={`/prompts?tag=${encodeURIComponent(tag)}`}
-              className="border rounded-lg p-4 hover:bg-accent/50 transition-colors"
+              className="app-panel rounded-[1.5rem] p-4 transition-colors hover:border-primary/20 hover:bg-accent/20"
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="font-medium text-sm">{tag}</span>

@@ -7,6 +7,7 @@
     "delete": "Delete",
     "cancel": "Cancel",
     "copy": "Copy",
+    "copyFailed": "Failed to copy",
     "copied": "Copied",
     "edit": "Edit",
     "back": "Back",
@@ -23,6 +24,7 @@
     "unfavorite": "Unfavorite",
     "deleteForever": "Delete Forever",
     "deleted": "Deleted",
+    "reset": "Reset",
     "newPrompt": "New Prompt",
     "unsavedChanges": "(unsaved changes)",
     "titleRequired": "Title is required",
@@ -32,7 +34,6 @@
     "characters": "{count} characters",
     "words": "~{count} words"
   },
-
   "nav": {
     "home": "Home",
     "prompts": "Prompts",
@@ -46,22 +47,43 @@
     "tags": "Tags",
     "playground": "Playground",
     "settings": "Settings",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "brandTagline": "Discovery-first prompt workspace",
+    "promptsSubtitle": "Prompt library",
+    "playgroundSubtitle": "MiniMax lab",
+    "sidebarPitchTitle": "Prompt R&D",
+    "sidebarPitchDescription": "Move from capture to analysis, refactor, benchmark, and packaging in one place.",
+    "toggleTheme": "Toggle theme",
+    "logout": "Logout"
   },
-
   "home": {
+    "eyebrow": "Prompt R&D",
     "title": "Home",
+    "description": "Build, analyze, benchmark, and package prompts inside a discovery-first workbench designed for iteration.",
     "totalPrompts": "Total Prompts",
     "inInbox": "In Inbox",
     "favorites": "Favorites",
     "modules": "Modules",
     "quickCapture": "Quick Capture",
     "recentPrompts": "Recent Prompts",
-    "tags": "Tags"
+    "tags": "Tags",
+    "recentDescription": "Jump back into the prompts you have touched most recently.",
+    "inboxDescription": "Fast capture items waiting to be promoted into production-ready prompts.",
+    "inboxEmpty": "Inbox is clear for now.",
+    "collectionsDescription": "Group prompts and modules into reusable packs.",
+    "modulesDescription": "Maintain the reusable ingredients behind your best prompts.",
+    "statsHints": {
+      "recentAssets": "{count} recent assets",
+      "inbox": "Capture first, refine later",
+      "favorites": "Your reusable prompt shelf",
+      "modules": "Reusable building blocks"
+    }
   },
-
   "prompts": {
     "title": "Prompts",
+    "libraryEyebrow": "Prompt Library",
+    "libraryDescription": "Discover prompt assets quickly, move between status buckets, and keep the strongest entries within easy reach.",
+    "filtersDescription": "Use search, filters, and tags together to move through your library with less friction.",
     "promptContent": "Prompt Content",
     "variables": "Variables",
     "notes": "Notes",
@@ -85,6 +107,23 @@
     "recentlyCreated": "Recently Created",
     "alphabetical": "Alphabetical",
     "startWriting": "Start writing to see a preview.",
+    "emptyFilteredDescription": "Try widening your search or clearing the active filters.",
+    "listHeaders": {
+      "prompt": "Prompt",
+      "status": "Status",
+      "tags": "Tags",
+      "updated": "Updated"
+    },
+    "detailDescription": "Evolve this prompt through analysis, refactor, versioning, and benchmark comparison.",
+    "variablesHeaders": {
+      "name": "Name",
+      "description": "Description",
+      "default": "Default"
+    },
+    "detailVersionsDescription": "Track immutable snapshots, compare changes, and mark the strongest baseline.",
+    "detailBenchmarkTitle": "Benchmark Evolution",
+    "detailBenchmarkDescription": "Inspect the latest scorecard and compare how this prompt evolves against baseline or previous versions.",
+    "detailAgentDescription": "Keep analysis and refactor inside the main reading flow so long outputs never stretch a secondary rail.",
     "versions": {
       "title": "Version History",
       "description": "Immutable snapshots created whenever this prompt is saved.",
@@ -118,13 +157,21 @@
       }
     }
   },
-
   "editor": {
     "newPrompt": "New Prompt",
     "editPrompt": "Edit Prompt",
     "preview": "Preview",
+    "agentTab": "Agent",
     "versionsTab": "Versions",
     "modules": "Modules",
+    "workspaceEyebrow": "Workspace",
+    "workspaceDescription": "Shape prompt content, review live structure, and run the MiniMax agent without leaving the workspace.",
+    "variablesSummary": "{count} variables",
+    "metadataTitle": "Prompt Metadata",
+    "metadataDescription": "Keep title, intent, model, and tags aligned with the draft you are evolving.",
+    "contentDescription": "Write, restructure, and prepare the prompt body that powers the workbench.",
+    "toolsTitle": "Workspace Tools",
+    "toolsDescription": "Switch between preview, agent insights, version history, and reusable modules without leaving the draft.",
     "titleLabel": "Title *",
     "titlePlaceholder": "Prompt title",
     "descriptionLabel": "Description",
@@ -137,13 +184,32 @@
     "tagsPlaceholder": "Type and press Enter to add tags",
     "notesLabel": "Notes",
     "notesPlaceholder": "Personal notes about this prompt...",
+    "canvasTitle": "Prompt Canvas",
+    "canvasDescription": "Draft the core instructions and keep reusable placeholders in double braces.",
+    "canvasCharacters": "{count} chars",
+    "canvasLines": "{count} lines",
+    "canvasPlaceholdersEnabled": "Dynamic placeholders enabled",
+    "canvasPlaceholderHint": "Use {{variable}} for reusable slots.",
+    "previewLiveTitle": "Live Preview",
+    "previewEmptyTitle": "Start writing to see a preview.",
+    "previewEmptyDescription": "We will render the current draft with its variable placeholders so you can inspect tone, structure, and reusable slots.",
+    "previewVariablesTitle": "Variables in play",
+    "previewRenderedTitle": "Rendered Prompt",
+    "previewRenderedDescription": "Preview the final prompt with fallback values filled in.",
+    "previewModeBadge": "Preview mode",
+    "previewStats": {
+      "characters": "Characters",
+      "words": "Words",
+      "variables": "Variables"
+    },
     "promptUpdated": "Prompt updated",
     "promptCreated": "Prompt created"
   },
-
   "inbox": {
     "title": "Inbox",
     "quickCapture": "Quick Capture",
+    "pageDescription": "Use the inbox as a low-friction capture layer, then promote the best items when they are ready.",
+    "captureDescription": "Paste rough ideas quickly so they enter the workflow before you lose them.",
     "captureTitle": "Title (optional)",
     "captureTitlePlaceholder": "Quick title...",
     "captureContent": "Prompt Content *",
@@ -152,10 +218,11 @@
     "captured": "Captured to inbox",
     "empty": "Inbox is empty. Capture a prompt to get started."
   },
-
   "modules": {
     "title": "Modules",
     "newModule": "New Module",
+    "pageDescription": "Maintain the reusable roles, goals, constraints, and formats that power stronger prompt systems.",
+    "assetCount": "{count} assets",
     "editModule": "Edit Module",
     "moduleTitle": "Title *",
     "moduleTitlePlaceholder": "Module title",
@@ -166,90 +233,232 @@
     "moduleCreated": "Module created",
     "moduleDeleted": "Module deleted",
     "insert": "Insert",
+    "inserterEmpty": "No modules found. Create modules on the Modules page first.",
     "noModules": "No modules found. Create one to get started.",
     "all": "All",
     "role": "Role",
     "goal": "Goal",
     "constraint": "Constraint",
     "outputFormat": "Output Format",
+    "output_format": "Output Format",
     "style": "Style",
-    "selfCheck": "Self Check"
+    "selfCheck": "Self Check",
+    "self_check": "Self Check"
   },
-
   "favorites": {
+    "eyebrow": "Prompt Shelf",
     "title": "Favorites",
+    "pageDescription": "Keep the prompts you reach for most often close at hand so proven building blocks are easy to reuse.",
+    "countLabel": "{count} favorites",
     "empty": "No favorites yet. Star a prompt to add it here."
   },
-
   "archive": {
+    "eyebrow": "Archive Vault",
     "title": "Archive",
+    "pageDescription": "Review prompts you have retired from the active workflow, then restore or remove them permanently when needed.",
+    "countLabel": "{count} archived",
     "empty": "No archived prompts.",
     "permanentlyDeleted": "Permanently deleted"
   },
-
   "tags": {
+    "eyebrow": "Tag Index",
     "title": "Tags",
+    "pageDescription": "Scan the tag landscape across prompts and modules so you can jump into the right slice of the library faster.",
+    "countLabel": "{count} tags",
     "empty": "No tags yet. Add tags to your prompts or modules.",
     "promptCount": "{count} prompts",
     "moduleCount": "{count} modules"
   },
-
   "playground": {
+    "eyebrow": "Agent Lab",
     "title": "Agent Playground",
     "description": "Paste any prompt text to see how the agent analyzes it. This is a sandbox for testing classification, risk detection, variable extraction, and similarity matching.",
-    "promptContent": "Prompt Content",
     "placeholder": "Paste a prompt here to analyze...",
     "analyze": "Analyze",
-    "results": "Analysis Results"
+    "results": "Analysis Results",
+    "resultsDescription": "MiniMax will inspect the prompt as-is and return an instant stateless readout with no saved history.",
+    "signals": {
+      "variables": "Variables",
+      "risk": "Risk",
+      "similar": "Similar prompts",
+      "trajectory": "Trajectory"
+    },
+    "brief": {
+      "title": "Experiment Brief",
+      "description": "Use this space to probe how a draft prompt behaves before you save, benchmark, or refactor it elsewhere.",
+      "stateless": "This run is stateless: it does not write Prompt, AgentHistory, or benchmark data back into the workspace."
+    },
+    "workspace": {
+      "title": "Prompt Input",
+      "description": "Paste or draft a prompt to inspect.",
+      "mode": "Stateless",
+      "characters": "{count} chars",
+      "lines": "{count} lines",
+      "ready": "Ready to analyze",
+      "waiting": "Add content to begin",
+      "clear": "Clear"
+    },
+    "templates": {
+      "title": "Quick Experiments",
+      "description": "Load a starter prompt and immediately see how the agent categorizes, scores risk, and extracts variables.",
+      "loaded": "Loaded",
+      "writing": {
+        "title": "Writing assistant",
+        "description": "A structured prompt for rewriting rough notes into polished prose.",
+        "content": "You are a senior writing assistant. Rewrite the following rough notes into a polished article intro for {{audience}}. Keep the tone {{tone}}, stay under {{word_limit}} words, and end with one concrete next step."
+      },
+      "translation": {
+        "title": "Translation prompt",
+        "description": "Test bilingual prompts that preserve nuance, terminology, and formatting.",
+        "content": "Translate the following product announcement from {{source_language}} to {{target_language}}. Preserve bullet structure, keep product names unchanged, and note any phrases that may need localization review."
+      },
+      "support": {
+        "title": "Customer support",
+        "description": "Probe how well a support prompt balances empathy, policy, and next actions.",
+        "content": "You are a customer support specialist. Reply to the user issue below using a calm and empathetic tone. Clarify the root cause, suggest the safest next step, and mention any policy limitation that applies."
+      },
+      "code": {
+        "title": "Code review prompt",
+        "description": "Inspect prompts that ask for bugs, regressions, and missing tests.",
+        "content": "Review the following code change like a senior engineer. Prioritize bugs, regressions, and missing tests first. Then list medium-risk issues, and end with any open questions that block approval."
+      }
+    },
+    "outputs": {
+      "title": "What you'll get",
+      "description": "Every run produces a structured readout of the prompt's shape, risks, and reusable pieces.",
+      "suggestions": "Suggested direction",
+      "suggestionsDescription": "Recommended category, model, and status to help frame what kind of prompt you're testing.",
+      "variables": "Extracted variables",
+      "variablesDescription": "Detected placeholders and input slots that can become explicit variables in a reusable version.",
+      "risk": "Risk signals",
+      "riskDescription": "A risk level plus concrete reasons such as sensitive content, prompt injection patterns, or structural complexity.",
+      "trajectory": "ReAct trajectory",
+      "trajectoryDescription": "The visible thought / action / observation timeline that shows how MiniMax reached the analysis."
+    },
+    "resultsState": {
+      "running": "Running",
+      "live": "Live result",
+      "idle": "Waiting"
+    },
+    "emptyState": {
+      "title": "Ready for the next prompt experiment",
+      "description": "Paste a draft or load a quick experiment on the left to inspect its variables, risk signals, similar prompts, and visible ReAct trajectory."
+    }
   },
-
   "settings": {
     "title": "Settings",
+    "eyebrow": "Workbench controls",
+    "description": "Tune workspace defaults, MiniMax agent behavior, and recovery actions from one control surface.",
+    "accessDeniedTitle": "Administrator access required",
+    "accessDeniedDescription": "This page manages global workspace behavior and is only available to administrators.",
+    "accessDeniedBody": "Sign in with the administrator password to change defaults, recovery actions, or agent-wide settings.",
+    "summary": {
+      "theme": "Theme: {value}",
+      "view": "View: {value}",
+      "model": "Model: {value}",
+      "status": "Status: {value}",
+      "provider": "Provider: {value}",
+      "depth": "Depth: {value}"
+    },
+    "workspaceDefaultsTitle": "Workspace Defaults",
+    "workspaceDefaultsDescription": "Set the baseline view, model, status, and theme that should greet you across the workbench.",
+    "themeLabel": "Theme",
+    "themeDescription": "Choose how the interface should render when you open the workbench on this machine.",
+    "themeOptions": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
     "defaults": "Defaults",
     "defaultView": "Default View",
+    "defaultViewDescription": "Pick the starting layout for prompt browsing pages.",
     "defaultModel": "Default Model",
+    "defaultModelDescription": "Set the model label new prompts should inherit by default.",
+    "defaultStatus": "Default Status",
+    "defaultStatusDescription": "Choose the lifecycle status assigned to new prompts when they are created.",
     "card": "Card",
     "list": "List",
     "agentSection": "Agent",
+    "agentControlsTitle": "Agent Controls",
+    "agentControlsDescription": "Control which MiniMax capabilities run automatically and how strict the analysis pipeline should be.",
     "enableAgent": "Enable Agent",
     "enableAgentDesc": "Run analysis on prompts",
     "autoAnalyze": "Auto-Analyze",
     "autoAnalyzeDesc": "Analyze new prompts automatically",
+    "analyzeOnPaste": "Analyze on paste",
+    "analyzeOnPasteDesc": "Trigger analysis immediately after captured text is pasted into the workbench.",
     "normalization": "Normalization",
     "normalizationDesc": "Suggest content cleanup",
     "moduleExtraction": "Module Extraction",
     "moduleExtractionDesc": "Detect reusable module candidates",
+    "providerLabel": "Agent Provider",
+    "providerDescription": "Choose which backend label and strategy profile should drive MiniMax-style analysis in this workspace.",
+    "providers": {
+      "minimax": "MiniMax",
+      "openai": "OpenAI",
+      "claude": "Claude",
+      "gemini": "Gemini",
+      "zhipu": "Zhipu",
+      "mock": "Mock"
+    },
     "analysisDepth": "Analysis Depth",
+    "analysisDepthDescription": "Adjust how deeply the agent should inspect structure, reuse potential, and risk before returning.",
     "quick": "Quick",
     "standard": "Standard",
     "deep": "Deep",
+    "riskThreshold": "Risk Threshold",
+    "riskThresholdDescription": "Define the minimum risk severity that should be surfaced as an actionable concern.",
+    "riskOptions": {
+      "low": "Low risk",
+      "medium": "Medium risk",
+      "high": "High risk"
+    },
+    "confidenceThreshold": "Confidence Threshold",
+    "confidenceThresholdDescription": "Set the minimum confidence score the agent should treat as strong enough for recommendations.",
+    "similarityThreshold": "Similarity Threshold",
+    "similarityThresholdDescription": "Control how similar another prompt must be before it appears as a duplication or inspiration signal.",
+    "thresholdHint": "Use a value between 0 and 1. Press Enter or blur to save.",
+    "thresholdValidation": "Thresholds must be between 0 and 1.",
+    "saving": "Saving...",
+    "dataRecoveryTitle": "Data & Recovery",
+    "dataRecoveryDescription": "Export a clean workspace snapshot, restore prompts and modules from backup JSON, or reset settings to defaults.",
     "dataSection": "Data",
     "exportData": "Export Data",
-    "exportDataDesc": "Download all prompts, modules, and settings as JSON",
+    "exportDataDesc": "Download prompts, modules, and current settings as a workspace snapshot JSON.",
     "export": "Export",
     "exported": "Data exported",
     "importData": "Import Data",
-    "importDataDesc": "Restore from a previously exported JSON file",
+    "importDataDesc": "Restore prompts, modules, and settings from a previously exported workspace snapshot.",
     "import": "Import",
-    "importSuccess": "Data imported. Reloading...",
+    "importing": "Importing...",
+    "importSuccess": "Imported {prompts} prompts and {modules} modules.",
     "importError": "Failed to import file",
     "invalidFile": "Invalid export file",
     "resetSettings": "Reset Settings",
-    "resetSettingsDesc": "Restore default settings (does not delete data)",
+    "resetSettingsDesc": "Restore default workspace behavior without deleting prompts, modules, or skills.",
     "reset": "Reset",
-    "resetDone": "Settings reset to defaults"
+    "resetDone": "Settings reset to defaults",
+    "footnotes": {
+      "defaultsTitle": "Defaults shape new work",
+      "defaultsDescription": "These values seed newly created prompts and browsing surfaces across the workbench.",
+      "agentTitle": "Agent rules stay centralized",
+      "agentDescription": "MiniMax analysis, normalization, and module extraction all read from this control surface.",
+      "thresholdsTitle": "Thresholds guide signal strength",
+      "thresholdsDescription": "Confidence, similarity, and risk thresholds help keep analysis recommendations consistent.",
+      "dataTitle": "Recovery actions stay explicit",
+      "dataDescription": "Export and import keep a portable snapshot, while reset only affects settings defaults."
+    }
   },
-
   "search": {
     "placeholder": "Search prompts, modules, pages...",
+    "dialogTitle": "Command Palette",
+    "dialogDescription": "Search for a page, prompt, module, collection, or skill.",
     "pages": "Pages",
     "prompts": "Prompts",
     "modules": "Modules",
-    "collections": "Collections"
-    ,
+    "collections": "Collections",
     "skills": "Skills"
   },
-
   "skills": {
     "title": "Skills",
     "description": "Wrap your strongest prompts into reusable capabilities with a goal, schemas, and an optional collection pack.",
@@ -497,7 +706,6 @@
       "noBenchmark": "No benchmark"
     }
   },
-
   "benchmark": {
     "title": "Benchmark Scorecard",
     "description": "Run MiniMax against a saved prompt version to score clarity, reusability, controllability, and deployment readiness.",
@@ -547,10 +755,11 @@
       "deploymentReadiness": "Deployment Readiness"
     }
   },
-
   "collections": {
     "title": "Collections",
     "newCollection": "New Collection",
+    "pageDescription": "Package prompts and modules into reusable systems so the best work can be rediscovered and reused quickly.",
+    "countLabel": "{count} collections",
     "empty": "No collections yet. Create one to group prompts and modules into a reusable pack.",
     "noDescription": "No description yet.",
     "itemCount": "{count} item(s)",
@@ -599,11 +808,19 @@
       }
     }
   },
-
   "login": {
     "eyebrow": "Vault Access",
     "title": "Sign in",
-    "description": "Enter the admin password to unlock the Prompt IDE.",
+    "description": "Enter your workspace password to unlock Prompt IDE.",
+    "discoveryTitle": "Discovery",
+    "discoveryDescription": "Capture prompts, compare versions, benchmark improvements, and package modules into reusable collections.",
+    "agentTitle": "MiniMax Agent",
+    "agentDescription": "Analyze, refactor, and benchmark prompts inside one focused workspace built for iteration.",
+    "highlights": {
+      "promptCapture": "Prompt capture",
+      "versionCompare": "Version compare",
+      "skillOperations": "Skill operations"
+    },
     "passwordLabel": "Password",
     "passwordPlaceholder": "Enter your password",
     "submit": "Unlock",
@@ -611,7 +828,6 @@
     "invalidPassword": "The password is incorrect.",
     "configError": "Authentication is not configured."
   },
-
   "agent": {
     "title": "Agent Analysis",
     "riskLevel": "Risk Level",
@@ -750,9 +966,9 @@
       }
     },
     "risk": {
-      "low": "low",
-      "medium": "medium",
-      "high": "high",
+      "low": "Low risk",
+      "medium": "Medium risk",
+      "high": "High risk",
       "detectedPII": "Detected potential {type}",
       "injectionPattern": "Potential prompt injection pattern: {pattern}",
       "email": "email",
@@ -782,13 +998,23 @@
       "noSensitiveContent": "No sensitive content detected"
     }
   },
-
   "status": {
     "inbox": "Inbox",
     "production": "Production",
     "archived": "Archived"
   },
-
+  "categories": {
+    "code": "Code",
+    "writing": "Writing",
+    "data": "Data",
+    "marketing": "Marketing",
+    "education": "Education",
+    "design": "Design",
+    "research": "Research",
+    "productivity": "Productivity",
+    "communication": "Communication",
+    "general": "General"
+  },
   "models": {
     "universal": "Universal",
     "claude": "Claude",
@@ -796,7 +1022,6 @@
     "gemini": "Gemini",
     "deepseek": "DeepSeek"
   },
-
   "locale": {
     "zh": "中文",
     "en": "English",

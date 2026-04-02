@@ -6,7 +6,7 @@ Prompt IDE is a private **Prompt R&D Workbench** for one operator. It is designe
 
 This milestone is the first stable product stage. The app now covers:
 
-- Prompt CRUD with localized app shell and cookie-based auth
+- Prompt CRUD with localized app shell and shared-password auth roles
 - Prompt version history with baseline selection and restore
 - MiniMax analysis for saved prompts and the stateless playground
 - MiniMax refactor proposals with apply-draft, apply-variables, and module creation
@@ -17,11 +17,11 @@ This milestone is the first stable product stage. The app now covers:
 Out of scope for this stage:
 
 - public marketplace or gallery
-- team collaboration and permissions
+- team collaboration, invitations, and per-user permissions
 - multi-model orchestration
 - workflow engine / DAG runtime
 
-The next milestone is **Docker containerization and VPS deployment**.
+This milestone now includes a production-oriented Docker / Compose deployment path for a single self-hosted operator.
 
 ## Tech Stack
 
@@ -50,6 +50,7 @@ cp .env.example .env
 Then set at least:
 
 - `ADMIN_PASSWORD`
+- `MEMBER_PASSWORD` (optional, enables non-admin shared access without destructive asset permissions)
 - `MINIMAX_API_KEY`
 - `DATABASE_URL=file:./dev.db`
 
@@ -60,6 +61,68 @@ npm run dev
 ```
 
 Open `http://localhost:3000`.
+
+Local development intentionally uses **HTTP** because `next dev` is serving directly without a local TLS termination layer.
+
+## Deploy With Docker
+
+Prompt IDE now ships a minimal single-host deployment setup based on:
+
+- `Dockerfile` multi-stage standalone build
+- `compose.yaml` for the app container plus an on-demand schema sync service
+- named-volume SQLite persistence mounted at `/app/data`
+- `/api/health` readiness probe that checks Prisma + SQLite availability
+- `deploy/update.sh` for the recommended server-side update flow
+
+### Production Environment
+
+Copy `.env.example` to `.env` on the server and set at least:
+
+- `DATABASE_URL=file:/app/data/prompt-ide.db`
+- `ADMIN_PASSWORD`
+- `MEMBER_PASSWORD` (optional, keeps shared non-admin access enabled)
+- `MINIMAX_API_KEY`
+- `NODE_ENV=production`
+- `HOSTNAME=0.0.0.0`
+- `PORT=3000`
+- `NEXT_TELEMETRY_DISABLED=1`
+
+`NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` is optional for this single-instance deployment, but you should set it if you want an explicit long-lived secret rather than relying on the runtime default.
+
+### First Deploy
+
+```bash
+docker compose --profile ops build app schema
+docker compose --profile ops run --rm schema
+docker compose up -d --wait app
+```
+
+Image build only installs dependencies, generates the Prisma client, and builds the Next standalone bundle. Database schema sync remains an explicit deployment step through the `schema` service, not part of `docker build`.
+
+Then open `http://<server-host>:3000/zh/login`.
+
+### Update Flow
+
+The recommended update flow for this repo is server-side source checkout plus rebuild:
+
+```bash
+./deploy/update.sh
+```
+
+The script performs:
+
+- `git pull --ff-only`
+- `docker compose --profile ops build app schema`
+- `docker compose --profile ops run --rm schema`
+- `docker compose up -d --wait app`
+
+### Persistence And Scope
+
+- SQLite data lives in the named volume declared by `compose.yaml`
+- container health is driven by `/api/health`, which verifies both Prisma queryability and SQLite storage writability
+- the deployment setup is intentionally single-host and single-volume
+- reverse proxy / TLS termination is still expected to be handled outside this repo
+- this is a deployment baseline, not a clustered or multi-instance topology
 
 ## Database Commands
 
@@ -121,17 +184,11 @@ Primary loops:
 - Prompt evolution: `Refactor -> Accept -> Benchmark Compare -> Decide -> Package`
 - Skill operations: `Define -> Run -> Observe -> Manage`
 
-For detailed architecture, read:
-
-- [AI_HANDOVER.md](./AI_HANDOVER.md)
-- [AGENT_DESIGN.md](./AGENT_DESIGN.md)
-
 ## Milestone Notes
 
-This repository follows a write-through documentation rule:
+The repository now ships a first production-oriented deployment baseline:
 
-- if schema changes, update handover docs
-- if server action patterns change, update handover docs
-- if agent or skill contracts change, update handover docs
-
-Stale external memory is treated as a bug.
+- core product capabilities are implemented and locally validated
+- the current focus is stability, regression safety, and credible self-hosting
+- Docker / Compose assets now exist in-repo for a single-host VPS path
+- reverse proxy, TLS, backups, and host hardening remain infrastructure follow-up work

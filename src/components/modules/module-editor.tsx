@@ -156,7 +156,7 @@ function ModuleEditorForm({
           <SelectContent>
             {MODULE_TYPES.map((mt) => (
               <SelectItem key={mt.value} value={mt.value}>
-                {mt.label}
+                {t(mt.value)}
               </SelectItem>
             ))}
           </SelectContent>

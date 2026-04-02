@@ -61,7 +61,7 @@ export default function CollectionsPage() {
           </>
         }
         title={t("title")}
-        description="Package prompts and modules into reusable systems so the best work can be rediscovered and reused quickly."
+        description={t("pageDescription")}
         actions={
           <Button onClick={() => setDialogOpen(true)} className="rounded-2xl">
             <Plus className="mr-1 h-4 w-4" />
@@ -71,7 +71,7 @@ export default function CollectionsPage() {
       >
         <div className="chip-row">
           <Badge variant="outline" className="rounded-full px-3 py-1">
-            {collections.length} collections
+            {t("countLabel", { count: collections.length })}
           </Badge>
         </div>
       </PageHeader>

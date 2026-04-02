@@ -1,5 +1,8 @@
+import type { AuthRole, AuthSession, AuthzSnapshot } from "@/types/auth"
+import { guestAuthzSnapshot } from "@/types/auth"
+
 const encoder = new TextEncoder()
-const AUTH_TOKEN_SCOPE = "prompt-ide-auth-v1"
+const AUTH_TOKEN_SCOPE = "prompt-ide-auth-v2"
 
 export const AUTH_COOKIE_NAME = "auth_token"
 export const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 30
@@ -19,7 +22,15 @@ function safeEqual(left: string, right: string) {
   return mismatch === 0
 }
 
-async function createSignedToken(secret: string) {
+function getSecretForRole(role: AuthRole) {
+  if (role === "admin") {
+    return process.env.ADMIN_PASSWORD ?? null
+  }
+
+  return process.env.MEMBER_PASSWORD ?? null
+}
+
+async function createSignedToken(role: AuthRole, secret: string) {
   const key = await crypto.subtle.importKey(
     "raw",
     encoder.encode(secret),
@@ -28,22 +39,70 @@ async function createSignedToken(secret: string) {
     ["sign"]
   )
 
-  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(AUTH_TOKEN_SCOPE))
+  const signature = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    encoder.encode(`${AUTH_TOKEN_SCOPE}:${role}`)
+  )
+
   return toHex(new Uint8Array(signature))
 }
 
-export async function buildAuthToken() {
-  const secret = process.env.ADMIN_PASSWORD
+export function resolveRoleForPassword(password: string): AuthRole | null {
+  const adminPassword = process.env.ADMIN_PASSWORD
+  if (adminPassword && safeEqual(password, adminPassword)) {
+    return "admin"
+  }
+
+  const memberPassword = process.env.MEMBER_PASSWORD
+  if (memberPassword && safeEqual(password, memberPassword)) {
+    return "member"
+  }
+
+  return null
+}
+
+export async function buildAuthToken(role: AuthRole) {
+  const secret = getSecretForRole(role)
   if (!secret) return null
 
-  return createSignedToken(secret)
+  const signature = await createSignedToken(role, secret)
+  return `${role}.${signature}`
+}
+
+export async function getAuthSessionFromToken(token?: string): Promise<AuthSession | null> {
+  if (!token) return null
+
+  const [rawRole, signature] = token.split(".")
+  if (!rawRole || !signature) return null
+  if (rawRole !== "admin" && rawRole !== "member") return null
+
+  const secret = getSecretForRole(rawRole)
+  if (!secret) return null
+
+  const expectedSignature = await createSignedToken(rawRole, secret)
+  if (!safeEqual(signature, expectedSignature)) {
+    return null
+  }
+
+  return { role: rawRole }
 }
 
 export async function isValidAuthToken(token?: string) {
-  if (!token) return false
+  return (await getAuthSessionFromToken(token)) !== null
+}
 
-  const expectedToken = await buildAuthToken()
-  if (!expectedToken) return false
+export function createAuthzSnapshot(session: AuthSession | null): AuthzSnapshot {
+  if (!session) {
+    return guestAuthzSnapshot
+  }
 
-  return safeEqual(token, expectedToken)
+  const isAdmin = session.role === "admin"
+
+  return {
+    isAuthenticated: true,
+    role: session.role,
+    canDeleteAssets: isAdmin,
+    canManageSettings: isAdmin,
+  }
 }

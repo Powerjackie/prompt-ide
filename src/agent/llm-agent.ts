@@ -55,6 +55,7 @@ const MAX_MODULE_RESULTS = 5
 const MINIMAX_ANALYSIS_TIMEOUT_MS = 45_000
 const MINIMAX_BENCHMARK_TIMEOUT_MS = 90_000
 const MINIMAX_REFACTOR_TIMEOUT_MS = 120_000
+export type NarrationLocale = "zh" | "en"
 
 const AGENT_TOOLS: ChatCompletionTool[] = [
   {
@@ -79,7 +80,21 @@ const AGENT_TOOLS: ChatCompletionTool[] = [
   },
 ]
 
-const AGENT_SYSTEM_PROMPT = `
+function createNarrationLanguagePolicy(locale: NarrationLocale) {
+  const targetLanguage =
+    locale === "zh" ? "Simplified Chinese" : "English"
+
+  return `
+Language policy:
+- The caller-selected UI locale is "${locale}".
+- Use ${targetLanguage} for all reasoning, trajectory-visible thoughts/actions/observations, and every free-text JSON value.
+- Never switch narrative language based on the prompt body unless the caller changes the locale.
+- Never translate required JSON field names, enum values, or UI translation keys.
+`.trim()
+}
+
+function createAgentSystemPrompt(locale: NarrationLocale) {
+  return `
 You are a Prompt Engineering Expert running a ReAct analysis loop for a personal prompt vault.
 
 Operating rules:
@@ -127,9 +142,13 @@ Guidance:
 - Use moduleCandidates to surface the most reusable matched module snippets.
 - Use summaryParts keys that already exist in the UI, such as summaryCategory, summaryVariables, summaryRisk, summaryDuplicates, and summaryNormalize.
 - Set analysisVersion to "minimax-2.7-react-v1".
-`.trim()
 
-const BENCHMARK_SYSTEM_PROMPT = `
+${createNarrationLanguagePolicy(locale)}
+`.trim()
+}
+
+function createBenchmarkSystemPrompt(locale: NarrationLocale) {
+  return `
 You are a prompt engineering evaluator for a personal Prompt IDE.
 
 Your job is to score a single saved prompt version for production readiness.
@@ -156,9 +175,13 @@ Scoring rules:
 
 Be specific, concise, and practical.
 Do not wrap JSON in markdown.
-`.trim()
 
-const REFACTOR_SYSTEM_PROMPT = `
+${createNarrationLanguagePolicy(locale)}
+`.trim()
+}
+
+function createRefactorSystemPrompt(locale: NarrationLocale) {
+  return `
 You are a Prompt Refactor Expert for a personal Prompt IDE.
 
 Operating rules:
@@ -200,7 +223,10 @@ Guidance:
 - suggestedVariables should focus on reusable input slots.
 - extractedModules should only include high-value reusable building blocks.
 - Set analysisVersion to "minimax-2.7-refactor-v1".
+
+${createNarrationLanguagePolicy(locale)}
 `.trim()
+}
 
 function createMiniMaxClient(timeout = MINIMAX_ANALYSIS_TIMEOUT_MS) {
   const apiKey = process.env.MINIMAX_API_KEY
@@ -225,6 +251,31 @@ function clampConfidence(value: unknown, fallback = 0.62) {
 function clampScore(value: unknown, fallback = 72) {
   if (typeof value !== "number" || Number.isNaN(value)) return fallback
   return Math.min(100, Math.max(0, Math.round(value)))
+}
+
+function localizeNarration(locale: NarrationLocale, zh: string, en: string) {
+  return locale === "en" ? en : zh
+}
+
+function inferNarrationLocale(text: string): NarrationLocale {
+  const englishPatterns = [
+    /\b(?:think|reason|analy[sz]e|analysis|reply|respond|write|output|return)\s+(?:in|using)\s+english\b/i,
+    /\b(?:please\s+)?use\s+english\s+for\s+(?:analysis|reasoning|thoughts?|response|output)\b/i,
+    /(?:请|请用|用|使用|以)英文(?:进行)?(?:分析|思考|回答|输出)/,
+  ]
+
+  return englishPatterns.some((pattern) => pattern.test(text)) ? "en" : "zh"
+}
+
+function resolveNarrationLocale(
+  locale?: string | null,
+  fallbackText = ""
+): NarrationLocale {
+  if (locale === "zh" || locale === "en") {
+    return locale
+  }
+
+  return inferNarrationLocale(fallbackText)
 }
 
 function normalizeRiskLevel(value: unknown): AgentAnalysisResult["riskLevel"] {
@@ -286,23 +337,32 @@ function sanitizeModelReasoning(text: string) {
   return text.trim()
 }
 
-function deriveTitle(promptContent: string) {
+function deriveTitle(promptContent: string, locale: NarrationLocale = "zh") {
   const firstLine = promptContent
     .split(/\r?\n/)
     .map((line) => line.trim())
     .find(Boolean)
 
-  if (!firstLine) return "MiniMax Prompt Analysis"
+  if (!firstLine) {
+    return localizeNarration(locale, "MiniMax 提示词分析", "MiniMax Prompt Analysis")
+  }
   return firstLine.length > 72 ? `${firstLine.slice(0, 69)}...` : firstLine
 }
 
-function extractVariablesFromPrompt(promptContent: string): Variable[] {
+function extractVariablesFromPrompt(
+  promptContent: string,
+  locale: NarrationLocale = "zh"
+): Variable[] {
   const matches = Array.from(promptContent.matchAll(/\{\{\s*([a-zA-Z0-9_.-]+)\s*\}\}/g))
   const uniqueNames = Array.from(new Set(matches.map((match) => match[1]).filter(Boolean)))
 
   return uniqueNames.map((name) => ({
     name,
-    description: `Variable extracted from prompt placeholder ${name}.`,
+    description: localizeNarration(
+      locale,
+      `从提示词占位符 ${name} 提取出的变量。`,
+      `Variable extracted from prompt placeholder ${name}.`
+    ),
     defaultValue: "",
   }))
 }
@@ -392,7 +452,8 @@ function normalizeAnalysis(
   promptContent: string,
   finalThought: string,
   fallbackModuleCandidates: ModuleCandidate[],
-  usedModuleTool: boolean
+  usedModuleTool: boolean,
+  locale: NarrationLocale
 ): AgentAnalysisResult {
   const now = new Date().toISOString()
   const source = isRecord(parsed) ? parsed : {}
@@ -405,7 +466,7 @@ function normalizeAnalysis(
           defaultValue: ensureString(variable.defaultValue, ""),
         }))
         .filter((variable) => variable.name.length > 0)
-    : extractVariablesFromPrompt(promptContent)
+    : extractVariablesFromPrompt(promptContent, locale)
 
   const duplicateCandidates = Array.isArray(source.duplicateCandidates)
     ? source.duplicateCandidates
@@ -444,7 +505,7 @@ function normalizeAnalysis(
   ])
 
   return {
-    suggestedTitle: ensureString(source.suggestedTitle, deriveTitle(promptContent)),
+    suggestedTitle: ensureString(source.suggestedTitle, deriveTitle(promptContent, locale)),
     suggestedDescription: ensureString(
       source.suggestedDescription,
       summarizeText(finalThought || "MiniMax generated a structured prompt analysis.", 160)
@@ -472,12 +533,17 @@ function createFallbackAnalysis(
   promptContent: string,
   finalThought: string,
   moduleCandidates: ModuleCandidate[],
-  usedModuleTool: boolean
+  usedModuleTool: boolean,
+  locale: NarrationLocale
 ) {
-  return normalizeAnalysis({}, promptContent, finalThought, moduleCandidates, usedModuleTool)
+  return normalizeAnalysis({}, promptContent, finalThought, moduleCandidates, usedModuleTool, locale)
 }
 
-function normalizeBenchmarkResult(parsed: unknown, snapshot: PromptVersionSnapshot): BenchmarkResult {
+function normalizeBenchmarkResult(
+  parsed: unknown,
+  snapshot: PromptVersionSnapshot,
+  locale: NarrationLocale
+): BenchmarkResult {
   const source = isRecord(parsed) ? parsed : {}
   const clarityScore = clampScore(source.clarityScore, snapshot.content.length > 120 ? 78 : 68)
   const reusabilityScore = clampScore(
@@ -504,12 +570,24 @@ function normalizeBenchmarkResult(parsed: unknown, snapshot: PromptVersionSnapsh
     deploymentReadinessScore,
     summary: ensureString(
       source.summary,
-      `MiniMax benchmarked this prompt as a ${derivedOverall >= 80 ? "strong" : "developing"} candidate for repeated use.`
+      localizeNarration(
+        locale,
+        `MiniMax 将这个提示词评估为一个${derivedOverall >= 80 ? "较强" : "仍在发展中"}的可重复复用候选。`,
+        `MiniMax benchmarked this prompt as a ${derivedOverall >= 80 ? "strong" : "developing"} candidate for repeated use.`
+      )
     ),
-    improvementSuggestions: ensureStringArray(source.improvementSuggestions, [
-      "Clarify the output structure and response constraints.",
-      "Add reusable variable placeholders for user-specific inputs.",
-    ]),
+    improvementSuggestions: ensureStringArray(
+      source.improvementSuggestions,
+      locale === "en"
+        ? [
+            "Clarify the output structure and response constraints.",
+            "Add reusable variable placeholders for user-specific inputs.",
+          ]
+        : [
+            "进一步明确输出结构和响应约束。",
+            "为用户输入补充可复用的变量占位符。",
+          ]
+    ),
     recommendedForProduction:
       typeof source.recommendedForProduction === "boolean"
         ? source.recommendedForProduction
@@ -560,23 +638,33 @@ function normalizeModuleType(value: unknown): ModuleType {
 }
 
 function buildRefactorFallbackModules(
-  fallbackModuleCandidates: ModuleCandidate[]
+  fallbackModuleCandidates: ModuleCandidate[],
+  locale: NarrationLocale
 ): RefactorModuleSuggestion[] {
   return fallbackModuleCandidates.map((candidate, index) => ({
-    title: `Reusable ${candidate.type} module ${index + 1}`,
+    title: localizeNarration(
+      locale,
+      `可复用${candidate.type}模块 ${index + 1}`,
+      `Reusable ${candidate.type} module ${index + 1}`
+    ),
     type: normalizeModuleType(candidate.type),
     content: candidate.content,
     tags: [candidate.type, "refactor"],
-    rationale: "Suggested from the closest reusable module already saved in the vault.",
+    rationale: localizeNarration(
+      locale,
+      "这是根据仓库里最接近的已保存模块生成的复用建议。",
+      "Suggested from the closest reusable module already saved in the vault."
+    ),
   }))
 }
 
 function normalizeRefactorModules(
   value: unknown,
-  fallbackModuleCandidates: ModuleCandidate[]
+  fallbackModuleCandidates: ModuleCandidate[],
+  locale: NarrationLocale
 ): RefactorModuleSuggestion[] {
   if (!Array.isArray(value)) {
-    return buildRefactorFallbackModules(fallbackModuleCandidates)
+    return buildRefactorFallbackModules(fallbackModuleCandidates, locale)
   }
 
   const normalized = value
@@ -586,33 +674,51 @@ function normalizeRefactorModules(
       if (!content) return null
 
       return {
-        title: ensureString(module.title, "Reusable prompt module"),
+        title: ensureString(
+          module.title,
+          localizeNarration(locale, "可复用提示词模块", "Reusable prompt module")
+        ),
         type: normalizeModuleType(module.type),
         content,
         tags: ensureStringArray(module.tags, []),
         rationale: ensureString(
           module.rationale,
-          "MiniMax identified this section as a reusable building block."
+          localizeNarration(
+            locale,
+            "MiniMax 识别出这一段可以沉淀为可复用模块。",
+            "MiniMax identified this section as a reusable building block."
+          )
         ),
       }
     })
     .filter((module): module is RefactorModuleSuggestion => module !== null)
 
-  return normalized.length > 0 ? normalized : buildRefactorFallbackModules(fallbackModuleCandidates)
+  return normalized.length > 0
+    ? normalized
+    : buildRefactorFallbackModules(fallbackModuleCandidates, locale)
 }
 
 function normalizeCleanedPromptDraft(
   value: unknown,
   promptContent: string,
-  finalThought: string
+  finalThought: string,
+  locale: NarrationLocale
 ): CleanedPromptDraft {
   const source = isRecord(value) ? value : {}
 
   return {
-    title: ensureString(source.title, deriveTitle(promptContent)),
+    title: ensureString(source.title, deriveTitle(promptContent, locale)),
     description: ensureString(
       source.description,
-      summarizeText(finalThought || "MiniMax prepared a cleaned prompt draft.", 160)
+      summarizeText(
+        finalThought ||
+          localizeNarration(
+            locale,
+            "MiniMax 已准备好一份更清晰的提示词草稿。",
+            "MiniMax prepared a cleaned prompt draft."
+          ),
+        160
+      )
     ),
     content: ensureString(source.content, promptContent.trim() || promptContent),
     tags: ensureStringArray(source.tags, ["refactor", "minimax"]),
@@ -623,29 +729,40 @@ function normalizeRefactorResult(
   parsed: unknown,
   promptContent: string,
   finalThought: string,
-  fallbackModuleCandidates: ModuleCandidate[]
+  fallbackModuleCandidates: ModuleCandidate[],
+  locale: NarrationLocale
 ): PromptRefactorResult {
   const now = new Date().toISOString()
   const source = isRecord(parsed) ? parsed : {}
   const cleanedPromptDraft = normalizeCleanedPromptDraft(
     source.cleanedPromptDraft,
     promptContent,
-    finalThought
+    finalThought,
+    locale
   )
 
   return {
     summary: ensureString(
       source.summary,
-      summarizeText(finalThought || "MiniMax generated a prompt refactor proposal.", 180)
+      summarizeText(
+        finalThought ||
+          localizeNarration(
+            locale,
+            "MiniMax 已生成一份提示词重构提案。",
+            "MiniMax generated a prompt refactor proposal."
+          ),
+        180
+      )
     ),
     cleanedPromptDraft,
     suggestedVariables: normalizeVariables(
       source.suggestedVariables,
-      extractVariablesFromPrompt(cleanedPromptDraft.content)
+      extractVariablesFromPrompt(cleanedPromptDraft.content, locale)
     ),
     extractedModules: normalizeRefactorModules(
       source.extractedModules,
-      fallbackModuleCandidates
+      fallbackModuleCandidates,
+      locale
     ),
     analysisVersion: ensureString(source.analysisVersion, "minimax-2.7-refactor-v1"),
     generatedAt: ensureString(source.generatedAt, now),
@@ -655,9 +772,10 @@ function normalizeRefactorResult(
 function createFallbackRefactor(
   promptContent: string,
   finalThought: string,
-  fallbackModuleCandidates: ModuleCandidate[]
+  fallbackModuleCandidates: ModuleCandidate[],
+  locale: NarrationLocale
 ) {
-  return normalizeRefactorResult({}, promptContent, finalThought, fallbackModuleCandidates)
+  return normalizeRefactorResult({}, promptContent, finalThought, fallbackModuleCandidates, locale)
 }
 
 function pushTrajectoryStep(
@@ -685,6 +803,7 @@ async function runModuleAwareLoop(options: {
   promptContent: string
   promptId: string
   missingClientThought: string
+  narrationLocale: NarrationLocale
   timeoutMs?: number
 }): Promise<ModuleAwareLoopResult> {
   const client = createMiniMaxClient(options.timeoutMs)
@@ -698,8 +817,8 @@ async function runModuleAwareLoop(options: {
   ]
 
   if (!client) {
-    const fallbackQuery = deriveTitle(options.promptContent)
-    const toolResult = await searchPromptModules(fallbackQuery)
+    const fallbackQuery = deriveTitle(options.promptContent, options.narrationLocale)
+    const toolResult = await searchPromptModules(fallbackQuery, options.narrationLocale)
     fallbackModuleCandidates = await fetchModuleCandidates(fallbackQuery)
     usedModuleTool = true
 
@@ -707,7 +826,11 @@ async function runModuleAwareLoop(options: {
     pushTrajectoryStep(
       trajectory,
       "action",
-      `Executed ${SEARCH_PROMPT_MODULES_TOOL} with a fallback query derived from the prompt title.`,
+      localizeNarration(
+        options.narrationLocale,
+        `已根据提示词标题生成兜底查询，并执行 ${SEARCH_PROMPT_MODULES_TOOL}。`,
+        `Executed ${SEARCH_PROMPT_MODULES_TOOL} with a fallback query derived from the prompt title.`
+      ),
       SEARCH_PROMPT_MODULES_TOOL,
       { query: fallbackQuery, promptId: options.promptId },
       null
@@ -767,13 +890,20 @@ async function runModuleAwareLoop(options: {
         }
 
         const args = parseToolArguments(toolCall.function.arguments)
-        const query = ensureString(args.query, deriveTitle(options.promptContent))
+        const query = ensureString(
+          args.query,
+          deriveTitle(options.promptContent, options.narrationLocale)
+        )
         usedModuleTool = true
 
         pushTrajectoryStep(
           trajectory,
           "action",
-          `Requested reusable prompt modules using the query "${query}".`,
+          localizeNarration(
+            options.narrationLocale,
+            `使用查询“${query}”请求可复用提示词模块。`,
+            `Requested reusable prompt modules using the query "${query}".`
+          ),
           SEARCH_PROMPT_MODULES_TOOL,
           { query, promptId: options.promptId, iteration },
           null
@@ -781,11 +911,15 @@ async function runModuleAwareLoop(options: {
 
         let toolResult: string
         try {
-          toolResult = await searchPromptModules(query)
+          toolResult = await searchPromptModules(query, options.narrationLocale)
           fallbackModuleCandidates = await fetchModuleCandidates(query)
         } catch (error) {
           const message = error instanceof Error ? error.message : "Unknown module search failure."
-          toolResult = `Module search failed for query "${query}": ${message}`
+          toolResult = localizeNarration(
+            options.narrationLocale,
+            `查询“${query}”的模块搜索失败：${message}`,
+            `Module search failed for query "${query}": ${message}`
+          )
         }
 
         pushTrajectoryStep(
@@ -826,10 +960,10 @@ async function runModuleAwareLoop(options: {
   }
 }
 
-async function searchPromptModules(query: string) {
+async function searchPromptModules(query: string, locale: NarrationLocale = "zh") {
   const trimmedQuery = query.trim()
   if (!trimmedQuery) {
-    return "No query was provided for module search."
+    return localizeNarration(locale, "模块搜索未提供查询词。", "No query was provided for module search.")
   }
 
   const modules = await prisma.module.findMany({
@@ -845,19 +979,31 @@ async function searchPromptModules(query: string) {
   })
 
   if (modules.length === 0) {
-    return `No prompt modules matched the query "${trimmedQuery}".`
+    return localizeNarration(
+      locale,
+      `没有任何提示词模块匹配查询“${trimmedQuery}”。`,
+      `No prompt modules matched the query "${trimmedQuery}".`
+    )
   }
 
   return modules
     .map((module, index) => {
       const tags = parseModuleTags(module.tags)
       return [
-        `Result ${index + 1}`,
+        localizeNarration(locale, `结果 ${index + 1}`, `Result ${index + 1}`),
         `ID: ${module.id}`,
-        `Title: ${module.title}`,
-        `Type: ${module.type}`,
-        `Tags: ${tags.length > 0 ? tags.join(", ") : "none"}`,
-        `Content: ${summarizeText(module.content, 320)}`,
+        localizeNarration(locale, `标题：${module.title}`, `Title: ${module.title}`),
+        localizeNarration(locale, `类型：${module.type}`, `Type: ${module.type}`),
+        localizeNarration(
+          locale,
+          `标签：${tags.length > 0 ? tags.join(", ") : "无"}`,
+          `Tags: ${tags.length > 0 ? tags.join(", ") : "none"}`
+        ),
+        localizeNarration(
+          locale,
+          `内容：${summarizeText(module.content, 320)}`,
+          `Content: ${summarizeText(module.content, 320)}`
+        ),
       ].join("\n")
     })
     .join("\n\n")
@@ -906,8 +1052,13 @@ function buildToolObservationData(query: string, toolResult: string, moduleCandi
 export async function evaluatePromptBenchmark(
   snapshot: PromptVersionSnapshot,
   promptId: string,
-  versionNumber: number
+  versionNumber: number,
+  locale?: string | null
 ): Promise<BenchmarkResult> {
+  const narrationLocale = resolveNarrationLocale(
+    locale,
+    [snapshot.title, snapshot.description, snapshot.content, snapshot.notes].join("\n")
+  )
   const client = createMiniMaxClient(MINIMAX_BENCHMARK_TIMEOUT_MS)
   const promptPayload = {
     promptId,
@@ -923,17 +1074,20 @@ export async function evaluatePromptBenchmark(
   }
 
   if (!client) {
-    return normalizeBenchmarkResult(null, snapshot)
+    return normalizeBenchmarkResult(null, snapshot, narrationLocale)
   }
 
   const completion = await client.chat.completions.create({
     model: MINIMAX_MODEL,
     temperature: 0.2,
     messages: [
-      { role: "system", content: BENCHMARK_SYSTEM_PROMPT },
+      { role: "system", content: createBenchmarkSystemPrompt(narrationLocale) },
       {
         role: "user",
-        content: JSON.stringify(promptPayload, null, 2),
+        content: [
+          `Narration locale: ${narrationLocale}`,
+          JSON.stringify(promptPayload, null, 2),
+        ].join("\n\n"),
       },
     ],
   })
@@ -944,20 +1098,27 @@ export async function evaluatePromptBenchmark(
   const jsonCandidate = extractJsonCandidate(finalText)
   const parsed = safeJsonParse<unknown>(jsonCandidate ?? finalText, null)
 
-  return normalizeBenchmarkResult(parsed, snapshot)
+  return normalizeBenchmarkResult(parsed, snapshot, narrationLocale)
 }
 
 export async function analyzePromptWithAgent(
   promptContent: string,
-  promptId: string
+  promptId: string,
+  locale?: string | null
 ): Promise<AgentRunResult> {
+  const narrationLocale = resolveNarrationLocale(locale, promptContent)
   const loop = await runModuleAwareLoop({
-    systemPrompt: AGENT_SYSTEM_PROMPT,
-    userPrompt: `Prompt ID: ${promptId}\nPrompt Content:\n${promptContent}`,
+    systemPrompt: createAgentSystemPrompt(narrationLocale),
+    userPrompt: `Prompt ID: ${promptId}\nNarration locale: ${narrationLocale}\nPrompt Content:\n${promptContent}`,
     promptContent,
     promptId,
     missingClientThought:
-      "MiniMax API key is unavailable, so the agent produced a graceful fallback analysis after a local module lookup.",
+      localizeNarration(
+        narrationLocale,
+        "MiniMax API key 不可用，因此 Agent 在进行本地模块检索后生成了一份平稳降级的分析结果。",
+        "MiniMax API key is unavailable, so the agent produced a graceful fallback analysis after a local module lookup."
+      ),
+    narrationLocale,
     timeoutMs: MINIMAX_ANALYSIS_TIMEOUT_MS,
   })
 
@@ -968,33 +1129,52 @@ export async function analyzePromptWithAgent(
     const parsed = safeJsonParse<unknown>(jsonCandidate ?? loop.finalText, null)
     const sanitizedThought = sanitizeModelReasoning(loop.finalText)
     const finalThought =
-      sanitizedThought || "Finalized a structured analysis after tool-assisted reasoning."
+      sanitizedThought ||
+      localizeNarration(
+        narrationLocale,
+        "已在工具辅助推理后完成结构化分析。",
+        "Finalized a structured analysis after tool-assisted reasoning."
+      )
 
     analysis = normalizeAnalysis(
       parsed,
       promptContent,
       finalThought,
       loop.fallbackModuleCandidates,
-      loop.usedModuleTool
+      loop.usedModuleTool,
+      narrationLocale
     )
   } else {
     const fallbackThought =
       loop.termination === "iteration_limit"
-        ? "The ReAct loop hit the iteration limit before MiniMax returned final JSON, so the agent emitted a safe fallback analysis."
-        : "Returned a fallback analysis because MiniMax was not configured, while still checking saved modules."
+        ? localizeNarration(
+            narrationLocale,
+            "ReAct 循环在 MiniMax 返回最终 JSON 前达到了迭代上限，因此 Agent 输出了一份安全的降级分析。",
+            "The ReAct loop hit the iteration limit before MiniMax returned final JSON, so the agent emitted a safe fallback analysis."
+          )
+        : localizeNarration(
+            narrationLocale,
+            "由于 MiniMax 未配置，Agent 在检查已保存模块后返回了一份降级分析结果。",
+            "Returned a fallback analysis because MiniMax was not configured, while still checking saved modules."
+          )
 
     analysis = createFallbackAnalysis(
       promptContent,
       fallbackThought,
       loop.fallbackModuleCandidates,
-      loop.usedModuleTool
+      loop.usedModuleTool,
+      narrationLocale
     )
   }
 
   pushTrajectoryStep(
     loop.trajectory,
     "thought",
-    `Finalized analysis with suggested title "${analysis.suggestedTitle}" and risk "${analysis.riskLevel}".`
+    localizeNarration(
+      narrationLocale,
+      `已完成分析，建议标题为“${analysis.suggestedTitle}”，风险等级为“${analysis.riskLevel}”。`,
+      `Finalized analysis with suggested title "${analysis.suggestedTitle}" and risk "${analysis.riskLevel}".`
+    )
   )
 
   return {
@@ -1014,12 +1194,15 @@ export async function analyzePromptWithAgent(
 
 export async function refactorPromptWithAgent(
   promptContent: string,
-  promptId: string
+  promptId: string,
+  locale?: string | null
 ): Promise<PromptRefactorRunResult> {
+  const narrationLocale = resolveNarrationLocale(locale, promptContent)
   const loop = await runModuleAwareLoop({
-    systemPrompt: REFACTOR_SYSTEM_PROMPT,
+    systemPrompt: createRefactorSystemPrompt(narrationLocale),
     userPrompt: [
       `Prompt ID: ${promptId}`,
+      `Narration locale: ${narrationLocale}`,
       "Task: Refactor this saved prompt into a cleaner draft, reusable variables, and extracted modules.",
       "Prompt Content:",
       promptContent,
@@ -1027,7 +1210,12 @@ export async function refactorPromptWithAgent(
     promptContent,
     promptId,
     missingClientThought:
-      "MiniMax API key is unavailable, so the agent produced a graceful fallback refactor proposal after a local module lookup.",
+      localizeNarration(
+        narrationLocale,
+        "MiniMax API key 不可用，因此 Agent 在进行本地模块检索后生成了一份平稳降级的重构提案。",
+        "MiniMax API key is unavailable, so the agent produced a graceful fallback refactor proposal after a local module lookup."
+      ),
+    narrationLocale,
     timeoutMs: MINIMAX_REFACTOR_TIMEOUT_MS,
   })
 
@@ -1038,31 +1226,50 @@ export async function refactorPromptWithAgent(
     const parsed = safeJsonParse<unknown>(jsonCandidate ?? loop.finalText, null)
     const sanitizedThought = sanitizeModelReasoning(loop.finalText)
     const finalThought =
-      sanitizedThought || "Finalized a structured refactor proposal after tool-assisted reasoning."
+      sanitizedThought ||
+      localizeNarration(
+        narrationLocale,
+        "已在工具辅助推理后完成结构化重构提案。",
+        "Finalized a structured refactor proposal after tool-assisted reasoning."
+      )
 
     proposal = normalizeRefactorResult(
       parsed,
       promptContent,
       finalThought,
-      loop.fallbackModuleCandidates
+      loop.fallbackModuleCandidates,
+      narrationLocale
     )
   } else {
     const fallbackThought =
       loop.termination === "iteration_limit"
-        ? "The ReAct loop hit the iteration limit before MiniMax returned final JSON, so the agent emitted a safe fallback refactor proposal."
-        : "Returned a fallback refactor proposal because MiniMax was not configured, while still checking saved modules."
+        ? localizeNarration(
+            narrationLocale,
+            "ReAct 循环在 MiniMax 返回最终 JSON 前达到了迭代上限，因此 Agent 输出了一份安全的降级重构提案。",
+            "The ReAct loop hit the iteration limit before MiniMax returned final JSON, so the agent emitted a safe fallback refactor proposal."
+          )
+        : localizeNarration(
+            narrationLocale,
+            "由于 MiniMax 未配置，Agent 在检查已保存模块后返回了一份降级重构提案。",
+            "Returned a fallback refactor proposal because MiniMax was not configured, while still checking saved modules."
+          )
 
     proposal = createFallbackRefactor(
       promptContent,
       fallbackThought,
-      loop.fallbackModuleCandidates
+      loop.fallbackModuleCandidates,
+      narrationLocale
     )
   }
 
   pushTrajectoryStep(
     loop.trajectory,
     "thought",
-    `Finalized refactor proposal with ${proposal.extractedModules.length} reusable module suggestion(s).`
+    localizeNarration(
+      narrationLocale,
+      `已完成重构提案，生成了 ${proposal.extractedModules.length} 个可复用模块建议。`,
+      `Finalized refactor proposal with ${proposal.extractedModules.length} reusable module suggestion(s).`
+    )
   )
 
   return {

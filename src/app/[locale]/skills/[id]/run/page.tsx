@@ -2,7 +2,7 @@
 
 import { use, useEffect, useMemo, useState } from "react"
 import { Link } from "@/i18n/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useSearchParams } from "next/navigation"
 import {
   ArrowLeft,
@@ -81,8 +81,10 @@ export default function SkillRunPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
+  const locale = useLocale() as "zh" | "en"
   const t = useTranslations("skills.run")
   const ts = useTranslations("skills")
+  const tr = useTranslations("agent.risk")
   const tc = useTranslations("common")
   const ta = useTranslations("agent")
   const searchParams = useSearchParams()
@@ -194,7 +196,7 @@ export default function SkillRunPage({
     }
 
     setRunning(true)
-    const result = await runStatelessAgentAnalysis(prompt)
+    const result = await runStatelessAgentAnalysis(prompt, locale)
     if (result.success) {
       setAnalysis(result.data.analysis)
       setTrajectory(result.data.trajectory)
@@ -623,7 +625,9 @@ export default function SkillRunPage({
                     </p>
                   </div>
                   <span className="text-right text-sm font-medium">
-                    {latestRun ? t("recentRunRisk", { level: latestRun.riskLevel }) : ts("health.missing")}
+                    {latestRun
+                      ? t("recentRunRisk", { level: tr(latestRun.riskLevel) })
+                      : ts("health.missing")}
                   </span>
                 </div>
               </div>
@@ -752,7 +756,7 @@ export default function SkillRunPage({
                     <p className="text-sm leading-6">{run.summary}</p>
                     <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                       <Badge variant="outline" className="rounded-full px-2.5 py-0.5 text-[11px]">
-                        {t("recentRunRisk", { level: run.riskLevel })}
+                        {t("recentRunRisk", { level: tr(run.riskLevel) })}
                       </Badge>
                       <Badge variant="outline" className="rounded-full px-2.5 py-0.5 text-[11px]">
                         {t("recentRunConfidence", { confidence: Math.round(run.confidence * 100) })}
