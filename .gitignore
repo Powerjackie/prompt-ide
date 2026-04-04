@@ -25,6 +25,10 @@
 # misc
 .DS_Store
 *.pem
+backups/
+prompt-ide-backups/
+*.db
+*.db-journal
 
 # debug
 npm-debug.log*

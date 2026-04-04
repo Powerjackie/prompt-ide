@@ -5,6 +5,10 @@ node_modules
 scripts/
 dev.db
 dev.db-journal
+backups/
+prompt-ide-backups/
+*.db
+*.db-journal
 *.md
 *.log
 coverage
