@@ -149,11 +149,11 @@
 
 @layer components {
   .app-shell {
-    @apply min-h-[100dvh] text-foreground md:h-[100dvh] md:overflow-hidden;
+    @apply min-h-[100dvh] text-foreground lg:h-[100dvh] lg:overflow-hidden;
   }
 
   .app-shell__viewport {
-    @apply min-h-[100dvh] p-0 md:h-[100dvh] md:overflow-hidden;
+    @apply min-h-[100dvh] p-0 lg:h-[100dvh] lg:overflow-hidden;
   }
 
   @media (min-width: 1024px) {
@@ -199,7 +199,7 @@
   }
 
   .app-shell__main-frame {
-    @apply min-h-[100dvh] overflow-visible rounded-none border-0 bg-transparent shadow-none lg:h-full lg:min-h-0 lg:overflow-hidden lg:rounded-[2.15rem] lg:border lg:border-white/60 lg:bg-card/92 lg:shadow-[0_30px_92px_-56px_rgba(15,23,42,0.42)] lg:backdrop-blur-2xl;
+    @apply min-h-[100dvh] overflow-visible rounded-none border-0 bg-transparent shadow-none lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:overflow-hidden lg:rounded-[2.15rem] lg:border lg:border-white/60 lg:bg-card/92 lg:shadow-[0_30px_92px_-56px_rgba(15,23,42,0.42)] lg:backdrop-blur-2xl;
   }
 
   .dark .app-shell__main-frame {
@@ -220,7 +220,7 @@
   }
 
   .app-shell__content {
-    @apply relative flex min-h-[100dvh] flex-1 flex-col overflow-visible md:min-h-0 md:overflow-hidden;
+    @apply relative flex min-h-[100dvh] flex-1 flex-col overflow-visible lg:h-full lg:min-h-0 lg:overflow-hidden;
   }
 
   .app-shell__content::before {
@@ -240,7 +240,7 @@
   }
 
   .app-main {
-    @apply relative flex-1 overflow-visible px-3 pb-6 pt-3 sm:px-4 md:min-h-0 md:overflow-y-auto md:pb-8 md:pt-4 lg:px-5;
+    @apply relative flex-1 overflow-visible px-3 pb-6 pt-3 sm:px-4 lg:min-h-0 lg:overflow-y-auto lg:px-5 lg:pb-8 lg:pt-4;
   }
 
   .app-main__inner {
