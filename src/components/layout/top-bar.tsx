@@ -36,6 +36,7 @@ const PATH_LABEL_MAP: Record<string, string> = {
   "/archive": "archive",
   "/tags": "tags",
   "/playground": "playground",
+  "/docs": "docs",
   "/settings": "settings",
 }
 

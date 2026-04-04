@@ -1,6 +1,7 @@
 import type { ComponentType } from "react"
 import {
   Archive,
+  BookOpen,
   FileText,
   FlaskConical,
   Inbox,
@@ -36,5 +37,6 @@ export const primaryNavigationItems: readonly NavigationItem[] = [
 
 export const utilityNavigationItems: readonly NavigationItem[] = [
   { href: "/playground", labelKey: "playground", icon: FlaskConical },
+  { href: "/docs", labelKey: "docs", icon: BookOpen },
   { href: "/settings", labelKey: "settings", icon: Settings },
 ] as const

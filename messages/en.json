@@ -54,7 +54,8 @@
     "sidebarPitchTitle": "Prompt R&D",
     "sidebarPitchDescription": "Move from capture to analysis, refactor, benchmark, and packaging in one place.",
     "toggleTheme": "Toggle theme",
-    "logout": "Logout"
+    "logout": "Logout",
+    "docs": "Docs"
   },
   "home": {
     "eyebrow": "Prompt R&D",
@@ -1032,5 +1033,77 @@
     "title": "Page not found",
     "description": "The page you are looking for does not exist or may have been moved.",
     "backHome": "Back to home"
+  },
+  "docs": {
+    "title": "Documentation",
+    "nav": {
+      "gettingStarted": "Getting Started",
+      "introduction": "Introduction",
+      "login": "Login & Roles",
+      "quickTour": "Quick Tour",
+      "coreFeatures": "Core Features",
+      "prompts": "Prompts",
+      "editor": "Editor",
+      "variables": "Variables",
+      "modules": "Modules",
+      "collections": "Collections",
+      "tags": "Tags",
+      "aiTools": "AI Tools",
+      "playground": "Playground",
+      "analysis": "Agent Analysis",
+      "refactor": "Agent Refactor",
+      "benchmark": "Benchmarks",
+      "advanced": "Advanced",
+      "skills": "Skills",
+      "versions": "Version History",
+      "inbox": "Inbox",
+      "archiveFavorites": "Archive & Favorites",
+      "reference": "Reference",
+      "settings": "Settings",
+      "keyboardShortcuts": "Keyboard Shortcuts",
+      "faq": "FAQ"
+    },
+    "groups": {
+      "gettingStarted": "Start quickly and understand the product surface before exploring deeper workflows.",
+      "coreFeatures": "Learn the prompt workspace, reusable building blocks, and organization patterns.",
+      "aiTools": "Use MiniMax-powered analysis, refactor, and benchmark tools with confidence.",
+      "advanced": "Move beyond the basics into skills, versions, inbox workflows, and archival patterns.",
+      "reference": "Find practical reference material for settings, shortcuts, and common questions."
+    },
+    "toc": {
+      "onThisPage": "On this page"
+    },
+    "callout": {
+      "tip": "Tip",
+      "note": "Note",
+      "warning": "Warning"
+    },
+    "breadcrumb": {
+      "docs": "Docs"
+    },
+    "welcome": {
+      "title": "Welcome to Prompt IDE Documentation",
+      "description": "Learn how to capture, refine, analyze, benchmark, and package prompts inside Prompt IDE."
+    },
+    "home": {
+      "sections": {
+        "browseByWorkflow": "Browse by workflow",
+        "calloutExamples": "Callout examples"
+      },
+      "callouts": {
+        "tip": "Use the docs sidebar to jump between workflows while keeping the current article in view.",
+        "note": "This first batch focuses on navigation, layout, and documentation primitives rather than full article content.",
+        "warning": "All documentation routes stay behind the existing authentication flow, just like the rest of Prompt IDE."
+      }
+    },
+    "placeholder": {
+      "description": "{section} is scaffolded and ready for the next content batch.",
+      "overview": "This page will introduce the core workflow, UI surface, and expected outcomes for {section}.",
+      "comingNext": "The next documentation batch will replace this placeholder with complete guidance, examples, and screenshots for {section}.",
+      "sections": {
+        "overview": "Overview",
+        "comingNext": "Coming next"
+      }
+    }
   }
 }

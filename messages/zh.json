@@ -54,7 +54,8 @@
     "sidebarPitchTitle": "Prompt 研发",
     "sidebarPitchDescription": "把捕获、分析、重构、评测与打包整合进同一套个人工作流。",
     "toggleTheme": "切换主题",
-    "logout": "退出登录"
+    "logout": "退出登录",
+    "docs": "文档"
   },
   "home": {
     "title": "首页",
@@ -1032,5 +1033,77 @@
     "title": "页面未找到",
     "description": "你访问的页面不存在，或它可能已经被移动。",
     "backHome": "返回首页"
+  },
+  "docs": {
+    "title": "使用文档",
+    "nav": {
+      "gettingStarted": "快速开始",
+      "introduction": "产品简介",
+      "login": "登录与角色",
+      "quickTour": "界面导览",
+      "coreFeatures": "核心功能",
+      "prompts": "提示词管理",
+      "editor": "编辑器",
+      "variables": "变量系统",
+      "modules": "模块复用",
+      "collections": "合集管理",
+      "tags": "标签系统",
+      "aiTools": "AI 工具",
+      "playground": "实验室",
+      "analysis": "Agent 分析",
+      "refactor": "Agent 重构",
+      "benchmark": "版本评测",
+      "advanced": "进阶功能",
+      "skills": "技能系统",
+      "versions": "版本历史",
+      "inbox": "收件箱",
+      "archiveFavorites": "归档与收藏",
+      "reference": "参考资料",
+      "settings": "设置项",
+      "keyboardShortcuts": "快捷键",
+      "faq": "常见问题"
+    },
+    "groups": {
+      "gettingStarted": "先快速建立整体认知，再继续深入各个工作流与功能模块。",
+      "coreFeatures": "了解提示词工作台、可复用构件，以及常见的内容组织方式。",
+      "aiTools": "掌握 MiniMax 驱动的分析、重构与评测能力，知道何时使用、如何阅读结果。",
+      "advanced": "从技能、版本、收件箱到归档收藏，逐步进入更完整的资产管理流程。",
+      "reference": "集中查看设置说明、快捷键与常见问题，快速完成查阅。"
+    },
+    "toc": {
+      "onThisPage": "本页目录"
+    },
+    "callout": {
+      "tip": "提示",
+      "note": "注意",
+      "warning": "警告"
+    },
+    "breadcrumb": {
+      "docs": "文档"
+    },
+    "welcome": {
+      "title": "欢迎来到 Prompt IDE 使用文档",
+      "description": "在这里学习如何在 Prompt IDE 中完成捕获、整理、分析、评测与打包提示词的完整流程。"
+    },
+    "home": {
+      "sections": {
+        "browseByWorkflow": "按工作流浏览",
+        "calloutExamples": "提示组件示例"
+      },
+      "callouts": {
+        "tip": "使用左侧文档导航可以在不同工作流之间快速切换，同时保持当前文章阅读位置。",
+        "note": "第一批只搭建导航、布局和文档基础组件，正式内容会在后续批次逐步补齐。",
+        "warning": "文档路由继续沿用现有登录保护，与 Prompt IDE 其他页面保持一致。"
+      }
+    },
+    "placeholder": {
+      "description": "{section} 已完成路由和布局骨架，等待下一批内容填充。",
+      "overview": "这一页后续会补充 {section} 的核心工作流、界面说明以及推荐使用方式。",
+      "comingNext": "下一批文档会把这里的占位内容替换成完整说明、操作示例和必要截图。",
+      "sections": {
+        "overview": "概览",
+        "comingNext": "后续补充"
+      }
+    }
   }
 }
