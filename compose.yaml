@@ -22,6 +22,11 @@ services:
       - prompt-ide-data:/app/data
     init: true
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
     healthcheck:
       test:
         [

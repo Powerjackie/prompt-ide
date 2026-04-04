@@ -88,7 +88,7 @@ Copy `.env.example` to `.env` on the server and set at least:
 - `PORT=3000`
 - `NEXT_TELEMETRY_DISABLED=1`
 
-`NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` is optional for this single-instance deployment, but you should set it if you want an explicit long-lived secret rather than relying on the runtime default.
+`NEXT_SERVER_ACTIONS_ENCRYPTION_KEY` is required for production. It must be base64 encoded and decode to 16, 24, or 32 bytes.
 
 ### First Deploy
 
@@ -99,6 +99,8 @@ docker compose up -d --wait app
 ```
 
 Image build only installs dependencies, generates the Prisma client, and builds the Next standalone bundle. Database schema sync remains an explicit deployment step through the `schema` service, not part of `docker build`.
+
+When the app sits behind Cloudflare and/or Nginx, `next.config.ts` now explicitly configures `serverActions.allowedOrigins` for the production host.
 
 Then open `http://<server-host>:3000/zh/login`.
 
