@@ -10,6 +10,7 @@ import {
   ClipboardCopy,
   Copy,
   Layers3,
+  MoreHorizontal,
   PenSquare,
   RotateCcw,
   Star,
@@ -53,6 +54,13 @@ import { useAuthz } from "@/components/auth/authz-provider"
 import { getLatestPromptEvolutionComparison } from "@/app/actions/benchmark.actions"
 import { createSkillFromPrompt } from "@/app/actions/skill.actions"
 import { STATUS_OPTIONS } from "@/lib/constants"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { cn, copyToClipboard, formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 import type { AgentTrajectoryStep } from "@/types/agent"
@@ -234,6 +242,15 @@ export default function PromptDetailPage({
   const modelLabel = tm(prompt.model)
   const statusOption = STATUS_OPTIONS.find((status) => status.value === prompt.status)
   const currentSnapshot = createPromptSnapshot(prompt)
+  const sectionLinks = [
+    { id: "overview", label: t("metadata") },
+    { id: "content", label: t("promptContent") },
+    ...(prompt.variables.length > 0 ? [{ id: "variables", label: t("variables") }] : []),
+    ...(prompt.notes ? [{ id: "notes", label: t("notes") }] : []),
+    { id: "versions", label: t("versions.title") },
+    { id: "benchmark", label: t("detailBenchmarkTitle") },
+    { id: "agent", label: ta("title") },
+  ]
 
   const handleCopy = async () => {
     const ok = await copyToClipboard(prompt.content)
@@ -350,92 +367,162 @@ export default function PromptDetailPage({
         description={prompt.description || t("detailDescription")}
         actions={
           <>
-            <Button variant="ghost" size="sm" asChild className="rounded-2xl">
-              <Link href="/prompts">
-                <ArrowLeft className="mr-1 h-4 w-4" />
-                {tc("back")}
-              </Link>
-            </Button>
-            {prompt.status === "inbox" ? (
-              <Button size="sm" onClick={handlePromote} className="rounded-2xl">
-                <ArrowUpRight className="mr-1 h-4 w-4" />
-                {tc("promote")}
+            <div className="flex w-full items-center gap-2 sm:hidden">
+              <Button variant="ghost" size="sm" asChild className="rounded-2xl">
+                <Link href="/prompts">
+                  <ArrowLeft className="mr-1 h-4 w-4" />
+                  {tc("back")}
+                </Link>
               </Button>
-            ) : null}
-            <Button variant="outline" size="sm" onClick={handleCopy} className="rounded-2xl">
-              <Copy className="mr-1 h-4 w-4" />
-              {tc("copy")}
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleToggleFavorite} className="rounded-2xl">
-              <Star
-                className={cn(
-                  "mr-1 h-4 w-4",
-                  prompt.isFavorite && "fill-yellow-400 text-yellow-400"
-                )}
-              />
-              {prompt.isFavorite ? tc("unfavorite") : tc("favorite")}
-            </Button>
-            <Button variant="outline" size="sm" asChild className="rounded-2xl">
-              <Link href={`/editor/${prompt.id}`}>
-                <PenSquare className="mr-1 h-4 w-4" />
-                {tc("edit")}
-              </Link>
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleClone} className="rounded-2xl">
-              <ClipboardCopy className="mr-1 h-4 w-4" />
-              {tc("clone")}
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleCreateSkill} className="rounded-2xl">
-              <Layers3 className="mr-1 h-4 w-4" />
-              {ta("createSkill")}
-            </Button>
-            {prompt.status !== "archived" ? (
-              <Button variant="outline" size="sm" onClick={handleArchive} className="rounded-2xl">
-                <Archive className="mr-1 h-4 w-4" />
-                {tc("archive")}
+              <Button variant="outline" size="sm" onClick={handleCopy} className="rounded-2xl">
+                <Copy className="mr-1 h-4 w-4" />
+                {tc("copy")}
               </Button>
-            ) : (
-              <Button variant="outline" size="sm" onClick={handleRestoreStatus} className="rounded-2xl">
-                <RotateCcw className="mr-1 h-4 w-4" />
-                {tc("restore")}
+              <Button variant="outline" size="sm" asChild className="rounded-2xl">
+                <Link href={`/editor/${prompt.id}`}>
+                  <PenSquare className="mr-1 h-4 w-4" />
+                  {tc("edit")}
+                </Link>
               </Button>
-            )}
-            {canDeleteAssets ? (
-              <AlertDialog>
-                <AlertDialogTrigger render={<Button size="sm" variant="destructive" className="rounded-2xl" />}>
-                  <Trash2 className="mr-1 h-4 w-4" />
-                  {tc("delete")}
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>{t("deleteConfirmTitle")}</AlertDialogTitle>
-                    <AlertDialogDescription>{t("deleteConfirmDesc")}</AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete}>{tc("delete")}</AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            ) : null}
+              <DropdownMenu>
+                <DropdownMenuTrigger render={<Button variant="outline" size="icon" className="ml-auto h-9 w-9 rounded-2xl" />}>
+                  <MoreHorizontal className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  {prompt.status === "inbox" ? (
+                    <DropdownMenuItem onClick={handlePromote}>
+                      <ArrowUpRight className="h-4 w-4" />
+                      {tc("promote")}
+                    </DropdownMenuItem>
+                  ) : null}
+                  <DropdownMenuItem onClick={handleToggleFavorite}>
+                    <Star className={cn("h-4 w-4", prompt.isFavorite && "fill-yellow-400 text-yellow-400")} />
+                    {prompt.isFavorite ? tc("unfavorite") : tc("favorite")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleClone}>
+                    <ClipboardCopy className="h-4 w-4" />
+                    {tc("clone")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleCreateSkill}>
+                    <Layers3 className="h-4 w-4" />
+                    {ta("createSkill")}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {prompt.status !== "archived" ? (
+                    <DropdownMenuItem onClick={handleArchive}>
+                      <Archive className="h-4 w-4" />
+                      {tc("archive")}
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onClick={handleRestoreStatus}>
+                      <RotateCcw className="h-4 w-4" />
+                      {tc("restore")}
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className="hidden sm:flex sm:flex-wrap sm:items-center sm:gap-2">
+              <Button variant="ghost" size="sm" asChild className="rounded-2xl">
+                <Link href="/prompts">
+                  <ArrowLeft className="mr-1 h-4 w-4" />
+                  {tc("back")}
+                </Link>
+              </Button>
+              {prompt.status === "inbox" ? (
+                <Button size="sm" onClick={handlePromote} className="rounded-2xl">
+                  <ArrowUpRight className="mr-1 h-4 w-4" />
+                  {tc("promote")}
+                </Button>
+              ) : null}
+              <Button variant="outline" size="sm" onClick={handleCopy} className="rounded-2xl">
+                <Copy className="mr-1 h-4 w-4" />
+                {tc("copy")}
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleToggleFavorite} className="rounded-2xl">
+                <Star
+                  className={cn(
+                    "mr-1 h-4 w-4",
+                    prompt.isFavorite && "fill-yellow-400 text-yellow-400"
+                  )}
+                />
+                {prompt.isFavorite ? tc("unfavorite") : tc("favorite")}
+              </Button>
+              <Button variant="outline" size="sm" asChild className="rounded-2xl">
+                <Link href={`/editor/${prompt.id}`}>
+                  <PenSquare className="mr-1 h-4 w-4" />
+                  {tc("edit")}
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleClone} className="rounded-2xl">
+                <ClipboardCopy className="mr-1 h-4 w-4" />
+                {tc("clone")}
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleCreateSkill} className="rounded-2xl">
+                <Layers3 className="mr-1 h-4 w-4" />
+                {ta("createSkill")}
+              </Button>
+              {prompt.status !== "archived" ? (
+                <Button variant="outline" size="sm" onClick={handleArchive} className="rounded-2xl">
+                  <Archive className="mr-1 h-4 w-4" />
+                  {tc("archive")}
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" onClick={handleRestoreStatus} className="rounded-2xl">
+                  <RotateCcw className="mr-1 h-4 w-4" />
+                  {tc("restore")}
+                </Button>
+              )}
+              {canDeleteAssets ? (
+                <AlertDialog>
+                  <AlertDialogTrigger render={<Button size="sm" variant="destructive" className="rounded-2xl" />}>
+                    <Trash2 className="mr-1 h-4 w-4" />
+                    {tc("delete")}
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t("deleteConfirmTitle")}</AlertDialogTitle>
+                      <AlertDialogDescription>{t("deleteConfirmDesc")}</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{tc("cancel")}</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete}>{tc("delete")}</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              ) : null}
+            </div>
           </>
         }
       >
-        <div className="chip-row">
-          <Badge variant="outline" className="rounded-full px-3 py-1">{modelLabel}</Badge>
-          <Badge variant="outline" className="rounded-full px-3 py-1">{prompt.category}</Badge>
-          {prompt.tags.slice(0, 4).map((tag) => (
-            <Link key={tag} href={`/prompts?tag=${tag}`}>
-              <Badge variant="secondary" className="rounded-full px-3 py-1">{tag}</Badge>
-            </Link>
-          ))}
+        <div className="space-y-3">
+          <div className="chip-row">
+            <Badge variant="outline" className="rounded-full px-3 py-1">{modelLabel}</Badge>
+            <Badge variant="outline" className="rounded-full px-3 py-1">{prompt.category}</Badge>
+            {prompt.tags.slice(0, 4).map((tag) => (
+              <Link key={tag} href={`/prompts?tag=${tag}`}>
+                <Badge variant="secondary" className="rounded-full px-3 py-1">{tag}</Badge>
+              </Link>
+            ))}
+          </div>
+          <div className="chip-row">
+            {sectionLinks.map((section) => (
+              <a
+                key={section.id}
+                href={`#${section.id}`}
+                className="inline-flex items-center rounded-full border border-border/70 bg-background/70 px-3 py-1 text-xs text-muted-foreground transition hover:border-primary/20 hover:text-foreground"
+              >
+                {section.label}
+              </a>
+            ))}
+          </div>
         </div>
       </PageHeader>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
-        <div className="space-y-6">
-          <Card className="app-panel">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <div className="order-2 space-y-6 xl:order-1">
+          <Card id="content" className="app-panel scroll-mt-24">
+            <CardHeader className="flex flex-col items-start gap-3 pb-2 sm:flex-row sm:items-center sm:justify-between">
               <CardTitle className="text-sm">{t("promptContent")}</CardTitle>
               <Button variant="ghost" size="sm" onClick={handleCopy} className="rounded-2xl">
                 <Copy className="mr-1 h-3.5 w-3.5" />
@@ -443,20 +530,20 @@ export default function PromptDetailPage({
               </Button>
             </CardHeader>
             <CardContent>
-              <pre className="max-h-[36rem] overflow-y-auto whitespace-pre-wrap rounded-[1.5rem] border border-border/60 bg-muted/40 p-5 font-mono text-sm leading-7 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
+              <pre className="max-h-[36rem] overflow-auto whitespace-pre-wrap break-words rounded-[1.5rem] border border-border/60 bg-muted/40 p-4 font-mono text-sm leading-7 sm:p-5 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
                 {prompt.content}
               </pre>
             </CardContent>
           </Card>
 
           {prompt.variables.length > 0 && (
-            <Card className="app-panel">
+            <Card id="variables" className="app-panel scroll-mt-24">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">{t("variables")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="overflow-hidden rounded-[1.5rem] border border-border/70">
-                  <div className="grid grid-cols-3 gap-4 bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground">
+                  <div className="hidden grid-cols-3 gap-4 bg-muted/50 px-4 py-2 text-xs font-medium text-muted-foreground sm:grid">
                     <div>{t("variablesHeaders.name")}</div>
                     <div>{t("variablesHeaders.description")}</div>
                     <div>{t("variablesHeaders.default")}</div>
@@ -464,11 +551,26 @@ export default function PromptDetailPage({
                   {prompt.variables.map((variable) => (
                     <div
                       key={variable.name}
-                      className="grid grid-cols-3 gap-4 border-t px-4 py-2 text-sm"
+                      className="grid gap-2 border-t px-4 py-3 text-sm sm:grid-cols-3 sm:gap-4 sm:py-2"
                     >
-                      <div className="font-mono text-xs">{`{{${variable.name}}}`}</div>
-                      <div className="text-muted-foreground">{variable.description || "-"}</div>
-                      <div className="text-muted-foreground">{variable.defaultValue || "-"}</div>
+                      <div className="space-y-1">
+                        <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground sm:hidden">
+                          {t("variablesHeaders.name")}
+                        </div>
+                        <div className="font-mono text-xs break-all">{`{{${variable.name}}}`}</div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground sm:hidden">
+                          {t("variablesHeaders.description")}
+                        </div>
+                        <div className="text-muted-foreground break-words">{variable.description || "-"}</div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground sm:hidden">
+                          {t("variablesHeaders.default")}
+                        </div>
+                        <div className="text-muted-foreground break-words">{variable.defaultValue || "-"}</div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -477,17 +579,17 @@ export default function PromptDetailPage({
           )}
 
           {prompt.notes && (
-            <Card className="app-panel">
+            <Card id="notes" className="app-panel scroll-mt-24">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">{t("notes")}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">{prompt.notes}</p>
+                <p className="text-sm text-muted-foreground break-words">{prompt.notes}</p>
               </CardContent>
             </Card>
           )}
 
-          <section id="versions" className="app-panel scroll-mt-24 p-6">
+          <section id="versions" className="app-panel scroll-mt-24 p-4 sm:p-6">
             <SectionHeader
               title={t("versions.title")}
               description={t("detailVersionsDescription")}
@@ -506,7 +608,7 @@ export default function PromptDetailPage({
             </div>
           </section>
 
-          <section id="benchmark" className="app-panel scroll-mt-24 p-6">
+          <section id="benchmark" className="app-panel scroll-mt-24 p-4 sm:p-6">
             <SectionHeader
               title={t("detailBenchmarkTitle")}
               description={t("detailBenchmarkDescription")}
@@ -521,14 +623,14 @@ export default function PromptDetailPage({
             </div>
           </section>
 
-          <section id="agent" className="app-panel scroll-mt-24 p-6">
+          <section id="agent" className="app-panel scroll-mt-24 p-4 sm:p-6">
             <SectionHeader
               title={ta("title")}
               description={t("detailAgentDescription")}
             />
             <div className="mt-5">
               <Tabs defaultValue="analysis" className="space-y-4">
-                <TabsList variant="line" className="rounded-2xl bg-muted/45 p-1 dark:border dark:border-primary/10 dark:bg-background/60">
+                <TabsList variant="line" className="flex h-auto flex-wrap justify-start rounded-2xl bg-muted/45 p-1 dark:border dark:border-primary/10 dark:bg-background/60">
                   <TabsTrigger value="analysis">{ta("modes.analysis")}</TabsTrigger>
                   <TabsTrigger value="refactor">{ta("modes.refactor")}</TabsTrigger>
                 </TabsList>
@@ -562,13 +664,13 @@ export default function PromptDetailPage({
           </section>
         </div>
 
-        <div className="space-y-4 xl:sticky xl:top-6 xl:self-start">
-          <Card className="app-panel">
+        <div className="order-1 space-y-4 xl:order-2 xl:sticky xl:top-6 xl:self-start">
+          <Card id="overview" className="app-panel">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">{t("metadata")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
-              <div className="flex justify-between">
+              <div className="flex items-start justify-between gap-4">
                 <span className="text-muted-foreground">{t("status")}</span>
                 <div className="flex items-center gap-1.5">
                   <span
@@ -578,34 +680,34 @@ export default function PromptDetailPage({
                 </div>
               </div>
               <Separator />
-              <div className="flex justify-between">
+              <div className="flex items-start justify-between gap-4">
                 <span className="text-muted-foreground">{t("model")}</span>
-                <span>{modelLabel}</span>
+                <span className="break-words text-right">{modelLabel}</span>
               </div>
               <Separator />
-              <div className="flex justify-between">
+              <div className="flex items-start justify-between gap-4">
                 <span className="text-muted-foreground">{t("category")}</span>
-                <span>{prompt.category}</span>
+                <span className="break-words text-right">{prompt.category}</span>
               </div>
               <Separator />
-              <div className="flex justify-between">
+              <div className="flex items-start justify-between gap-4">
                 <span className="text-muted-foreground">{t("source")}</span>
-                <span>{prompt.source || "-"}</span>
+                <span className="break-words text-right">{prompt.source || "-"}</span>
               </div>
               <Separator />
-              <div className="flex justify-between">
+              <div className="flex items-start justify-between gap-4">
                 <span className="text-muted-foreground">{t("created")}</span>
-                <span>{formatDate(prompt.createdAt)}</span>
+                <span className="text-right">{formatDate(prompt.createdAt)}</span>
               </div>
               <Separator />
-              <div className="flex justify-between">
+              <div className="flex items-start justify-between gap-4">
                 <span className="text-muted-foreground">{t("updated")}</span>
-                <span>{formatDate(prompt.updatedAt)}</span>
+                <span className="text-right">{formatDate(prompt.updatedAt)}</span>
               </div>
               <Separator />
-              <div className="flex justify-between">
+              <div className="flex items-start justify-between gap-4">
                 <span className="text-muted-foreground">{t("lastUsed")}</span>
-                <span>{prompt.lastUsedAt ? formatDate(prompt.lastUsedAt) : t("never")}</span>
+                <span className="text-right">{prompt.lastUsedAt ? formatDate(prompt.lastUsedAt) : t("never")}</span>
               </div>
             </CardContent>
           </Card>

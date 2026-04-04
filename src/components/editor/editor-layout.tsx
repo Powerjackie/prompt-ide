@@ -366,7 +366,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(380px,0.92fr)] xl:items-start">
         {/* Left: Metadata + Editor */}
         <div className="space-y-6">
-          <div className="app-panel p-6">
+          <div className="app-panel p-4 sm:p-6">
             <SectionHeader
               title={t("metadataTitle")}
               description={t("metadataDescription")}
@@ -376,7 +376,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
             </div>
           </div>
 
-          <div className="app-panel space-y-4 p-6">
+          <div className="app-panel space-y-4 p-4 sm:p-6">
             <SectionHeader
               title={t("contentLabel")}
               description={t("contentDescription")}
@@ -390,7 +390,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
         </div>
 
         {/* Right: Preview / Agent / Modules tabs */}
-        <div className="app-panel flex min-h-[680px] flex-col overflow-hidden p-6 xl:self-start xl:max-h-[min(920px,calc(100vh-8rem))] dark:shadow-[0_28px_92px_-42px_rgba(0,0,0,0.88),0_0_24px_-20px_rgba(79,246,255,0.4)]">
+        <div className="app-panel flex min-h-[420px] flex-col overflow-hidden p-4 sm:p-5 md:min-h-[680px] xl:self-start xl:max-h-[min(920px,calc(100vh-8rem))] xl:p-6 dark:shadow-[0_28px_92px_-42px_rgba(0,0,0,0.88),0_0_24px_-20px_rgba(79,246,255,0.4)]">
           <div className="mb-4">
             <SectionHeader
               title={t("toolsTitle")}
@@ -398,7 +398,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
             />
           </div>
           <Tabs defaultValue="preview" className="flex h-full min-h-0 flex-col">
-            <TabsList className="rounded-2xl border border-border/60 bg-muted/45 p-1 dark:border-primary/10 dark:bg-background/60">
+            <TabsList className="flex h-auto flex-wrap justify-start rounded-2xl border border-border/60 bg-muted/45 p-1 dark:border-primary/10 dark:bg-background/60">
                 <TabsTrigger value="preview">
                   <Eye className="h-3.5 w-3.5 mr-1" /> {t("preview")}
                 </TabsTrigger>
@@ -421,7 +421,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
             </TabsContent>
             <TabsContent value="agent" className="mt-4 min-h-0 flex-1 overflow-hidden">
               <Tabs defaultValue="analysis" className="flex h-full min-h-0 flex-col">
-                <TabsList variant="line" className="rounded-2xl border border-border/60 bg-muted/45 p-1 dark:border-primary/10 dark:bg-background/60">
+                <TabsList variant="line" className="flex h-auto flex-wrap justify-start rounded-2xl border border-border/60 bg-muted/45 p-1 dark:border-primary/10 dark:bg-background/60">
                   <TabsTrigger value="analysis">{ta("modes.analysis")}</TabsTrigger>
                   <TabsTrigger value="refactor">{ta("modes.refactor")}</TabsTrigger>
                 </TabsList>

@@ -36,6 +36,27 @@ function PromptsContent() {
   const [pending, startTransition] = useTransition()
   const [view, setView] = useState<"card" | "list">("card")
 
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const media = window.matchMedia("(max-width: 767px)")
+    const syncView = () => {
+      if (media.matches) {
+        setView("card")
+      }
+    }
+
+    syncView()
+
+    if (typeof media.addEventListener === "function") {
+      media.addEventListener("change", syncView)
+      return () => media.removeEventListener("change", syncView)
+    }
+
+    media.addListener(syncView)
+    return () => media.removeListener(syncView)
+  }, [])
+
   const prompts = useMemo(
     () => allPrompts.filter((prompt) => prompt.status !== "archived"),
     [allPrompts]
@@ -86,7 +107,7 @@ function PromptsContent() {
           </Button>
         }
       >
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
           {highlightedPrompts.map((prompt) => (
             <Link
               key={prompt.id}
@@ -123,20 +144,21 @@ function PromptsContent() {
         />
 
         {view === "card" ? (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 2xl:grid-cols-3">
             {filtered.map((prompt) => (
               <PromptCard key={prompt.id} prompt={prompt} />
             ))}
           </div>
         ) : (
           <div className="app-panel overflow-hidden">
-            <div className="grid grid-cols-[minmax(0,2.3fr)_auto_auto_auto] items-center gap-4 border-b border-border/70 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <div className="overflow-x-auto">
+              <div className="grid min-w-[720px] grid-cols-[minmax(0,2.3fr)_auto_auto_auto] items-center gap-4 border-b border-border/70 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
               <span>{t("listHeaders.prompt")}</span>
               <span>{t("listHeaders.status")}</span>
               <span>{t("listHeaders.tags")}</span>
               <span>{t("listHeaders.updated")}</span>
             </div>
-            <div className="divide-y divide-border/70">
+              <div className="divide-y divide-border/70">
               {filtered.map((prompt) => {
                 const modelLabel = tm(prompt.model)
                 const statusOption = STATUS_OPTIONS.find((option) => option.value === prompt.status)
@@ -145,7 +167,7 @@ function PromptsContent() {
                   <Link
                     key={prompt.id}
                     href={`/prompts/${prompt.id}`}
-                    className="grid grid-cols-[minmax(0,2.3fr)_auto_auto_auto] items-center gap-4 px-5 py-4 transition hover:bg-muted/40"
+                    className="grid min-w-[720px] grid-cols-[minmax(0,2.3fr)_auto_auto_auto] items-center gap-4 px-5 py-4 transition hover:bg-muted/40"
                   >
                     <div className="min-w-0">
                       <div className="truncate text-sm font-semibold">{prompt.title}</div>
@@ -222,6 +244,7 @@ function PromptsContent() {
                   </Link>
                 )
               })}
+              </div>
             </div>
           </div>
         )}

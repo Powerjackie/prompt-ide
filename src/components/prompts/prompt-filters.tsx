@@ -61,12 +61,12 @@ export function PromptFiltersBar({
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="grid w-full gap-2 sm:flex sm:flex-wrap sm:items-center lg:w-auto">
             <Select
               value={filters.status}
               onValueChange={(value) => updateFilter("status", value as PromptFilters["status"])}
             >
-              <SelectTrigger className="h-11 min-w-36 rounded-2xl bg-background/80 dark:border-primary/12 dark:bg-background/68">
+              <SelectTrigger className="h-11 w-full rounded-2xl bg-background/80 sm:min-w-36 sm:w-auto dark:border-primary/12 dark:bg-background/68">
                 <SelectValue placeholder={t("status")} />
               </SelectTrigger>
               <SelectContent>
@@ -83,7 +83,7 @@ export function PromptFiltersBar({
               value={filters.model}
               onValueChange={(value) => updateFilter("model", value as PromptFilters["model"])}
             >
-              <SelectTrigger className="h-11 min-w-36 rounded-2xl bg-background/80 dark:border-primary/12 dark:bg-background/68">
+              <SelectTrigger className="h-11 w-full rounded-2xl bg-background/80 sm:min-w-36 sm:w-auto dark:border-primary/12 dark:bg-background/68">
                 <SelectValue placeholder={t("model")} />
               </SelectTrigger>
               <SelectContent>
@@ -100,7 +100,7 @@ export function PromptFiltersBar({
               value={filters.sort}
               onValueChange={(value) => updateFilter("sort", value as PromptFilters["sort"])}
             >
-              <SelectTrigger className="h-11 min-w-40 rounded-2xl bg-background/80 dark:border-primary/12 dark:bg-background/68">
+              <SelectTrigger className="h-11 w-full rounded-2xl bg-background/80 sm:min-w-40 sm:w-auto dark:border-primary/12 dark:bg-background/68">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -124,7 +124,7 @@ export function PromptFiltersBar({
               {tc("reset")}
             </Button>
           ) : null}
-          <div className="flex items-center rounded-2xl border border-border/70 bg-background/80 p-1 dark:border-primary/12 dark:bg-background/68">
+          <div className="hidden items-center rounded-2xl border border-border/70 bg-background/80 p-1 dark:border-primary/12 dark:bg-background/68 md:flex">
             <Button
               variant={view === "card" ? "secondary" : "ghost"}
               size="icon"

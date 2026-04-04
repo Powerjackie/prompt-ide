@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useLocale, useTranslations } from "next-intl"
 import {
   Bot,
@@ -91,6 +91,15 @@ export default function PlaygroundPage() {
   const characterCount = content.length
   const lineCount = content.length === 0 ? 0 : content.split(/\r?\n/).length
 
+  const handleMobileFocus = useCallback((element: HTMLTextAreaElement | null) => {
+    if (!element || typeof window === "undefined") return
+    if (!window.matchMedia("(max-width: 767px)").matches) return
+
+    requestAnimationFrame(() => {
+      element.scrollIntoView({ block: "center", behavior: "smooth" })
+    })
+  }, [])
+
   const handleAnalyze = async () => {
     if (!content.trim()) return
 
@@ -133,7 +142,7 @@ export default function PlaygroundPage() {
       />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-        <div className="space-y-5">
+        <div className="space-y-5 xl:col-start-1 xl:row-start-1">
           <section className="app-panel space-y-4 p-5 lg:p-6">
             <SectionHeader
               title={t("brief.title")}
@@ -159,7 +168,7 @@ export default function PlaygroundPage() {
           </section>
 
           <section className="app-panel overflow-hidden p-0">
-            <div className="flex items-start justify-between gap-4 border-b border-border/70 px-5 py-4 lg:px-6">
+            <div className="flex flex-col items-start gap-4 border-b border-border/70 px-5 py-4 sm:flex-row sm:justify-between lg:px-6">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <Sparkles className="h-4 w-4 text-primary" />
@@ -177,7 +186,8 @@ export default function PlaygroundPage() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder={t("placeholder")}
-                className="min-h-[360px] rounded-[1.5rem] border-border/70 bg-background/80 px-4 py-4 font-mono text-sm leading-6 shadow-inner focus-visible:border-primary/30 focus-visible:ring-primary/15 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.74),rgba(17,22,37,0.88))] dark:text-slate-100 dark:caret-primary"
+                className="min-h-[280px] rounded-[1.5rem] border-border/70 bg-background/80 px-4 py-4 font-mono text-sm leading-6 shadow-inner focus-visible:border-primary/30 focus-visible:ring-primary/15 sm:min-h-[360px] dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.74),rgba(17,22,37,0.88))] dark:text-slate-100 dark:caret-primary"
+                onFocus={(event) => handleMobileFocus(event.currentTarget)}
               />
 
               <div className="flex flex-col gap-3 rounded-[1.5rem] border border-border/70 bg-muted/35 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-cyan-200/34 dark:bg-[linear-gradient(180deg,rgba(18,25,42,0.98),rgba(12,18,31,0.98))] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_0_1px_rgba(79,246,255,0.08),0_16px_32px_-18px_rgba(79,246,255,0.28)]">
@@ -188,11 +198,11 @@ export default function PlaygroundPage() {
                     {content.trim() ? t("workspace.ready") : t("workspace.waiting")}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="rounded-2xl dark:text-slate-100 dark:hover:bg-white/7 dark:hover:text-white dark:disabled:opacity-100 dark:disabled:text-slate-100/80"
+                    className="w-full rounded-2xl sm:w-auto dark:text-slate-100 dark:hover:bg-white/7 dark:hover:text-white dark:disabled:opacity-100 dark:disabled:text-slate-100/80"
                     onClick={handleClear}
                     disabled={!content && !analysis && !trajectory}
                   >
@@ -202,7 +212,7 @@ export default function PlaygroundPage() {
                   <Button
                     onClick={handleAnalyze}
                     disabled={analyzing || !content.trim()}
-                    className="rounded-2xl dark:disabled:opacity-100 dark:disabled:bg-[linear-gradient(135deg,rgba(109,248,255,0.98),rgba(131,145,255,0.92))] dark:disabled:text-[#07131b] dark:disabled:shadow-[0_0_0_1px_rgba(79,246,255,0.22),0_18px_38px_-18px_rgba(79,246,255,0.42)]"
+                    className="w-full rounded-2xl sm:w-auto dark:disabled:opacity-100 dark:disabled:bg-[linear-gradient(135deg,rgba(109,248,255,0.98),rgba(131,145,255,0.92))] dark:disabled:text-[#07131b] dark:disabled:shadow-[0_0_0_1px_rgba(79,246,255,0.22),0_18px_38px_-18px_rgba(79,246,255,0.42)]"
                   >
                     <Bot className="h-4 w-4 mr-1" />
                     {analyzing ? ta("analyzing") : t("analyze")}
@@ -212,6 +222,61 @@ export default function PlaygroundPage() {
             </div>
           </section>
 
+        </div>
+
+        <section className="app-panel space-y-4 p-5 lg:p-6 xl:col-start-2 xl:row-start-1 xl:row-span-2">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between">
+            <SectionHeader
+              title={t("results")}
+              description={t("resultsDescription")}
+            />
+            <Badge variant="outline" className="rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.16em]">
+              {analyzing
+                ? t("resultsState.running")
+                : analysis
+                  ? t("resultsState.live")
+                  : t("resultsState.idle")}
+            </Badge>
+          </div>
+          <div className="rounded-[1.75rem] border border-border/70 bg-background/70 p-4 lg:p-5 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.76),rgba(17,22,37,0.9))]">
+            {!analysis && !analyzing ? (
+              <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 px-6 py-10 text-center sm:min-h-[420px]">
+                <span className="flex h-14 w-14 items-center justify-center rounded-[1.5rem] border border-primary/15 bg-primary/8 text-primary dark:border-primary/28 dark:bg-primary/12 dark:shadow-[0_0_34px_-16px_rgba(79,246,255,0.82)]">
+                  <Bot className="h-6 w-6" />
+                </span>
+                <div className="space-y-2">
+                  <div className="text-lg font-semibold">{t("emptyState.title")}</div>
+                  <p className="max-w-md text-sm leading-6 text-muted-foreground">
+                    {t("emptyState.description")}
+                  </p>
+                </div>
+                <div className="chip-row justify-center">
+                  <Badge variant="outline" className="rounded-full px-3 py-1">
+                    {t("signals.variables")}
+                  </Badge>
+                  <Badge variant="outline" className="rounded-full px-3 py-1">
+                    {t("signals.risk")}
+                  </Badge>
+                  <Badge variant="outline" className="rounded-full px-3 py-1">
+                    {t("signals.similar")}
+                  </Badge>
+                  <Badge variant="outline" className="rounded-full px-3 py-1">
+                    {t("signals.trajectory")}
+                  </Badge>
+                </div>
+              </div>
+            ) : (
+              <AnalysisPanel
+                analysis={analysis}
+                trajectory={trajectory}
+                analyzing={analyzing}
+                analyzingLabel={ta("analyzingWithEngine", { engine: "MiniMax-2.7" })}
+              />
+            )}
+          </div>
+        </section>
+
+        <div className="space-y-5 xl:col-start-1 xl:row-start-2">
           <section className="app-panel space-y-4 p-5 lg:p-6">
             <SectionHeader
               title={t("templates.title")}
@@ -238,7 +303,7 @@ export default function PlaygroundPage() {
                         <Icon className="h-4 w-4" />
                       </span>
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                           <div className="font-medium">{template.title}</div>
                           {selectedTemplateId === template.id ? (
                             <Badge variant="secondary" className="rounded-full px-2 py-0.5 text-[10px] dark:bg-primary/10 dark:text-primary">
@@ -303,57 +368,7 @@ export default function PlaygroundPage() {
           </section>
         </div>
 
-        <section className="app-panel space-y-4 p-5 lg:p-6">
-          <div className="flex items-start justify-between gap-4">
-            <SectionHeader
-              title={t("results")}
-              description={t("resultsDescription")}
-            />
-            <Badge variant="outline" className="rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.16em]">
-              {analyzing
-                ? t("resultsState.running")
-                : analysis
-                  ? t("resultsState.live")
-                  : t("resultsState.idle")}
-            </Badge>
-          </div>
-          <div className="rounded-[1.75rem] border border-border/70 bg-background/70 p-4 lg:p-5 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.76),rgba(17,22,37,0.9))]">
-            {!analysis && !analyzing ? (
-              <div className="flex min-h-[420px] flex-col items-center justify-center gap-4 px-6 py-10 text-center">
-                <span className="flex h-14 w-14 items-center justify-center rounded-[1.5rem] border border-primary/15 bg-primary/8 text-primary dark:border-primary/28 dark:bg-primary/12 dark:shadow-[0_0_34px_-16px_rgba(79,246,255,0.82)]">
-                  <Bot className="h-6 w-6" />
-                </span>
-                <div className="space-y-2">
-                  <div className="text-lg font-semibold">{t("emptyState.title")}</div>
-                  <p className="max-w-md text-sm leading-6 text-muted-foreground">
-                    {t("emptyState.description")}
-                  </p>
-                </div>
-                <div className="chip-row justify-center">
-                  <Badge variant="outline" className="rounded-full px-3 py-1">
-                    {t("signals.variables")}
-                  </Badge>
-                  <Badge variant="outline" className="rounded-full px-3 py-1">
-                    {t("signals.risk")}
-                  </Badge>
-                  <Badge variant="outline" className="rounded-full px-3 py-1">
-                    {t("signals.similar")}
-                  </Badge>
-                  <Badge variant="outline" className="rounded-full px-3 py-1">
-                    {t("signals.trajectory")}
-                  </Badge>
-                </div>
-              </div>
-            ) : (
-              <AnalysisPanel
-                analysis={analysis}
-                trajectory={trajectory}
-                analyzing={analyzing}
-                analyzingLabel={ta("analyzingWithEngine", { engine: "MiniMax-2.7" })}
-              />
-            )}
-          </div>
-        </section>
+
       </div>
     </div>
   )

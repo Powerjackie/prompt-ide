@@ -71,7 +71,7 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
               </span>
               <div className="min-w-0">
                 <h3 className="line-clamp-1 text-base font-semibold leading-tight">{prompt.title}</h3>
-                <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                   <span className={cn("inline-block h-2 w-2 rounded-full", statusOption?.color)} />
                   <span>{statusOption ? ts(statusOption.value) : prompt.status}</span>
                   <span aria-hidden>|</span>
@@ -96,8 +96,8 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-5 pt-4">
-          <p className="line-clamp-3 min-h-[4.5rem] text-sm leading-6 text-muted-foreground">
+        <CardContent className="space-y-4 pt-4 sm:space-y-5">
+          <p className="line-clamp-3 min-h-0 text-sm leading-6 text-muted-foreground sm:min-h-[4.5rem]">
             {prompt.description || prompt.content}
           </p>
 
@@ -120,12 +120,12 @@ export function PromptCard({ prompt }: { prompt: Prompt }) {
 
           <div className="soft-divider" />
 
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Clock className="h-3.5 w-3.5" />
               <span>{formatDate(prompt.updatedAt)}</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 self-end sm:self-auto">
               <Button
                 variant="ghost"
                 size="icon"
