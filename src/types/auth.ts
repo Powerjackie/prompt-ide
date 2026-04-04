@@ -18,7 +18,7 @@ export const guestAuthzSnapshot: AuthzSnapshot = {
   canManageSettings: false,
 }
 
-export type AuthActionError = "invalidPassword" | "configError" | null
+export type AuthActionError = "invalidPassword" | "emptyPassword" | "configError" | null
 
 export interface AuthActionState {
   error: AuthActionError

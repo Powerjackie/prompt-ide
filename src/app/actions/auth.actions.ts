@@ -18,7 +18,12 @@ export async function loginAction(
     return { error: "invalidPassword" }
   }
 
-  const role = resolveRoleForPassword(password)
+  const trimmed = password.trim()
+  if (!trimmed) {
+    return { error: "emptyPassword" }
+  }
+
+  const role = resolveRoleForPassword(trimmed)
   if (!role) {
     return { error: "invalidPassword" }
   }

@@ -826,7 +826,8 @@
     "submit": "解锁",
     "submitting": "验证中...",
     "invalidPassword": "密码不正确。",
-    "configError": "尚未配置身份验证。"
+    "configError": "尚未配置身份验证。",
+    "emptyPassword": "请输入密码"
   },
   "agent": {
     "title": "Agent 分析",
@@ -1026,5 +1027,10 @@
     "zh": "中文",
     "en": "English",
     "switchLocale": "切换语言"
+  },
+  "notFound": {
+    "title": "页面未找到",
+    "description": "你访问的页面不存在，或它可能已经被移动。",
+    "backHome": "返回首页"
   }
 }

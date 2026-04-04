@@ -826,7 +826,8 @@
     "submit": "Unlock",
     "submitting": "Checking...",
     "invalidPassword": "The password is incorrect.",
-    "configError": "Authentication is not configured."
+    "configError": "Authentication is not configured.",
+    "emptyPassword": "Please enter your password."
   },
   "agent": {
     "title": "Agent Analysis",
@@ -1026,5 +1027,10 @@
     "zh": "中文",
     "en": "English",
     "switchLocale": "Switch Language"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or may have been moved.",
+    "backHome": "Back to home"
   }
 }

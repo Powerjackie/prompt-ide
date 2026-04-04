@@ -1,6 +1,7 @@
 "use server"
 
 import { ensureAuthenticated } from "@/lib/action-auth"
+import { formatActionError } from "@/lib/error-utils"
 import { prisma } from "@/lib/prisma"
 import { analyzePromptWithAgent, refactorPromptWithAgent } from "@/agent/llm-agent"
 import type { AgentTrajectoryStep } from "@/types/agent"
@@ -12,16 +13,8 @@ type ActionResult<T = unknown> =
   | { success: true; data: T }
   | { success: false; error: string }
 
-function formatAgentError(error: unknown, mode: "analysis" | "refactor") {
-  const message = error instanceof Error ? error.message : "Unknown agent failure"
-
-  if (message === "Request timed out.") {
-    return mode === "refactor"
-      ? "MiniMax timed out while generating the refactor proposal. Please retry."
-      : "MiniMax timed out while analyzing the prompt. Please retry."
-  }
-
-  return message
+function formatAgentError(error: unknown, locale: "zh" | "en" | undefined) {
+  return formatActionError(error, locale ?? "en")
 }
 
 function revalidateAll() {
@@ -97,7 +90,7 @@ export async function runAgentAnalysis(
       },
     }
   } catch (error) {
-    return { success: false, error: formatAgentError(error, "analysis") }
+    return { success: false, error: formatAgentError(error, locale) }
   }
 }
 
@@ -125,7 +118,7 @@ export async function runStatelessAgentAnalysis(
       },
     }
   } catch (error) {
-    return { success: false, error: formatAgentError(error, "analysis") }
+    return { success: false, error: formatAgentError(error, locale) }
   }
 }
 
@@ -191,7 +184,7 @@ export async function runPromptRefactor(
       },
     }
   } catch (error) {
-    return { success: false, error: formatAgentError(error, "refactor") }
+    return { success: false, error: formatAgentError(error, locale) }
   }
 }
 
@@ -236,7 +229,7 @@ export async function applyRefactorDraft(
       },
     }
   } catch (error) {
-    return { success: false, error: (error as Error).message }
+    return { success: false, error: formatActionError(error) }
   }
 }
 
@@ -278,7 +271,7 @@ export async function applyRefactorVariables(
       },
     }
   } catch (error) {
-    return { success: false, error: (error as Error).message }
+    return { success: false, error: formatActionError(error) }
   }
 }
 
@@ -336,6 +329,6 @@ export async function createModulesFromRefactor(
       },
     }
   } catch (error) {
-    return { success: false, error: (error as Error).message }
+    return { success: false, error: formatActionError(error) }
   }
 }

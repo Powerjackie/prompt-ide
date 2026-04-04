@@ -414,19 +414,19 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
                 <Puzzle className="h-3.5 w-3.5 mr-1" /> {t("modules")}
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="preview" className="mt-4 min-h-0 flex-1 overflow-hidden">
-              <div className="h-full overflow-y-auto rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
+            <TabsContent value="preview" className="mt-4 min-h-0 flex-1 overflow-y-auto">
+              <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
                 <PreviewPanel content={content} variables={variables} />
               </div>
             </TabsContent>
-            <TabsContent value="agent" className="mt-4 min-h-0 flex-1 overflow-hidden">
+            <TabsContent value="agent" className="mt-4 min-h-0 flex-1 overflow-y-auto">
               <Tabs defaultValue="analysis" className="flex h-full min-h-0 flex-col">
                 <TabsList variant="line" className="flex h-auto flex-wrap justify-start rounded-2xl border border-border/60 bg-muted/45 p-1 dark:border-primary/10 dark:bg-background/60">
                   <TabsTrigger value="analysis">{ta("modes.analysis")}</TabsTrigger>
                   <TabsTrigger value="refactor">{ta("modes.refactor")}</TabsTrigger>
                 </TabsList>
-                <TabsContent value="analysis" className="mt-4 min-h-0 flex-1 overflow-hidden">
-                  <div className="h-full overflow-y-auto rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
+                <TabsContent value="analysis" className="mt-4 min-h-0 flex-1 overflow-y-auto">
+                  <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
                     <AnalysisPanel
                       analysis={analysis}
                       trajectory={trajectory}
@@ -437,8 +437,8 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
                     />
                   </div>
                 </TabsContent>
-                <TabsContent value="refactor" className="mt-4 min-h-0 flex-1 overflow-hidden">
-                  <div className="h-full overflow-y-auto rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
+                <TabsContent value="refactor" className="mt-4 min-h-0 flex-1 overflow-y-auto">
+                  <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
                     <RefactorPanel
                       promptId={savedPrompt?.id}
                       promptContent={content}
@@ -458,8 +458,8 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
               </Tabs>
             </TabsContent>
             {savedPrompt?.id && (
-              <TabsContent value="versions" className="mt-4 min-h-0 flex-1 overflow-hidden">
-                <div className="h-full overflow-y-auto rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
+              <TabsContent value="versions" className="mt-4 min-h-0 flex-1 overflow-y-auto">
+                <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
                   <VersionHistoryPanel
                     promptId={savedPrompt.id}
                     currentSnapshot={currentSnapshot}
@@ -476,8 +476,8 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
                 </div>
               </TabsContent>
             )}
-            <TabsContent value="modules" className="mt-4 min-h-0 flex-1 overflow-hidden">
-              <div className="h-full overflow-y-auto rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
+            <TabsContent value="modules" className="mt-4 min-h-0 flex-1 overflow-y-auto">
+              <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
                 <ModuleInserter onInsert={handleInsertModule} />
               </div>
             </TabsContent>

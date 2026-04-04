@@ -1,6 +1,7 @@
 "use server"
 
 import { ensureAuthenticated } from "@/lib/action-auth"
+import { formatActionError } from "@/lib/error-utils"
 import { prisma } from "@/lib/prisma"
 import { deserializePromptSnapshot } from "@/lib/prompt-version"
 import { evaluatePromptBenchmark, type NarrationLocale } from "@/agent/llm-agent"
@@ -231,7 +232,7 @@ export async function getBenchmarkRunsByPromptId(
 
     return { success: true, data: rows.map(deserializeBenchmarkRun) }
   } catch (error) {
-    return { success: false, error: (error as Error).message }
+    return { success: false, error: formatActionError(error) }
   }
 }
 
@@ -262,7 +263,7 @@ export async function runPromptBenchmark(
     revalidateAll()
     return { success: true, data: row }
   } catch (error) {
-    return { success: false, error: (error as Error).message }
+    return { success: false, error: formatActionError(error, locale ?? "en") }
   }
 }
 
@@ -313,7 +314,7 @@ export async function compareBenchmarkRuns(
       },
     }
   } catch (error) {
-    return { success: false, error: (error as Error).message }
+    return { success: false, error: formatActionError(error) }
   }
 }
 
@@ -381,7 +382,7 @@ export async function runPromptEvolutionComparison(
       },
     }
   } catch (error) {
-    return { success: false, error: (error as Error).message }
+    return { success: false, error: formatActionError(error, locale) }
   }
 }
 
@@ -462,6 +463,6 @@ export async function getLatestPromptEvolutionComparison(
       },
     }
   } catch (error) {
-    return { success: false, error: (error as Error).message }
+    return { success: false, error: formatActionError(error, locale) }
   }
 }
