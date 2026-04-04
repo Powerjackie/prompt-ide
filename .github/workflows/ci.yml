@@ -41,6 +41,13 @@ jobs:
           NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
         run: npm run build
 
+      - name: Verify Prisma migrations on fresh SQLite
+        env:
+          DATABASE_URL: file:./ci-migrate.db
+          RUST_LOG: info
+        run: |
+          npx prisma migrate deploy --config prisma.config.ts
+          npx prisma migrate status --config prisma.config.ts
+
       - name: Docker Compose build
         run: docker compose --profile ops build app schema
-
