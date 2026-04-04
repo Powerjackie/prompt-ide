@@ -1,0 +1,11 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "bootstrap-sha": "cfaa0d90041ab73da00ef3f77d229b82c0a5cc94",
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "package-name": "prompt-ide",
+      "changelog-path": "CHANGELOG.md"
+    }
+  }
+}
