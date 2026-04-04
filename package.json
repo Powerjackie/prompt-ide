@@ -7,9 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "smoke:browser": "powershell -ExecutionPolicy Bypass -File scripts/playwright-smoke.ps1",
     "smoke:browser:headed": "powershell -ExecutionPolicy Bypass -File scripts/playwright-smoke.ps1 -Headed",
     "db:push": "npx prisma db push",
+    "db:migrate:dev": "npx prisma migrate dev",
+    "db:migrate:deploy": "npx prisma migrate deploy",
+    "db:migrate:status": "npx prisma migrate status",
     "db:seed": "npx tsx prisma/seed.ts",
     "db:reset": "npx prisma db push --force-reset && npx tsx prisma/seed.ts"
   },
@@ -17,7 +22,7 @@
     "@base-ui/react": "^1.3.0",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/adapter-libsql": "^7.6.0",
-    "@prisma/client": "^7.6.0",
+    "@prisma/client": "7.6.0",
     "@radix-ui/react-slot": "^1.2.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -42,11 +47,16 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.4.0",
+    "effect": "3.20.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
-    "prisma": "^7.6.0",
+    "prisma": "7.6.0",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.2"
+  },
+  "volta": {
+    "node": "22.22.2"
   }
 }

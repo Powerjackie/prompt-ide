@@ -12,13 +12,17 @@ const base64AesKey = z
     }
   }, "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY must be base64 and decode to 16, 24, or 32 bytes")
 
-export const serverEnv = z
-  .object({
-    NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-    DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
-    ADMIN_PASSWORD: z.string().min(1, "ADMIN_PASSWORD is required"),
-    MEMBER_PASSWORD: z.string().optional(),
-    MINIMAX_API_KEY: z.string().min(1, "MINIMAX_API_KEY is required"),
-    NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: base64AesKey,
-  })
-  .parse(process.env)
+export const serverEnvSchema = z.object({
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  ADMIN_PASSWORD: z.string().min(1, "ADMIN_PASSWORD is required"),
+  MEMBER_PASSWORD: z.string().optional(),
+  MINIMAX_API_KEY: z.string().min(1, "MINIMAX_API_KEY is required"),
+  NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: base64AesKey,
+})
+
+export function parseServerEnv(env: NodeJS.ProcessEnv) {
+  return serverEnvSchema.parse(env)
+}
+
+export const serverEnv = parseServerEnv(process.env)

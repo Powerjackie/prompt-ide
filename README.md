@@ -98,9 +98,11 @@ docker compose --profile ops run --rm schema
 docker compose up -d --wait app
 ```
 
-Image build only installs dependencies, generates the Prisma client, and builds the Next standalone bundle. Database schema sync remains an explicit deployment step through the `schema` service, not part of `docker build`.
+Image build only installs dependencies, generates the Prisma client, and builds the Next standalone bundle. Database schema sync remains an explicit deployment step through the `schema` service, not part of `docker build`. The `schema` service now runs `prisma migrate deploy`, so production rollout follows Prisma migration history instead of `db push`.
 
 When the app sits behind Cloudflare and/or Nginx, `next.config.ts` now explicitly configures `serverActions.allowedOrigins` for the production host.
+
+Baseline note: if an existing production SQLite database was originally created before Prisma Migrate history existed, the first rollout onto `migrate deploy` requires a one-time `prisma migrate resolve --applied 0_init` before normal deploys continue.
 
 Then open `http://<server-host>:3000/zh/login`.
 
@@ -117,7 +119,7 @@ The script performs:
 - `PROMPT_IDE_BACKUP_KIND=preupdate ./deploy/backup.sh`
 - `git pull --ff-only`
 - `docker compose --profile ops build app schema`
-- `docker compose --profile ops run --rm schema`
+- `docker compose --profile ops run --rm schema` (`prisma migrate deploy`)
 - `docker compose up -d --wait app`
 
 ### Backup And Restore
@@ -167,10 +169,17 @@ Restore from a specific backup:
 ## Database Commands
 
 ```bash
+npm run db:migrate:dev
+npm run db:migrate:deploy
+npm run db:migrate:status
 npm run db:push
 npm run db:seed
 npm run db:reset
 ```
+
+- development schema changes should use `prisma migrate dev` via `npm run db:migrate:dev`
+- production schema changes should use `prisma migrate deploy` via `npm run db:migrate:deploy`
+- `npm run db:push` remains available for local temporary experiments only and is not the production path
 
 `npm run db:reset` is the milestone baseline command. It force-resets SQLite and re-seeds a clean demo dataset with:
 

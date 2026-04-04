@@ -29,6 +29,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Test
+        run: npm run test
+
       - name: Build
         env:
           DATABASE_URL: file:./ci-build.db
@@ -40,3 +43,4 @@ jobs:
 
       - name: Docker Compose build
         run: docker compose --profile ops build app schema
+
