@@ -1,5 +1,10 @@
 # Prompt IDE
 
+[![CI](https://github.com/Powerjackie/prompt-ide/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Powerjackie/prompt-ide/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Powerjackie/prompt-ide?display_name=tag)](https://github.com/Powerjackie/prompt-ide/releases)
+[![License](https://img.shields.io/github/license/Powerjackie/prompt-ide)](https://github.com/Powerjackie/prompt-ide/blob/master/LICENSE)
+
+
 Prompt IDE is a private **Prompt R&D Workbench** for one operator. It is designed for writing, evaluating, refining, packaging, and reusing prompts with a stable local data layer and an integrated MiniMax-powered agent.
 
 ## Current Product Stage
@@ -40,6 +45,9 @@ Install dependencies:
 ```bash
 npm install
 ```
+
+Node baseline is tracked by `.nvmrc` and the `volta` pin in `package.json`.
+Use Node `22.22.2` locally to match the project baseline.
 
 Configure local environment:
 
