@@ -1104,6 +1104,798 @@
         "overview": "Overview",
         "comingNext": "Coming next"
       }
+    },
+    "pages": {
+      "introduction": {
+        "title": "Introduction",
+        "intro": "Prompt IDE is a private prompt R&D workspace for organizing, iterating on, and improving AI prompts over time.",
+        "whatIs": {
+          "title": "What is Prompt IDE?",
+          "content": "Prompt IDE brings prompt capture, editing, analysis, benchmarking, and packaging into one authenticated workspace. It is built for people who want more structure than a notes app and more flexibility than a fixed prompt gallery."
+        },
+        "capabilities": {
+          "title": "Core capabilities",
+          "content": "The product is organized around the full prompt lifecycle, from first draft to reusable asset.",
+          "items": {
+            "promptManagement": {
+              "title": "Prompt management.",
+              "content": "Store prompts as first-class assets with status, model, category, tags, notes, and source metadata. Browse them in multiple views, search quickly, and move them between inbox, production, and archive."
+            },
+            "editor": {
+              "title": "Editor.",
+              "content": "Use a purpose-built editor with metadata, variable-aware content editing, preview, modules, versions, and AI tools in one place. The editor is optimized for iterative prompt work rather than generic text editing."
+            },
+            "analysisRefactor": {
+              "title": "AI analysis and refactor.",
+              "content": "Run guided analysis and refactor flows powered by MiniMax-backed agents. The system can review prompt quality, surface risks, suggest metadata, and propose cleaner drafts or reusable modules."
+            },
+            "versioningBenchmark": {
+              "title": "Versioning and benchmarks.",
+              "content": "Every meaningful save can create a version snapshot. Benchmarks score prompt quality across several dimensions and compare the current version against a baseline or previous version."
+            },
+            "modules": {
+              "title": "Module reuse.",
+              "content": "Break repeated prompt patterns into reusable modules such as role, goal, or output format snippets. Insert them from the editor instead of rewriting the same instructions again and again."
+            },
+            "skills": {
+              "title": "Skills.",
+              "content": "Wrap prompts into reusable runnable tools with schemas, presets, and execution flows. Skills help teams reuse complex prompt templates without exposing all the raw prompt authoring steps every time."
+            },
+            "prompts": {
+              "title": "Prompt management.",
+              "content": "Store prompts as first-class assets with status, model, category, tags, notes, and source metadata. Browse them in multiple views, search quickly, and move them between inbox, production, and archive."
+            },
+            "analysis": {
+              "title": "AI analysis and refactor.",
+              "content": "Run guided analysis and refactor flows powered by MiniMax-backed agents. The system can review prompt quality, surface risks, suggest metadata, and propose cleaner drafts or reusable modules."
+            },
+            "benchmark": {
+              "title": "Versioning and benchmarks.",
+              "content": "Every meaningful save can create a version snapshot. Benchmarks score prompt quality across several dimensions and compare the current version against a baseline or previous version."
+            }
+          }
+        },
+        "audience": {
+          "title": "Who is this for?",
+          "content": "Prompt IDE is designed for solo AI builders, prompt engineers, and teams who want a repeatable way to manage prompt assets. It is especially helpful when prompts need review, version history, benchmarking, or packaging into reusable building blocks."
+        },
+        "foundation": {
+          "title": "Tech foundation",
+          "content": "The app is built on a modern Next.js stack, supports Chinese and English interfaces, works in light and dark themes, and has responsive layouts for desktop and mobile use."
+        },
+        "calloutTip": "If this is your first time in the app, start with the Quick Tour page before diving into individual tools."
+      },
+      "loginRoles": {
+        "title": "Login & Roles",
+        "intro": "Prompt IDE uses a simple password-based sign-in flow. After you enter a password, the server determines which role that password belongs to and creates the session for you.",
+        "loggingIn": {
+          "title": "Logging in",
+          "content": "There is no username field. Enter a valid password on the login page and select Unlock. The app checks the password server-side and signs you in with the matching role."
+        },
+        "roles": {
+          "title": "Roles",
+          "content": "Prompt IDE currently supports two roles with different levels of control.",
+          "adminTitle": "Admin.",
+          "adminContent": "Admins can delete prompts, modules, collections, and skills. They can also access Settings, including export, import, and reset actions.",
+          "memberTitle": "Member.",
+          "memberContent": "Members can browse and edit day-to-day content, but they cannot delete assets or open the administrative settings area."
+        },
+        "errors": {
+          "title": "Error messages",
+          "content": "The login form surfaces clear messages for the most common sign-in problems.",
+          "invalidPassword": "An incorrect password shows a password mismatch message.",
+          "emptyPassword": "Submitting an empty or whitespace-only password shows a dedicated empty-password message.",
+          "configError": "If the server is missing password configuration, the page shows a configuration error instead of letting the request silently fail."
+        },
+        "session": {
+          "title": "Session",
+          "content": "After login, the session cookie stays valid for 30 days unless you sign out earlier. Session handling is automatic, and you can sign out from the account area near the bottom of the sidebar."
+        },
+        "security": {
+          "title": "Security",
+          "content": "Authentication uses an httpOnly session cookie so client-side scripts cannot read it directly. In production the cookie is marked secure for HTTPS, and password checks use timing-safe comparison helpers on the server."
+        },
+        "calloutNote": "If you see a configuration error on the login screen, the server passwords are not configured correctly. Contact the workspace administrator rather than trying random passwords."
+      },
+      "quickTour": {
+        "title": "Quick Tour",
+        "intro": "The interface is organized so you can move from capture to editing, analysis, reuse, and packaging without losing context.",
+        "layout": {
+          "title": "App layout",
+          "content": "Most screens follow the same pattern: a navigation sidebar on the left, a top bar for search and preferences, and a main content area for the page you are working on."
+        },
+        "sidebar": {
+          "title": "Sidebar navigation",
+          "content": "The sidebar groups the main product areas so you can jump between capture, authoring, reuse, and administration.",
+          "utilityTitle": "The utility area gives you quick access to tools and workspace-level pages.",
+          "items": {
+            "home": {
+              "title": "Home.",
+              "content": "Start from the dashboard with stats, recent prompts, tags, and shortcuts into the rest of the workspace."
+            },
+            "prompts": {
+              "title": "Prompts.",
+              "content": "Browse the main prompt library with filters, search, and sorting."
+            },
+            "editor": {
+              "title": "Editor.",
+              "content": "Create a new prompt or continue editing an existing one in the dedicated authoring workspace."
+            },
+            "inbox": {
+              "title": "Inbox.",
+              "content": "Review new ideas, quick captures, and cloned prompts before promoting them into production."
+            },
+            "modules": {
+              "title": "Modules.",
+              "content": "Manage reusable prompt fragments such as roles, goals, and output formats."
+            },
+            "collections": {
+              "title": "Collections.",
+              "content": "Group prompts and modules into themed packs for reuse and sharing."
+            },
+            "skills": {
+              "title": "Skills.",
+              "content": "Package prompts into runnable tools with schemas, presets, and execution history."
+            },
+            "favorites": {
+              "title": "Favorites.",
+              "content": "Return to the prompts you care about most without changing their underlying status."
+            },
+            "archive": {
+              "title": "Archive.",
+              "content": "Review archived prompts and restore or permanently remove them when appropriate."
+            },
+            "tags": {
+              "title": "Tags.",
+              "content": "See which tags are used across the library and jump into filtered prompt views."
+            }
+          },
+          "utilityItems": {
+            "playground": {
+              "title": "Playground.",
+              "content": "Experiment with prompt analysis before creating a saved prompt record."
+            },
+            "docs": {
+              "title": "Docs.",
+              "content": "Open the product documentation area you are reading now."
+            },
+            "settings": {
+              "title": "Settings.",
+              "content": "Adjust workspace defaults and data management controls if you are an admin."
+            }
+          }
+        },
+        "topBar": {
+          "title": "Top bar features",
+          "content": "The top bar focuses on fast navigation and personal preferences.",
+          "search": "Press Ctrl+K or Cmd+K to open the command-style search dialog for pages, prompts, modules, collections, and skills.",
+          "theme": "Use the theme toggle to switch between light and dark modes.",
+          "locale": "Use the language switcher to swap between English and Chinese without leaving your current context."
+        },
+        "dashboard": {
+          "title": "Home dashboard",
+          "content": "The Home page highlights key counts such as total prompts, inbox items, favorites, and modules. It also shows recent prompts and quick entry points so you can continue work from where you left off."
+        },
+        "calloutTip": "Try Ctrl+K or Cmd+K first. It is the fastest way to understand how pages and assets are connected across the workspace."
+      },
+      "prompts": {
+        "title": "Prompts",
+        "intro": "Prompts are the core assets in Prompt IDE. Each record combines the prompt text itself with the metadata needed to review, reuse, and improve it over time.",
+        "whatIs": {
+          "title": "What is a prompt asset?",
+          "content": "A prompt asset is more than raw text. It can include a title, description, full content, variables, tags, status, category, preferred model, notes, and source information so the prompt stays understandable as it evolves."
+        },
+        "statuses": {
+          "title": "Prompt statuses",
+          "content": "Statuses help you separate draft work from production-ready prompts and retired material.",
+          "items": {
+            "inbox": {
+              "title": "Inbox.",
+              "content": "New or still-reviewing prompts usually begin here so you can refine them before wider use."
+            },
+            "production": {
+              "title": "Production.",
+              "content": "Prompts in active use or considered ready for regular work live in this state."
+            },
+            "archived": {
+              "title": "Archived.",
+              "content": "Archived prompts are kept for history and recovery but removed from day-to-day active lists."
+            }
+          }
+        },
+        "browsing": {
+          "title": "Browsing prompts",
+          "content": "The library supports multiple ways to scan and narrow down prompt records.",
+          "views": "Switch between a card view and a denser list view on larger screens.",
+          "filters": "Filter the library by status, preferred model, and tags.",
+          "sorting": "Sort by recently updated, recently created, alphabetical order, or recent use depending on the screen.",
+          "search": "Search matches titles and descriptions in real time so you can jump to the right prompt quickly."
+        },
+        "detail": {
+          "title": "Prompt detail page",
+          "content": "Each prompt has a detail page that combines the full text with reference data and quick actions.",
+          "fullContent": "Read the full prompt body and copy it with one click.",
+          "variables": "Review detected variables and their saved metadata.",
+          "notes": "Keep implementation notes or reminders alongside the prompt.",
+          "metadata": "See status, model, category, source, and timestamps in the metadata sidebar.",
+          "tags": "Open related tags directly from the tag chips shown on the page."
+        },
+        "actions": {
+          "title": "Common actions",
+          "content": "Prompt detail and list views expose the most common workflow actions.",
+          "items": {
+            "copy": "Copy the prompt content to the clipboard.",
+            "favorite": "Add or remove the prompt from Favorites without changing its workflow state.",
+            "edit": "Open the editor to refine the prompt.",
+            "promote": "Move the prompt from Inbox into Production when it is ready.",
+            "clone": "Create a new Inbox copy to explore a variation safely.",
+            "createSkill": "Create a skill using the prompt as the entry prompt.",
+            "archiveRestore": "Archive a prompt when it is no longer active, or restore it later.",
+            "delete": "Delete the prompt permanently if your role allows destructive actions."
+          }
+        },
+        "calloutNote": "Deleting a prompt cannot be undone and requires admin permissions. Use Archive first if you are not completely sure."
+      },
+      "editor": {
+        "title": "Editor",
+        "intro": "The editor is the main authoring workspace for prompt creation and iteration. It keeps metadata, content, versioning, AI tools, and module insertion in one screen.",
+        "titlePage": {
+          "layout": "Editor layout",
+          "metadata": "Metadata form",
+          "content": "Content editor",
+          "tools": "Tool panel tabs",
+          "saving": "Saving and dirty state"
+        },
+        "layout": {
+          "content": "The editor uses a two-column layout. The left side focuses on metadata and the main content body, while the right side hosts Preview, Agent, Versions, and Modules tabs for context-aware tooling."
+        },
+        "metadata": {
+          "content": "The form separates required fields from optional enrichment fields so you can save quickly and improve structure later.",
+          "required": "Title and content are required before a prompt can be saved.",
+          "optional": "Description, preferred model, status, category, source, tags, notes, and other metadata remain optional but useful.",
+          "modelsTitle": "Available models:",
+          "categoriesTitle": "Available categories:"
+        },
+        "content": {
+          "content": "Write the main prompt body in the content editor and use {{variableName}} placeholders where the prompt should stay reusable. Use Ctrl+S or Cmd+S to save without leaving the keyboard."
+        },
+        "tools": {
+          "content": "The right-hand tool panel keeps the supporting workflows close to the prompt you are editing.",
+          "preview": "Preview shows a rendered version of the prompt, using default variable values when available and placeholder brackets when not.",
+          "agent": "Agent contains the analysis and refactor flows for saved prompts.",
+          "versions": "Versions shows the prompt history and restoration tools.",
+          "modules": "Modules lets you browse reusable snippets and insert them into the current prompt."
+        },
+        "saving": {
+          "content": "Saving does more than persist text. It also updates the prompt lifecycle records behind the scenes.",
+          "create": "Saving a new prompt creates the prompt record and its initial version snapshot.",
+          "update": "Saving an existing prompt updates the current fields and records a new version snapshot.",
+          "dirty": "Any unsaved edit marks the prompt as having unsaved changes. While that state is active, analysis and refactor actions stay disabled until you save again."
+        },
+        "calloutWarning": "AI analysis and refactor only run on saved prompts. If the buttons are disabled or the page asks you to save first, save the prompt and try again.",
+        "calloutTip": "When you insert a module, the editor tries to place it at the current cursor position. If the editor is not focused, the module is appended to the end."
+      },
+      "variables": {
+        "title": "Variables",
+        "intro": "Variables let one prompt template adapt to many situations. Instead of duplicating prompts for every context, you can parameterize the parts that change.",
+        "whatIs": {
+          "title": "What are variables?",
+          "content": "Variables are named placeholders embedded directly inside prompt content. They make prompts reusable across roles, topics, products, formats, and other changing inputs."
+        },
+        "syntax": {
+          "title": "Variable syntax",
+          "content": "Prompt IDE detects variables written in the {{variableName}} form. Variable names should use letters, numbers, and underscores so they stay predictable across the workspace."
+        },
+        "detection": {
+          "title": "Automatic detection",
+          "content": "You do not have to register variables by hand before using them. The editor scans the prompt body and extracts variable entries automatically.",
+          "name": "Name is derived from the placeholder itself and is not manually renamed in the variable list.",
+          "description": "Description is optional and helps explain what the variable should contain.",
+          "defaultValue": "Default value is optional and is used for rendering previews."
+        },
+        "preview": {
+          "title": "Preview rendering",
+          "content": "Preview uses saved variable metadata to render a readable version of the prompt before you run it elsewhere.",
+          "withDefault": "If a variable has a default value, Preview substitutes that value into the rendered prompt.",
+          "withoutDefault": "If no default is set, Preview renders the placeholder as [variableName] so missing inputs stay visible."
+        },
+        "example": {
+          "title": "Example",
+          "content": "A simple template can expose several change points while keeping the overall instruction stable.",
+          "code": "You are a {{role}}. Please analyze the following {{topic}} and provide {{outputFormat}}."
+        },
+        "calloutTip": "Detected variables also feed into AI analysis and the skill runner, so clear variable names make later workflows easier to understand."
+      },
+      "modules": {
+        "title": "Modules",
+        "intro": "Modules are reusable prompt fragments. They help you standardize the repeated parts of your prompting style without forcing you to duplicate the same blocks in every prompt.",
+        "whatIs": {
+          "title": "What are modules?",
+          "content": "A module is a saved snippet such as a role definition, a goal statement, or an output format block. Modules can be managed independently and then inserted into prompts from the editor."
+        },
+        "types": {
+          "title": "Module types",
+          "content": "The module library organizes snippets by purpose so you can find the right kind of building block quickly.",
+          "items": {
+            "role": {
+              "title": "Role.",
+              "content": "Define who the model should act as."
+            },
+            "goal": {
+              "title": "Goal.",
+              "content": "Clarify the outcome or task the prompt should accomplish."
+            },
+            "constraint": {
+              "title": "Constraint.",
+              "content": "Set boundaries, exclusions, or operating rules."
+            },
+            "outputFormat": {
+              "title": "Output Format.",
+              "content": "Describe how the answer should be structured."
+            },
+            "style": {
+              "title": "Style.",
+              "content": "Set tone, voice, or stylistic expectations."
+            },
+            "selfCheck": {
+              "title": "Self Check.",
+              "content": "Add a final review or validation instruction for the model."
+            }
+          }
+        },
+        "browsing": {
+          "title": "Browsing modules",
+          "content": "Browse modules by type and scan cards for title, type, updated time, content preview, and tags before inserting or editing them."
+        },
+        "editing": {
+          "title": "Creating and editing modules",
+          "content": "Use the module dialog to create or revise reusable fragments.",
+          "required": "Title, type, and content are required.",
+          "tags": "Tags are optional and can be entered inline with Enter or commas.",
+          "aiGenerated": "Some modules may originate from AI refactor suggestions and can still be edited manually afterward."
+        },
+        "inserting": {
+          "title": "Inserting modules in the editor",
+          "content": "Open the Modules tab in the editor, filter by type if needed, and select Insert on the module you want. The content is inserted into the prompt with spacing handled for you."
+        },
+        "calloutNote": "Deleting a module requires admin permissions. Removing a module from the library does not retroactively change prompts where that module was already inserted as text."
+      },
+      "collections": {
+        "title": "Collections",
+        "intro": "Collections group related prompts and modules into reusable packs. They are useful when a workflow depends on several assets working together.",
+        "whatIs": {
+          "title": "What are collections?",
+          "content": "A collection is a curated set of prompt and module records assembled around a topic, workflow, or learning goal. It helps you package related assets without copying them into one large prompt."
+        },
+        "types": {
+          "title": "Collection types",
+          "content": "Collections can be categorized to match how the pack will be used.",
+          "items": {
+            "workflow": {
+              "title": "Workflow.",
+              "content": "For step-by-step operational flows or repeatable prompt pipelines."
+            },
+            "toolkit": {
+              "title": "Toolkit.",
+              "content": "For sets of reusable assets that support a broader job or domain."
+            },
+            "learning": {
+              "title": "Learning.",
+              "content": "For examples, references, or teaching-oriented bundles."
+            }
+          }
+        },
+        "create": {
+          "title": "Creating a collection",
+          "content": "Start a collection from the collection list, then provide a required title, an optional description, and a type that matches the pack's purpose."
+        },
+        "adding": {
+          "title": "Adding items",
+          "content": "Use the detail view to add assets into the collection.",
+          "prompts": "You can add prompt records from the prompt library.",
+          "modules": "You can also add reusable modules from the module library.",
+          "noDuplicates": "The same item cannot be added twice to the same collection."
+        },
+        "detail": {
+          "title": "Collection detail",
+          "content": "The detail page lists each item with a type marker and link so you can jump into the underlying prompt or module. Admin users can remove individual items from the collection when needed."
+        },
+        "calloutTip": "If AI refactor creates reusable modules, you can add them to an existing collection right away to keep related assets together."
+      },
+      "tags": {
+        "title": "Tags",
+        "intro": "Tags are a lightweight way to organize content across prompts and modules. They work across the library instead of being limited to a single page or view.",
+        "whatIs": {
+          "title": "What are tags?",
+          "content": "Tags are shared labels used to group related prompts and modules. They make filtering and discovery faster when your library grows beyond a handful of assets."
+        },
+        "create": {
+          "title": "Creating tags",
+          "content": "Tags are created inline while editing prompts or modules rather than through a separate admin screen.",
+          "inline": "Type a tag name directly in the tag input while editing a prompt or module.",
+          "confirm": "Press Enter or type a comma to confirm the tag.",
+          "lowercase": "Tags are normalized to lowercase automatically."
+        },
+        "overview": {
+          "title": "Tags overview page",
+          "content": "The Tags page aggregates all known tags and shows how often each one is used, including totals split across prompts and modules."
+        },
+        "filtering": {
+          "title": "Tag filtering",
+          "content": "Use tag chips and tag pages to jump into prompt views filtered by a specific label. The Home page also highlights frequently used tags as quick entry points."
+        },
+        "calloutNote": "There is currently no dedicated tag rename or bulk-delete workflow. To remove a tag completely, you need to remove it from every prompt and module that uses it."
+      },
+      "playground": {
+        "title": "Playground",
+        "intro": "The Playground is the fastest place to test an idea before you commit it to the prompt library. It focuses on quick analysis instead of long-term asset management.",
+        "whatIs": {
+          "title": "What is the Playground?",
+          "content": "Playground is an unsaved analysis workspace where you can paste prompt text, try starter templates, and inspect AI feedback without creating a prompt record first."
+        },
+        "howToUse": {
+          "title": "How to use it",
+          "content": "A typical Playground run is short and experimental.",
+          "step1": "Type or paste a prompt into the input area.",
+          "step2": "Optionally start from a built-in template such as writing, translation, support, or code.",
+          "step3": "Select Analyze to run the AI review.",
+          "step4": "Read the resulting suggestions, risks, variables, and similar-prompt signals before deciding whether to save the idea elsewhere."
+        },
+        "comparison": {
+          "title": "Playground vs. Editor",
+          "content": "Both areas help you improve prompts, but they serve different points in the workflow.",
+          "playground": "Playground is temporary and analysis-first. It does not create saved prompt records or version history.",
+          "editor": "Editor is for durable prompt work. It saves metadata, versions, modules, and AI-assisted changes into the main workspace."
+        },
+        "output": {
+          "title": "Analysis output",
+          "content": "The Playground analysis mirrors the main analysis flow closely enough for early exploration.",
+          "category": "It can suggest categories, models, or workflow metadata based on the text.",
+          "variables": "It identifies likely variables and parameterization opportunities.",
+          "risk": "It highlights risk signals or ambiguity that may reduce prompt reliability.",
+          "similar": "It can surface similar prompt candidates from the saved library."
+        },
+        "calloutTip": "Use Playground when you want a fast reality check before turning an idea into a saved prompt with versions and metadata."
+      },
+      "analysis": {
+        "title": "Agent Analysis",
+        "intro": "Agent Analysis is the deeper AI review workflow for saved prompts. It combines metadata suggestions, risk review, variable extraction, and similarity checks into one report.",
+        "whatIs": {
+          "title": "What is AI analysis?",
+          "content": "This feature runs a MiniMax-backed analysis flow over a saved prompt. The goal is to help you spot quality gaps, risky assumptions, unclear structure, and metadata suggestions before the prompt goes further."
+        },
+        "howToRun": {
+          "title": "How to run it",
+          "content": "Open a saved prompt in the editor, switch to the Agent tab, then choose Analysis. The prompt must already be saved and free of unsaved changes before analysis can start."
+        },
+        "results": {
+          "title": "Analysis results",
+          "content": "The result panel combines several perspectives into one review.",
+          "confidence": "Confidence indicates how certain the analysis is about its classification and recommendations.",
+          "risk": "Risk level summarizes major concerns and explains what may reduce prompt reliability or safety.",
+          "category": "Metadata suggestions can include category, model, status, and tags.",
+          "variables": "The analysis can highlight variables that should be formalized for reuse.",
+          "similar": "Similar prompt detection helps you see whether the workspace already contains a close match.",
+          "modules": "Module candidates point out repeated fragments that could become reusable modules."
+        },
+        "trajectory": {
+          "title": "Agent trajectory",
+          "content": "You can inspect the reasoning trace behind the result. Steps are grouped into thought, action, and observation so the AI's path is more transparent than a single opaque answer."
+        },
+        "calloutNote": "Analysis uses a MiniMax-backed model flow and may take several seconds to complete. If the AI service is temporarily unavailable, the app shows a friendly error instead of exposing low-level network details."
+      },
+      "refactor": {
+        "title": "Agent Refactor",
+        "intro": "Agent Refactor proposes an improved version of the current prompt instead of only reviewing it. It helps you move from diagnosis to a concrete revision plan.",
+        "whatIs": {
+          "title": "What is AI refactor?",
+          "content": "Refactor runs an AI-assisted improvement pass over the current prompt and returns a structured proposal for clearer content, better metadata, reusable variables, and possible modules."
+        },
+        "howToRun": {
+          "title": "How to run it",
+          "content": "Open a saved prompt in the editor, switch to Agent, then choose Refactor. As with analysis, the prompt must be saved and have no unsaved edits before the run begins."
+        },
+        "proposal": {
+          "title": "What the proposal includes",
+          "content": "A refactor result is more than a rewritten paragraph. It bundles several kinds of suggested changes together.",
+          "summary": "A summary explains what changed and why the AI believes the prompt can be improved.",
+          "draft": "A cleaned-up draft proposes improved title, description, content, and tags.",
+          "variables": "Variable suggestions extract reusable parameters from the current prompt.",
+          "modules": "Module suggestions identify fragments worth saving as standalone modules."
+        },
+        "diff": {
+          "title": "Diff view",
+          "content": "The comparison panel shows only the fields that changed, making it easier to evaluate the proposal before you apply anything."
+        },
+        "apply": {
+          "title": "Applying changes",
+          "content": "You do not have to accept everything at once. The editor exposes separate application actions for the main parts of the proposal.",
+          "draft": "Apply draft accepts the proposed title, description, content, and tags and saves them as a new version.",
+          "variables": "Apply variables accepts the suggested variable definitions and also creates a new version snapshot.",
+          "modules": "Create modules turns selected module suggestions into independent module records.",
+          "collections": "After modules are created, you can add them straight into an existing collection."
+        },
+        "calloutWarning": "Applying a draft or variable set creates a new version snapshot. Review the diff carefully before you accept the change.",
+        "calloutTip": "After a refactor, run or review benchmark comparisons to see whether the revised version is actually moving in the right direction."
+      },
+      "benchmark": {
+        "title": "Benchmark",
+        "intro": "Benchmarks give you a more standardized way to evaluate prompt quality across versions. Instead of relying only on intuition, you can compare the same prompt against earlier states using consistent dimensions.",
+        "whatIs": {
+          "title": "What are benchmarks?",
+          "content": "A benchmark is an AI-generated evaluation report tied to a specific prompt version. It summarizes overall quality and scores how ready that version is for dependable use."
+        },
+        "scores": {
+          "title": "Five score dimensions",
+          "content": "Each benchmark includes an overall score and four supporting dimensions to explain where the result comes from.",
+          "items": {
+            "overall": {
+              "title": "Overall.",
+              "content": "A combined signal that summarizes the prompt's general quality."
+            },
+            "clarity": {
+              "title": "Clarity.",
+              "content": "How clearly the prompt communicates intent and expected behavior."
+            },
+            "reusability": {
+              "title": "Reusability.",
+              "content": "How well the prompt can be reused across similar tasks without major rewriting."
+            },
+            "controllability": {
+              "title": "Controllability.",
+              "content": "How effectively the prompt constrains outputs and exposes useful parameters."
+            },
+            "deploymentReadiness": {
+              "title": "Deployment readiness.",
+              "content": "How close the prompt is to being safe and structured enough for regular production use."
+            }
+          }
+        },
+        "run": {
+          "title": "Running a benchmark",
+          "content": "You can trigger a benchmark from prompt detail views or other benchmark panels. The result is stored against a specific version snapshot so later comparisons stay meaningful."
+        },
+        "evolution": {
+          "title": "Evolution comparison",
+          "content": "Benchmark comparison shows how the current version changes relative to a baseline or previous version. Score deltas make improvements and regressions easy to spot, and the report can suggest whether the prompt is ready or should keep iterating."
+        },
+        "strategies": {
+          "title": "Comparison strategies",
+          "content": "Comparison mode controls which earlier version is used as the reference point.",
+          "items": {
+            "baseline": "Baseline compares against the version explicitly marked as the prompt's baseline.",
+            "previousVersion": "Previous Version compares against the immediately earlier snapshot.",
+            "auto": "Auto prefers the baseline when one exists and falls back to the previous version otherwise."
+          }
+        },
+        "calloutTip": "If you care about long-running quality tracking, mark a strong version as the baseline first so later benchmark results have a stable reference point."
+      },
+      "skills": {
+        "title": "Skills",
+        "intro": "Skills turn prompts into reusable runnable tools. They are useful when a prompt needs structured input, repeatable execution, and shareable presets rather than ad hoc copy-and-paste use.",
+        "whatIs": {
+          "title": "What is a skill?",
+          "content": "A skill wraps a prompt in a runnable layer that includes metadata, schemas, status, and execution support. It is the bridge between prompt authoring and practical day-to-day use."
+        },
+        "structure": {
+          "title": "Skill structure",
+          "content": "Each skill record combines descriptive metadata with the prompt and schema information needed to run it consistently.",
+          "name": "Name identifies the skill in lists and search results.",
+          "description": "Description explains what the skill does and when to use it.",
+          "goal": "Goal captures the intended outcome of the skill.",
+          "entryPrompt": "The entry prompt points to the prompt that powers the skill.",
+          "model": "A preferred model can be stored with the skill configuration.",
+          "schema": "Input and output schemas describe the expected data shape in JSON form.",
+          "status": "Status tracks whether the skill is draft, active, or archived."
+        },
+        "create": {
+          "title": "Creating a skill",
+          "content": "You can create a skill from the Skills area or start from a prompt detail page when you already know which prompt should serve as the entry point."
+        },
+        "runner": {
+          "title": "Skill runner",
+          "content": "The runner is where a skill becomes executable.",
+          "fields": "The runner derives usable input fields from the prompt variables and skill schema.",
+          "preview": "You can preview the rendered prompt before execution.",
+          "run": "After filling the inputs, start a run directly from the runner.",
+          "results": "Recent output shows the analysis-style result and related execution information."
+        },
+        "presets": {
+          "title": "Presets",
+          "content": "Presets let you save commonly used input combinations and reload them later. You can also turn recent runs into reusable presets to speed up repeated tasks."
+        },
+        "calloutTip": "Skills are a strong fit when you want teammates to use a prompt workflow as a tool without editing the raw prompt every time."
+      },
+      "versions": {
+        "title": "Versions",
+        "intro": "Version history records how a prompt evolves over time. Instead of overwriting yesterday's work, Prompt IDE keeps immutable snapshots that make comparison and recovery safer.",
+        "whatIs": {
+          "title": "What is version history?",
+          "content": "Every saved revision can create a new prompt version. This gives you a stable record of how the prompt changed, what the prompt looked like at each step, and which version a benchmark belongs to."
+        },
+        "snapshots": {
+          "title": "What snapshots store",
+          "content": "A version snapshot preserves the full prompt state, including title, description, content, status, source, model, category, tags, notes, and variables rather than only the text body."
+        },
+        "viewing": {
+          "title": "Viewing versions",
+          "content": "Versions are shown in descending order so the latest snapshot appears first. The editor and prompt detail views expose version history along with timestamps, version numbers, and summary information."
+        },
+        "baseline": {
+          "title": "Baseline",
+          "content": "One version can be marked as the baseline for a prompt. Benchmark comparison uses that baseline as the preferred reference point whenever available."
+        },
+        "restore": {
+          "title": "Restoring a version",
+          "content": "When you restore a previous version, the app shows the differences between the current prompt and the selected snapshot. Confirming the restore applies the older content as the new current state and records that restore itself as a fresh version."
+        },
+        "calloutNote": "Restoring a version does not erase the versions that came after it. History remains intact, and the restore becomes another step in that history."
+      },
+      "inbox": {
+        "title": "Inbox",
+        "intro": "Inbox is the capture-first area for prompts that are not yet production-ready. It helps you store ideas quickly and clean them up later.",
+        "whatIs": {
+          "title": "What is the Inbox?",
+          "content": "Inbox is the holding area for new prompt ideas, rough drafts, and cloned experiments. It is meant for collection and triage rather than final publication."
+        },
+        "enter": {
+          "title": "How items enter the Inbox",
+          "content": "Several workflows intentionally send prompts into Inbox first.",
+          "newPrompt": "Brand-new prompts default to the inbox state.",
+          "quickCapture": "The Inbox page includes a quick-capture area for saving raw ideas fast.",
+          "clone": "Cloned prompts also return to Inbox so the copy can evolve independently."
+        },
+        "capture": {
+          "title": "Quick capture",
+          "content": "Use the quick-capture controls at the top of the Inbox page when you want to record an idea before you have the time to structure its metadata properly."
+        },
+        "manage": {
+          "title": "Managing inbox items",
+          "content": "Inbox items can be promoted or redirected once you know what should happen next.",
+          "promote": "Promote moves an item from inbox to production when it is ready for active use.",
+          "edit": "Edit opens the item in the editor so you can improve structure and content.",
+          "archive": "Archive removes an item from active flows without deleting the record immediately.",
+          "copy": "Copy lets you grab the text quickly for use elsewhere."
+        },
+        "calloutTip": "Capture first, polish later. Inbox works best when you treat it as a fast landing zone instead of waiting for every new idea to be perfectly structured."
+      },
+      "archiveFavorites": {
+        "title": "Archive & Favorites",
+        "intro": "Archive and Favorites solve two different needs: removing prompts from daily views without deleting them, and keeping a personal shortlist of prompts you want to revisit often.",
+        "archive": {
+          "title": "Archive",
+          "content": "Archive is the soft-delete path for prompts that should leave active lists but remain available for history and recovery.",
+          "softDelete": "Archived prompts no longer appear in main active browsing flows such as the prompt library, inbox, or favorites.",
+          "restore": "Restoring an archived prompt brings it back into active use, typically with production status.",
+          "deleteForever": "Permanent deletion is reserved for admins and cannot be undone."
+        },
+        "favorites": {
+          "title": "Favorites",
+          "content": "Favorite status is independent from prompt status, so you can favorite a production prompt without changing its workflow state.",
+          "orthogonal": "Favorites are orthogonal to inbox, production, and archive states.",
+          "add": "Add a favorite from prompt cards or detail pages using the star control.",
+          "remove": "Select the star again to remove a prompt from Favorites.",
+          "visible": "The Favorites page only shows favorited prompts that are not archived."
+        },
+        "calloutNote": "If a prompt is archived, it disappears from Favorites even if it was starred earlier. Archive always wins over the favorite shortcut views."
+      },
+      "settings": {
+        "title": "Settings",
+        "intro": "Settings gives administrators control over workspace defaults, AI behavior, and data management tasks. Member accounts do not see this area.",
+        "access": {
+          "title": "Accessing Settings",
+          "content": "Settings is available from the utility area of the sidebar and is only visible to admins."
+        },
+        "workspace": {
+          "title": "Workspace defaults",
+          "content": "Workspace defaults influence how new records and daily views behave before you override them manually.",
+          "theme": "Theme can follow the system setting or be forced into light or dark mode.",
+          "defaultView": "Default view controls whether prompt browsing starts in card or list layout.",
+          "defaultModel": "Default model sets the preferred model value used for new prompts.",
+          "defaultStatus": "Default status decides whether new prompts begin in inbox, production, or archived state."
+        },
+        "agent": {
+          "title": "Agent controls",
+          "content": "The agent section tunes AI-assisted behavior and the thresholds behind analysis workflows.",
+          "enabled": "You can enable or disable the AI agent features globally.",
+          "autoAnalyze": "Automatic analysis can be turned on for relevant workflows.",
+          "analyzeOnPaste": "Paste-time analysis can be enabled or disabled.",
+          "normalization": "Text normalization can be toggled as part of the AI preprocessing flow.",
+          "moduleExtraction": "Module extraction can be enabled so the system suggests reusable modules.",
+          "analysisDepth": "Analysis depth can be set to quick, standard, or deep.",
+          "thresholds": "Risk, confidence, and similarity thresholds let you tune how strict the AI workflows should be."
+        },
+        "data": {
+          "title": "Data management",
+          "content": "Administrative data actions are grouped together so you can protect and move workspace data deliberately.",
+          "export": "Export downloads workspace data, including prompts, modules, and settings, as JSON.",
+          "import": "Import restores workspace data from a compatible JSON file.",
+          "reset": "Reset restores settings to their default values."
+        },
+        "calloutWarning": "Reset actions cannot be undone. Export a backup first if there is any chance you will want to return to the previous state."
+      },
+      "keyboardShortcuts": {
+        "title": "Keyboard Shortcuts",
+        "intro": "Prompt IDE keeps keyboard shortcuts intentionally small for now, focusing on the actions people use most often.",
+        "global": {
+          "title": "Global shortcuts",
+          "search": "Ctrl+K or Cmd+K opens the global search and command dialog."
+        },
+        "editor": {
+          "title": "Editor shortcuts",
+          "save": "Ctrl+S or Cmd+S saves the current prompt in the editor."
+        },
+        "general": {
+          "title": "General interactions",
+          "content": "Standard browser and dialog controls still apply. Tab moves focus, Enter confirms focused actions, and Escape closes dialogs or sheets where supported."
+        },
+        "calloutNote": "The shortcut set will likely grow over time, but the current experience intentionally stays lightweight and easy to remember."
+      },
+      "faq": {
+        "title": "FAQ",
+        "intro": "These are the questions new users tend to hit first when they start working in Prompt IDE.",
+        "questions": {
+          "grayButton": {
+            "title": "Why is the AI Analysis button gray?",
+            "answer1": "The most common reason is that the current prompt still has unsaved changes. Analysis and refactor flows only run against a saved prompt version, so the editor disables those actions until the prompt is saved.",
+            "answer2": "Save the prompt first, wait for the unsaved badge to disappear, and then try the analysis action again."
+          },
+          "serviceUnavailable": {
+            "title": "What should I do if the report says 'AI service temporarily unavailable'?",
+            "answer1": "That message usually means the app could not reach the external AI service at that moment. It does not mean your prompt has been deleted or corrupted.",
+            "answer2": "Wait a little and retry the action. Other parts of the workspace should continue working normally while the external service is unavailable."
+          },
+          "promoteInbox": {
+            "title": "How do I promote a prompt from Inbox to production?",
+            "answer1": "Open the prompt from Inbox or from its detail page and use the Promote action. This changes the prompt state from inbox to production.",
+            "answer2": "It is a good idea to review the prompt, save the latest edits, and confirm the metadata before you promote it."
+          },
+          "deletePermission": {
+            "title": "Why can't I see delete buttons?",
+            "answer1": "Destructive actions are restricted to admin users. If you are signed in as a member, the interface intentionally hides delete controls for prompts, modules, collections, and skills.",
+            "answer2": "If you expected to have admin access, ask the workspace administrator to confirm which password and role you should be using."
+          },
+          "backupData": {
+            "title": "How do I back up my data?",
+            "answer1": "Open Settings and use the export option in the data management area. The app downloads a JSON snapshot of the workspace data that can be stored elsewhere.",
+            "answer2": "Back up before large cleanups, resets, or environment changes so you have an easy recovery point."
+          },
+          "variableSyntax": {
+            "title": "What is the variable syntax?",
+            "answer1": "Prompt IDE uses double curly braces such as {{variableName}} to mark variables inside prompt content. The editor detects those placeholders automatically.",
+            "answer2": "For best results, keep variable names simple and use letters, numbers, and underscores only."
+          },
+          "modulesVsPrompts": {
+            "title": "What is the difference between modules and prompts?",
+            "answer1": "A prompt is a full instruction asset that can stand on its own. A module is a reusable fragment such as a role or formatting rule that is meant to be inserted into multiple prompts.",
+            "answer2": "Use prompts for complete workflows and modules for repeatable building blocks."
+          },
+          "restoreVersions": {
+            "title": "Will restoring a version delete my newer work?",
+            "answer1": "No. Restoring a version does not erase the newer snapshots already in history. Instead, the restore becomes a new latest version based on the older content.",
+            "answer2": "That means you can still inspect or compare the versions created after the one you restored from."
+          }
+        }
+      }
+    },
+    "models": {
+      "universal": "Universal",
+      "claude": "Claude",
+      "gpt4": "GPT",
+      "gemini": "Gemini",
+      "deepseek": "DeepSeek"
+    },
+    "categories": {
+      "code": "Code",
+      "writing": "Writing",
+      "data": "Data",
+      "marketing": "Marketing",
+      "education": "Education",
+      "design": "Design",
+      "research": "Research",
+      "productivity": "Productivity",
+      "communication": "Communication",
+      "general": "General"
     }
   }
 }
