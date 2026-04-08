@@ -2,7 +2,8 @@
 .next
 .env*
 node_modules
-scripts/
+scripts/*
+!scripts/import-source-prompts.ts
 dev.db
 dev.db-journal
 backups/

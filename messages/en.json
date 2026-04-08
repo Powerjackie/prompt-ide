@@ -1015,7 +1015,23 @@
     "research": "Research",
     "productivity": "Productivity",
     "communication": "Communication",
-    "general": "General"
+    "general": "General",
+    "ai": "AI",
+    "language": "Language & Translation",
+    "lifestyle": "Lifestyle",
+    "psychology": "Psychology & Social",
+    "philosophy": "Philosophy & Religion",
+    "games": "Games",
+    "medical": "Medical & Health",
+    "finance": "Finance",
+    "music": "Music & Arts",
+    "seo": "SEO",
+    "professional": "Professional Consulting",
+    "debate": "Debate & Speech",
+    "review": "Reviews & Critique",
+    "text": "Text & Words",
+    "interpreter": "Terminal & Interpreter",
+    "fun": "Fun & Trivia"
   },
   "models": {
     "universal": "Universal",
@@ -1895,7 +1911,23 @@
       "research": "Research",
       "productivity": "Productivity",
       "communication": "Communication",
-      "general": "General"
+      "general": "General",
+      "ai": "AI",
+      "language": "Language & Translation",
+      "lifestyle": "Lifestyle",
+      "psychology": "Psychology & Social",
+      "philosophy": "Philosophy & Religion",
+      "games": "Games",
+      "medical": "Medical & Health",
+      "finance": "Finance",
+      "music": "Music & Arts",
+      "seo": "SEO",
+      "professional": "Professional Consulting",
+      "debate": "Debate & Speech",
+      "review": "Reviews & Critique",
+      "text": "Text & Words",
+      "interpreter": "Terminal & Interpreter",
+      "fun": "Fun & Trivia"
     }
   }
 }

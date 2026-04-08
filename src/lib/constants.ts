@@ -35,6 +35,22 @@ export const CATEGORY_OPTIONS = [
   "productivity",
   "communication",
   "general",
+  "ai",
+  "language",
+  "lifestyle",
+  "psychology",
+  "philosophy",
+  "games",
+  "medical",
+  "finance",
+  "music",
+  "seo",
+  "professional",
+  "debate",
+  "review",
+  "text",
+  "interpreter",
+  "fun",
 ]
 
 export const RISK_COLORS = {

@@ -1015,7 +1015,23 @@
     "research": "研究",
     "productivity": "效率",
     "communication": "沟通",
-    "general": "通用"
+    "general": "通用",
+    "ai": "AI",
+    "language": "语言/翻译",
+    "lifestyle": "生活百科",
+    "psychology": "心理/社交",
+    "philosophy": "哲学/宗教",
+    "games": "趣味游戏",
+    "medical": "医疗健康",
+    "finance": "金融顾问",
+    "music": "音乐艺术",
+    "seo": "SEO",
+    "professional": "专业顾问",
+    "debate": "辩论/演讲",
+    "review": "点评/评鉴",
+    "text": "文本/词语",
+    "interpreter": "终端/解释器",
+    "fun": "趣味科普"
   },
   "models": {
     "universal": "通用",
@@ -1895,7 +1911,23 @@
       "research": "研究",
       "productivity": "效率",
       "communication": "沟通",
-      "general": "通用"
+      "general": "通用",
+      "ai": "AI",
+      "language": "语言/翻译",
+      "lifestyle": "生活百科",
+      "psychology": "心理/社交",
+      "philosophy": "哲学/宗教",
+      "games": "趣味游戏",
+      "medical": "医疗健康",
+      "finance": "金融顾问",
+      "music": "音乐艺术",
+      "seo": "SEO",
+      "professional": "专业顾问",
+      "debate": "辩论/演讲",
+      "review": "点评/评鉴",
+      "text": "文本/词语",
+      "interpreter": "终端/解释器",
+      "fun": "趣味科普"
     }
   }
 }

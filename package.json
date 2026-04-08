@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "smoke:browser": "powershell -ExecutionPolicy Bypass -File scripts/playwright-smoke.ps1",
     "smoke:browser:headed": "powershell -ExecutionPolicy Bypass -File scripts/playwright-smoke.ps1 -Headed",
+    "prompts:import:source": "npx tsx scripts/import-source-prompts.ts",
     "db:push": "npx prisma db push",
     "db:migrate:dev": "npx prisma migrate dev",
     "db:migrate:deploy": "npx prisma migrate deploy",
