@@ -42,6 +42,62 @@ export async function getPromptById(id: string): Promise<ActionResult<Serialized
   }
 }
 
+export async function getPromptsPaginated(
+  page: number = 1,
+  pageSize: number = 24
+): Promise<ActionResult<{ prompts: SerializedPrompt[]; total: number; page: number; pageSize: number }>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  try {
+    const skip = (page - 1) * pageSize
+    const [rows, total] = await Promise.all([
+      prisma.prompt.findMany({
+        orderBy: { updatedAt: "desc" },
+        skip,
+        take: pageSize,
+      }),
+      prisma.prompt.count(),
+    ])
+    return {
+      success: true,
+      data: { prompts: rows.map(deserializePrompt), total, page, pageSize },
+    }
+  } catch (e) {
+    return { success: false, error: (e as Error).message }
+  }
+}
+
+export async function getPromptsCount(): Promise<ActionResult<number>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  try {
+    return { success: true, data: await prisma.prompt.count() }
+  } catch (e) {
+    return { success: false, error: (e as Error).message }
+  }
+}
+
+export async function getRecentPrompts(limit: number = 4): Promise<ActionResult<SerializedPrompt[]>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  try {
+    const rows = await prisma.prompt.findMany({
+      where: { status: { notIn: ["inbox", "archived"] } },
+      orderBy: { updatedAt: "desc" },
+      take: limit,
+    })
+    return { success: true, data: rows.map(deserializePrompt) }
+  } catch (e) {
+    return { success: false, error: (e as Error).message }
+  }
+}
+
 export async function toggleFavorite(id: string): Promise<ActionResult<SerializedPrompt>> {
   if (!(await ensureAuthenticated())) {
     return { success: false, error: "Unauthorized" }

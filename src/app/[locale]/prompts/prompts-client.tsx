@@ -12,7 +12,7 @@ import { PageHeader } from "@/components/layout/page-header"
 import { SectionHeader } from "@/components/layout/section-header"
 import { PromptCard } from "@/components/prompts/prompt-card"
 import { PromptFiltersBar } from "@/components/prompts/prompt-filters"
-import { usePrompts } from "@/hooks/use-prompts"
+import { usePromptsPaginated } from "@/hooks/use-prompts"
 import { usePromptFilters } from "@/hooks/use-prompt-filters"
 import { useStaggerReveal } from "@/hooks/use-stagger-reveal"
 import { markPromptLastUsed, toggleFavorite } from "@/app/actions/prompt-surface.actions"
@@ -47,7 +47,15 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
   const tm = useTranslations("models")
   const ts = useTranslations("status")
   const searchParams = useSearchParams()
-  const { prompts: allPrompts, loading } = usePrompts()
+  const {
+    prompts: pagePrompts,
+    loading,
+    page,
+    total,
+    totalPages,
+    nextPage,
+    prevPage,
+  } = usePromptsPaginated(24)
   const [pending, startTransition] = useTransition()
   const [view, setView] = useState<"card" | "list">(() => initialView)
   const [manualOrderIds, setManualOrderIds] = useState<string[]>([])
@@ -75,10 +83,7 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
     return () => media.removeListener(syncView)
   }, [])
 
-  const prompts = useMemo(
-    () => allPrompts.filter((prompt) => prompt.status !== "archived"),
-    [allPrompts]
-  )
+  const prompts = pagePrompts
 
   const { filters, filtered, updateFilter, resetFilters } = usePromptFilters(prompts)
   const promptCardsRef = useStaggerReveal(
@@ -344,7 +349,7 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
 
       <div className="space-y-5">
         <SectionHeader
-          title={tc("promptCount", { count: filtered.length })}
+          title={tc("promptCount", { count: total })}
           description={t("filtersDescription")}
         />
 
@@ -500,6 +505,30 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
                 })}
               </div>
             </div>
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-3 pt-4">
+            <button
+              type="button"
+              onClick={prevPage}
+              disabled={page <= 1}
+              className="brutal-border brutal-shadow-sm px-4 py-2 font-mono text-sm font-semibold disabled:opacity-40 disabled:shadow-none hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-transform"
+            >
+              ←
+            </button>
+            <span className="font-mono text-sm text-muted-foreground">
+              {page} / {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={nextPage}
+              disabled={page >= totalPages}
+              className="brutal-border brutal-shadow-sm px-4 py-2 font-mono text-sm font-semibold disabled:opacity-40 disabled:shadow-none hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-transform"
+            >
+              →
+            </button>
           </div>
         )}
 

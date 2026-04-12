@@ -15,9 +15,9 @@ import {
 } from "lucide-react"
 import { gsap, ScrollTrigger, SplitText, useGSAP } from "@/lib/gsap-config"
 import { getRecentVersions, type RecentPromptVersion } from "@/app/actions/prompt-version.actions"
+import { getRecentPrompts, type SerializedPrompt } from "@/app/actions/prompt-surface.actions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { usePrompts } from "@/hooks/use-prompts"
 
 type LocalePrompt = {
   id: string
@@ -70,7 +70,8 @@ export default function HomePage() {
   const locale = useLocale()
   const t = useTranslations("home")
   const containerRef = useRef<HTMLDivElement>(null)
-  const { prompts: allPrompts, loading } = usePrompts()
+  const [recentPrompts, setRecentPrompts] = useState<SerializedPrompt[]>([])
+  const [loading, setLoading] = useState(true)
   const [recentVersions, setRecentVersions] = useState<RecentPromptVersion[]>([])
   const [recentVersionsLoading, setRecentVersionsLoading] = useState(true)
 
@@ -85,6 +86,18 @@ export default function HomePage() {
       }),
     [locale]
   )
+
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      const result = await getRecentPrompts(4)
+      if (cancelled) return
+      if (result.success) setRecentPrompts(result.data)
+      setLoading(false)
+    }
+    void load()
+    return () => { cancelled = true }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -110,14 +123,7 @@ export default function HomePage() {
     }
   }, [])
 
-  const continueWorkPrompts = useMemo(
-    () =>
-      [...allPrompts]
-        .filter((prompt) => prompt.status !== "inbox" && prompt.status !== "archived")
-        .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
-        .slice(0, 4) as LocalePrompt[],
-    [allPrompts]
-  )
+  const continueWorkPrompts = recentPrompts as LocalePrompt[]
 
   const featureCards = useMemo(
     () =>
