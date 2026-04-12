@@ -71,7 +71,7 @@ export default function HomePage() {
   const t = useTranslations("home")
   const containerRef = useRef<HTMLDivElement>(null)
   const [recentPrompts, setRecentPrompts] = useState<SerializedPrompt[]>([])
-  const [loading, setLoading] = useState(true)
+  const [promptsLoading, setPromptsLoading] = useState(true)
   const [recentVersions, setRecentVersions] = useState<RecentPromptVersion[]>([])
   const [recentVersionsLoading, setRecentVersionsLoading] = useState(true)
 
@@ -93,7 +93,7 @@ export default function HomePage() {
       const result = await getRecentPrompts(4)
       if (cancelled) return
       if (result.success) setRecentPrompts(result.data)
-      setLoading(false)
+      setPromptsLoading(false)
     }
     void load()
     return () => { cancelled = true }
@@ -296,7 +296,7 @@ export default function HomePage() {
     },
     {
       scope: containerRef,
-      dependencies: [continueWorkPrompts.length, recentVersions.length, loading, recentVersionsLoading],
+      dependencies: [continueWorkPrompts.length, recentVersions.length, promptsLoading, recentVersionsLoading],
       revertOnUpdate: true,
     }
   )
@@ -434,7 +434,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            {loading ? (
+            {promptsLoading ? (
               <LoadingWorkbench count={4} />
             ) : continueWorkPrompts.length > 0 ? (
               <div className="space-y-3">

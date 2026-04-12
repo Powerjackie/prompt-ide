@@ -16,6 +16,7 @@ export function CursorMagnet() {
   const nodeRef = useRef<HTMLDivElement>(null)
   const activeTargetRef = useRef<HTMLElement | null>(null)
   const enabledRef = useRef(false)
+  const visibleRef = useRef(false)
   const listenersBoundRef = useRef(false)
   const syncToTargetRef = useRef<(target: HTMLElement | null) => void>(() => {})
 
@@ -95,7 +96,10 @@ export function CursorMagnet() {
     const handlePointerMove = (event: PointerEvent) => {
       if (!enabledRef.current || !nodeRef.current) return
 
-      gsap.set(nodeRef.current, { autoAlpha: 0.82 })
+      if (!visibleRef.current) {
+        visibleRef.current = true
+        gsap.set(nodeRef.current, { autoAlpha: 0.82 })
+      }
 
       const target = event.target instanceof Element
         ? (event.target.closest(MAGNET_SELECTOR) as HTMLElement | null)
@@ -115,6 +119,7 @@ export function CursorMagnet() {
       if (!enabledRef.current) return
       activeTargetRef.current = null
       syncToTargetRef.current(null)
+      visibleRef.current = false
       if (nodeRef.current) gsap.set(nodeRef.current, { autoAlpha: 0 })
     }
 
