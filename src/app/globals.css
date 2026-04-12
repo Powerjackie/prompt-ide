@@ -256,7 +256,7 @@
   }
 
   .app-main {
-    @apply relative flex-1 overflow-visible px-4 pb-8 pt-4 sm:px-6 lg:min-h-0 lg:overflow-y-auto lg:px-8 lg:pb-12 lg:pr-12 lg:pt-6;
+    @apply relative flex-1 overflow-visible px-4 pb-6 pt-4 sm:px-6 lg:min-h-0 lg:overflow-y-auto lg:px-8 lg:pb-8 lg:pt-6;
   }
 
   .app-main__inner {
@@ -394,7 +394,7 @@
 
   .app-panel {
     @apply relative border-2 border-[color:var(--border)] bg-card;
-    box-shadow: 4px 4px 0 0 var(--border);
+    box-shadow: 3px 3px 0 0 var(--border);
   }
 
   .app-panel--muted {
@@ -403,7 +403,7 @@
 
   .page-header {
     @apply relative flex flex-col gap-4 border-[3px] border-[color:var(--border)] bg-card p-5 lg:p-6;
-    box-shadow: 12px 12px 0 0 var(--border);
+    box-shadow: 6px 6px 0 0 var(--border);
   }
 
   .page-header__top {
@@ -489,15 +489,15 @@
   }
 
   .brutal-shadow {
-    box-shadow: 4px 4px 0 0 var(--border);
+    box-shadow: 3px 3px 0 0 var(--border);
   }
 
   .brutal-shadow-lg {
-    box-shadow: 8px 8px 0 0 var(--border);
+    box-shadow: 4px 4px 0 0 var(--border);
   }
 
   .brutal-shadow-xl {
-    box-shadow: 12px 12px 0 0 var(--border);
+    box-shadow: 6px 6px 0 0 var(--border);
   }
 
   .brutal-border {
