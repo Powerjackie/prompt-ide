@@ -48,6 +48,7 @@
     "playground": "实验场",
     "settings": "设置",
     "collapse": "收起",
+    "library": "库",
     "brandTagline": "以发现为先的提示词工作台",
     "promptsSubtitle": "工作台",
     "playgroundSubtitle": "MiniMax 实验室",
@@ -55,10 +56,98 @@
     "sidebarPitchDescription": "把捕获、分析、重构、评测与打包整合进同一套个人工作流。",
     "toggleTheme": "切换主题",
     "logout": "退出登录",
-    "docs": "文档"
+    "docs": "文档",
+    "admin": "管理"
   },
   "home": {
     "title": "首页",
+    "heroCta": {
+      "title": "先跑一次无状态分析",
+      "description": "在实验场粘贴任意提示词，立即获得分类、变量提取和风险识别。",
+      "action": "进入实验场"
+    },
+    "landing": {
+      "kicker": "私人工作台 / 实时系统",
+      "title": "提示词运营",
+      "body": "构建提示词，压测提示词，保存胜出的版本，让工作面保持干净。",
+      "cta": {
+        "playground": "进入实验场",
+        "library": "浏览提示词库"
+      },
+      "meta": {
+        "mode": {
+          "label": "模式",
+          "value": "编写 / 测试 / 发布"
+        },
+        "surface": {
+          "label": "界面",
+          "value": "实验场 + 提示词库 + 模块"
+        },
+        "rule": {
+          "label": "规则",
+          "value": "大胆起草，留下好版本。"
+        }
+      },
+      "featureKicker": "系统流",
+      "featureTitle": "三个界面，一套操作节奏。",
+      "featureBody": "先讲清工作台能做什么，再把用户带回真正的执行面。",
+      "openAction": "打开",
+      "features": {
+        "playground": {
+          "title": "实验场",
+          "strap": "无状态分析",
+          "body": "粘贴任意原始提示词，在进入产品面之前先看变量、结构和风险。",
+          "hint": "运行一次压力检查"
+        },
+        "prompts": {
+          "title": "提示词库",
+          "strap": "工作副本 + 历史",
+          "body": "把可编辑草稿和版本轨迹放在一起，让好指令经得住反复修改。",
+          "hint": "浏览提示词记录"
+        },
+        "modules": {
+          "title": "模块",
+          "strap": "可复用操作块",
+          "body": "把常用指令、语气块和系统片段集中管理，避免盲目复制。",
+          "hint": "查看可复用部件"
+        }
+      },
+      "workbench": {
+        "kicker": "工作台",
+        "title": "回到正在处理的界面。",
+        "body": "下半部分保持紧凑。介绍到此结束，当前工作继续推进。",
+        "continueLabel": "继续工作",
+        "continueTitle": "最近生产草稿",
+        "continueBody": "快速回到已经承载真实指令的提示词。",
+        "continueEmpty": "还没有可继续的生产提示词。",
+        "versionLabel": "版本轨迹",
+        "versionTitle": "最近不可变切片",
+        "versionNoSummary": "暂无变更摘要。",
+        "versionEmpty": "暂无版本轨迹。",
+        "fastAccessLabel": "快速入口",
+        "fastAccessTitle": "把核心路线放近一点。",
+        "links": {
+          "playground": "进入实验场",
+          "prompts": "浏览提示词库",
+          "modules": "查看模块块"
+        }
+      },
+      "footer": {
+        "primary": "视觉重构 / 已验收",
+        "secondary": "首页 + 实验场 + 提示词库 / 在线"
+      }
+    },
+    "status": {
+      "inbox": "收件箱",
+      "production": "生产",
+      "archived": "已归档"
+    },
+    "continueWork": "继续上次工作",
+    "continueWorkDescription": "快速回到你最近处理过的提示词。",
+    "recentVersions": "最近版本变化",
+    "recentVersionsDescription": "追踪提示词的迭代历史。",
+    "recentVersionsEmpty": "暂无版本记录。",
+    "skillsDescription": "管理和运行你的可复用提示词技能。",
     "totalPrompts": "提示词总数",
     "inInbox": "收件箱",
     "favorites": "收藏",
@@ -813,15 +902,7 @@
     "eyebrow": "访问保护",
     "title": "登录",
     "description": "请输入工作台密码以解锁 Prompt IDE。",
-    "discoveryTitle": "发现工作台",
-    "discoveryDescription": "捕获提示词、比较版本、查看 benchmark 改进，并把模块打包进可复用合集。",
-    "agentTitle": "MiniMax Agent",
-    "agentDescription": "在同一个专注工作区里分析、重构并评测提示词，持续推动迭代。",
-    "highlights": {
-      "promptCapture": "提示词捕获",
-      "versionCompare": "版本对比",
-      "skillOperations": "技能运维"
-    },
+    "playgroundHint": "登录后直达实验场",
     "passwordLabel": "密码",
     "passwordPlaceholder": "输入密码",
     "submit": "解锁",
@@ -849,6 +930,7 @@
     "analysisComplete": "分析完成",
     "writeFirst": "请先写一点内容",
     "savePromptFirst": "请先保存提示词，再运行 Agent 分析。",
+    "disabled": "Agent 功能已由管理员禁用。",
     "category": "分类",
     "model": "模型",
     "status": "状态",
@@ -1928,6 +2010,306 @@
       "text": "文本/词语",
       "interpreter": "终端/解释器",
       "fun": "趣味科普"
+    }
+  },
+  "docsSurface": {
+    "eyebrow": "当前界面指南",
+    "title": "使用文档",
+    "description": "这是一份围绕已验收 post-refactor 状态编写的单页使用文档。它只描述当前真实存在的产品界面、明确列出刻意缺席的界面，并同步 Prompts、Editor、Admin 与 Playground 的真实合同。",
+    "open": "打开",
+    "currentPage": "当前页面",
+    "productSurface": {
+      "title": "产品界面",
+      "body": "当前 live surface 是刻意收束过的工作边界。下面这些路由都是真实存在、可作为当前产品面理解的保留集合。",
+      "liveRoutes": {
+        "root": "/",
+        "login": "/login",
+        "playground": "/playground",
+        "prompts": "/prompts",
+        "promptDetail": "/prompts/[id]",
+        "editor": "/editor",
+        "editorDetail": "/editor/[id]",
+        "modules": "/modules",
+        "docs": "/docs",
+        "admin": "/admin"
+      }
+    },
+    "adminPermissions": {
+      "title": "管理与权限",
+      "body": "管理能力仍然在线，但旧的 Settings 路由没有恢复。权限边界依旧明确，并继续由服务端守卫执行。",
+      "items": {
+        "liveRoute": "/admin 是当前唯一的 live 管理界面，而且现在是可编辑的，不再是只读状态。",
+        "memberDenied": "member 用户访问 /admin 时仍然只会看到 denial state，而不是可写控制项。",
+        "serverGuard": "设置读取与写入仍然依赖服务端 ensureAdmin() 保护，而不是只靠前端禁用。",
+        "settingsAbsent": "/settings 仍然是刻意缺席的路由，没有作为平行控制台被恢复。"
+      }
+    },
+    "verification": {
+      "title": "验证基线",
+      "body": "retained-surface browser smoke 已经是 accepted baseline，但它有明确边界，不等于所有深度验收都塞进默认 smoke。",
+      "items": {
+        "smokeCoverage": "当前 smoke baseline 覆盖 retained live routes、可编辑 /admin、member /admin denial、390x844 mobile、reduced motion，以及 command palette 中 Docs/Admin 的可发现性。",
+        "excludedSuccessPath": "默认 smoke 不把 Playground 的 MiniMax provider success-path 当作硬门槛；那仍属于更深层的单独验收。",
+        "port": "项目本地基线端口仍然是 3000。在当前这台 Windows 主机上，浏览器验收临时使用 5173 作为 fallback，但这不构成项目端口合同变更。"
+      }
+    },
+    "workflowSection": {
+      "title": "当前工作路由",
+      "body": "这些才是当前 accepted product 中应该实际使用的路由。本页会继续保持单页结构，不会恢复旧的多层 docs tree。"
+    },
+    "workflow": {
+      "home": {
+        "title": "首页",
+        "description": "从首页工作台进入当前保留的核心产品路线。"
+      },
+      "playground": {
+        "title": "实验场",
+        "description": "运行无状态提示词分析，不把结果写入历史。"
+      },
+      "prompts": {
+        "title": "提示词库",
+        "description": "浏览提示词库，切换卡片/列表视图，并进入提示词详情。"
+      },
+      "editor": {
+        "title": "编辑器",
+        "description": "创建或编辑工作副本，再保存为版本。"
+      },
+      "modules": {
+        "title": "模块",
+        "description": "管理可复用的指令片段，用于提示词组合。"
+      },
+      "docs": {
+        "title": "文档",
+        "description": "在这张单页文档里查看当前产品界面、权限模型和验证规则，不再依赖旧的多层文档树。"
+      },
+      "admin": {
+        "title": "管理",
+        "description": "使用当前 live 的可编辑 Admin Console 管理工作区默认值、Agent 设置和受保护的重置操作。"
+      }
+    },
+    "settingsHydration": {
+      "title": "设置下发",
+      "body": "管理员配置现在不再只是“能写入”的字段，而是会通过经过鉴权的服务端读取路径真正驱动产品默认行为。",
+      "items": {
+        "promptsDesktop": "桌面端 /prompts 现在会读取服务端 defaultView，而不是继续硬编码成 card。",
+        "promptsMobile": "移动端 /prompts 仍然强制使用 card，保留更安全的小屏布局。",
+        "editorNew": "新建 /editor prompt 时，defaultModel 和 defaultStatus 现在来自 effective settings。",
+        "editorExisting": "已有 /editor/[id] prompt 会继续保留自己已经持久化的 model/status，不会被默认值覆盖。",
+        "createPrompt": "createPrompt 的缺省回退现在会先读取 effective settings，再补 model/status。",
+        "agentEnabled": "agent.enabled 现在同时门控 UI 和 server action 路径，包括 Playground 与已保存 prompt 的 agent 动作。"
+      }
+    },
+    "playgroundContract": {
+      "title": "Playground 合同",
+      "body": "即使引入了 Admin Console 和 settings hydration，Playground 仍然保持无状态分析界面这一核心合同。",
+      "items": {
+        "stateless": "Playground 分析仍然是 stateless surface，默认运行路径不会把结果写回 Prompt 历史。",
+        "smokeBaseline": "日常 retained-surface smoke 只校验 Playground 的 UI 可达性：stage 可见、template click 生效、允许时 Analyze 可用。",
+        "deepAcceptance": "provider-backed 的 live-result success 仍然属于更深层的单独验收，不属于默认 smoke baseline。"
+      }
+    },
+    "removed": {
+      "title": "已移除 / 缺席界面",
+      "body": "这些路由在当前产品里是刻意缺席的。这里仅用于同步产品事实，不会把它们做成可点击入口。",
+      "items": {
+        "settings": "/settings 已由 /admin 取代",
+        "skills": "/skills/** 当前不在 live surface",
+        "oldDocs": "旧的 /docs/** 子路由没有恢复",
+        "collections": "/collections 当前不在 live surface",
+        "archive": "/archive 当前不在 live surface",
+        "favorites": "/favorites 当前不在 live surface",
+        "inbox": "/inbox 当前不在 live surface",
+        "tags": "/tags 当前不在 live surface"
+      }
+    }
+  },
+  "adminConsole": {
+    "eyebrow": "管理控制台",
+    "title": "管理控制台",
+    "description": "在同一个管理员控制台里编辑工作区默认值、Agent 行为和受保护的重置操作。",
+    "roleLabel": "当前角色",
+    "liveTitle": "可编辑管理界面",
+    "liveBody": "这里现在是唯一的 live 管理入口。它把之前的只读控制台升级成可编辑界面，但没有恢复 /settings，也没有削弱 ensureAdmin()。",
+    "deniedEyebrow": "需要管理员权限",
+    "deniedTitle": "访问受限",
+    "deniedBody": "你当前以成员身份登录。管理员设置仍由服务端 ensureAdmin 守卫保护。",
+    "readDocs": "查看文档",
+    "settingsUnavailable": "设置不可用",
+    "settingsUnavailableBody": "本次请求没有返回设置数据。",
+    "saveFailed": "设置更新失败。",
+    "workspace": {
+      "title": "工作区默认值",
+      "description": "设置新 Prompt 和日常操作默认继承的工作区基线。",
+      "theme": "主题",
+      "view": "默认视图",
+      "model": "默认模型",
+      "status": "默认状态",
+      "action": "保存工作区默认值",
+      "pending": "保存中...",
+      "saved": "工作区默认值已保存。",
+      "themeOptions": {
+        "light": "浅色",
+        "dark": "深色",
+        "system": "跟随系统"
+      },
+      "viewOptions": {
+        "card": "卡片",
+        "list": "列表"
+      },
+      "statusOptions": {
+        "inbox": "收件箱",
+        "production": "生产",
+        "archived": "归档"
+      },
+      "modelOptions": {
+        "universal": "通用",
+        "claude": "Claude",
+        "gpt4": "GPT-4",
+        "gemini": "Gemini",
+        "deepseek": "DeepSeek"
+      }
+    },
+    "agent": {
+      "title": "Agent 设置",
+      "description": "调整提供方、自动分析行为和阈值敏感度，同时不改变当前路由结构和分析合同。",
+      "enabled": "Agent 启用",
+      "enabledHelp": "管理端控制的 Agent 总开关。",
+      "autoAnalyze": "自动分析",
+      "autoAnalyzeHelp": "在工作流满足条件时自动触发分析。",
+      "analyzeOnPaste": "粘贴后分析",
+      "analyzeOnPasteHelp": "新的 Prompt 文本粘贴后立刻触发分析。",
+      "enableNormalization": "启用规范化",
+      "enableNormalizationHelp": "在深入分析前先对 Prompt 文本做规范化处理。",
+      "enableModuleExtraction": "启用模块提取",
+      "enableModuleExtractionHelp": "允许 Agent 层识别并提出可复用的 Prompt 模块。",
+      "provider": "提供方",
+      "depth": "分析深度",
+      "riskThreshold": "风险阈值",
+      "confidenceThreshold": "置信度阈值",
+      "similarityThreshold": "相似度阈值",
+      "thresholdHelp": "输入 0 到 1 之间的数值。",
+      "action": "保存 Agent 设置",
+      "pending": "保存中...",
+      "saved": "Agent 设置已保存。",
+      "providerOptions": {
+        "mock": "Mock",
+        "openai": "OpenAI",
+        "claude": "Claude",
+        "gemini": "Gemini",
+        "minimax": "MiniMax",
+        "zhipu": "智谱"
+      },
+      "depthOptions": {
+        "quick": "快速",
+        "standard": "标准",
+        "deep": "深入"
+      },
+      "riskOptions": {
+        "low": "低",
+        "medium": "中",
+        "high": "高"
+      }
+    },
+    "danger": {
+      "title": "危险操作区",
+      "body": "重置会把工作区和 Agent 设置恢复到 accepted 的默认基线。只有在你需要一个干净的管理控制台时才应该使用。",
+      "action": "恢复默认值",
+      "pending": "重置中...",
+      "resetDone": "设置已恢复为默认值。"
+    },
+    "resetDialog": {
+      "title": "要重置管理设置吗？",
+      "description": "这个操作会用默认基线覆盖当前工作区和 Agent 设置。只有在你确定要放弃当前配置时才应执行。",
+      "confirm": "立即重置",
+      "cancel": "取消"
+    },
+    "validation": {
+      "thresholdRange": "阈值必须是 0 到 1 之间的数字。"
+    },
+    "portability": {
+      "title": "\u8bbe\u7f6e\u8fc1\u79fb",
+      "description": "\u5c06\u5f53\u524d\u751f\u6548\u7684\u8bbe\u7f6e\u5bfc\u51fa\u4e3a JSON\uff0c\u6216\u8005\u901a\u8fc7\u53d7\u5b88\u536b\u7684\u7ba1\u7406\u8def\u5f84\u9a8c\u8bc1\u540e\u5bfc\u5165\u4e00\u4efd\u5b8c\u6574\u7684\u66ff\u6362 payload\u3002",
+      "copy": "\u590d\u5236 JSON",
+      "download": "\u4e0b\u8f7d JSON",
+      "copySuccess": "\u8bbe\u7f6e JSON \u5df2\u590d\u5236\u3002",
+      "copyFailed": "\u8bbe\u7f6e JSON \u590d\u5236\u5931\u8d25\u3002",
+      "importLabel": "\u5bfc\u5165\u8bbe\u7f6e JSON",
+      "importHelp": "\u7c98\u8d34\u4e00\u4efd\u5b8c\u6574\u7684 AppSettings JSON payload\u3002\u53ea\u6709\u5728\u901a\u8fc7\u9a8c\u8bc1\u5e76\u7ecf\u8fc7\u786e\u8ba4\u540e\u624d\u4f1a\u771f\u6b63\u5bfc\u5165\uff0c\u65e0\u6548 payload \u4e0d\u4f1a\u53d1\u751f\u90e8\u5206\u5199\u5165\u3002",
+      "validate": "\u9a8c\u8bc1 JSON",
+      "validating": "\u9a8c\u8bc1\u4e2d...",
+      "validateSuccess": "\u8bbe\u7f6e JSON \u9a8c\u8bc1\u901a\u8fc7\u3002",
+      "validateFailed": "\u8bbe\u7f6e JSON \u9a8c\u8bc1\u5931\u8d25\u3002",
+      "validateFirst": "\u8bf7\u5148\u5bf9\u5f53\u524d JSON payload \u8fdb\u884c\u9a8c\u8bc1\uff0c\u518d\u6267\u884c\u5bfc\u5165\u3002",
+      "import": "\u5bfc\u5165\u8bbe\u7f6e",
+      "importing": "\u5bfc\u5165\u4e2d...",
+      "importSuccess": "\u8bbe\u7f6e\u5df2\u5bfc\u5165\u3002",
+      "importFailed": "\u8bbe\u7f6e\u5bfc\u5165\u5931\u8d25\u3002",
+      "confirmTitle": "\u8981\u8986\u76d6\u5f53\u524d\u8bbe\u7f6e\u5417\uff1f",
+      "confirmBody": "\u8fd9\u4f1a\u7528\u5df2\u9a8c\u8bc1\u7684\u5bfc\u5165 payload \u66ff\u6362\u5f53\u524d\u6301\u4e45\u5316\u7684 AppSettings\u3002\u53ea\u6709\u5728\u4f60\u786e\u8ba4\u8981\u8986\u76d6\u73b0\u6709\u7ba1\u7406\u57fa\u7ebf\u65f6\u624d\u5e94\u6267\u884c\u3002",
+      "confirmCancel": "\u53d6\u6d88",
+      "confirmAction": "\u7acb\u5373\u5bfc\u5165",
+      "validatedTitle": "\u5df2\u9a8c\u8bc1 payload \u6458\u8981"
+    },
+    "sync": {
+      "title": "同步状态",
+      "body": "所有编辑都通过现有 server action 保存，再用持久化结果回填页面状态，确保控制台始终和真实存储值一致。",
+      "pending": "存在未保存修改",
+      "clean": "已保存并同步"
+    },
+    "diagnostics": {
+      "title": "\u8fd0\u884c\u65f6\u8bca\u65ad",
+      "description": "\u8fd9\u662f\u5f53\u524d\u7ba1\u7406\u72b6\u6001\u3001\u5b58\u50a8\u60c5\u51b5\u548c\u751f\u6548\u9ed8\u8ba4\u503c\u7684\u975e\u79d8\u5bc6\u8fd0\u884c\u6458\u8981\u3002",
+      "refreshFailed": "\u5237\u65b0\u8fd0\u884c\u65f6\u8bca\u65ad\u5931\u8d25\u3002",
+      "role": {
+        "title": "\u89d2\u8272"
+      },
+      "storage": {
+        "title": "\u8bbe\u7f6e\u5b58\u50a8",
+        "key": "\u8bbe\u7f6e key",
+        "rowExists": "\u914d\u7f6e\u884c\u662f\u5426\u5b58\u5728",
+        "source": "\u5f53\u524d\u6765\u6e90",
+        "sourcePersisted": "\u6301\u4e45\u5316\u914d\u7f6e",
+        "sourceFallback": "\u9ed8\u8ba4 fallback"
+      },
+      "database": {
+        "title": "\u6570\u636e\u5e93\u6458\u8981",
+        "provider": "\u63d0\u4f9b\u65b9",
+        "target": "\u76ee\u6807\u63d0\u793a",
+        "mode": "\u5b58\u50a8\u6a21\u5f0f",
+        "modeFile": "\u6587\u4ef6\u578b SQLite"
+      },
+      "defaults": {
+        "title": "\u751f\u6548\u4e2d\u7684\u9ed8\u8ba4\u503c",
+        "view": "\u9ed8\u8ba4\u89c6\u56fe",
+        "model": "\u9ed8\u8ba4\u6a21\u578b",
+        "status": "\u9ed8\u8ba4\u72b6\u6001",
+        "agentEnabled": "Agent \u5df2\u542f\u7528",
+        "provider": "Agent \u63d0\u4f9b\u65b9",
+        "depth": "\u5206\u6790\u6df1\u5ea6"
+      },
+      "values": {
+        "yes": "\u662f",
+        "no": "\u5426",
+        "enabled": "\u5df2\u542f\u7528",
+        "disabled": "\u5df2\u7981\u7528"
+      },
+      "guardrails": {
+        "title": "\u5b88\u536b\u8fb9\u754c",
+        "ensureAdmin": "\u7ba1\u7406\u5199\u5165\u4ecd\u7136\u5fc5\u987b\u7ecf\u8fc7 ensureAdmin()\u3002",
+        "settingsAbsent": "/settings \u4ecd\u7136\u7f3a\u5e2d\u3002",
+        "adminOnly": "/admin \u4ecd\u7136\u662f\u552f\u4e00\u7684 live admin route\u3002"
+      }
+    },
+    "guards": {
+      "title": "服务端守卫",
+      "body": "这个页面不会削弱现有 action contract。读取、写入和重置仍继续依赖 ensureAdmin()。",
+      "ensureAdmin": "ensureAdmin 已启用"
+    },
+    "notes": {
+      "title": "操作说明",
+      "workspace": "工作区默认值会影响主题、Prompt 默认视图、默认模型和初始状态这些 live 基线。",
+      "agent": "Agent 设置用于调节提供方选择、分析深度和自动分析行为，但不会改变无状态分析合同。",
+      "reset": "这里只有一个危险操作：重置，而且始终需要显式二次确认。"
     }
   }
 }

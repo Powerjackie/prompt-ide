@@ -1,231 +1,531 @@
 "use client"
 
-import { useMemo } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Link } from "@/i18n/navigation"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import {
   ArrowRight,
+  ArrowUpRight,
   FileText,
   FlaskConical,
-  Inbox,
-  LibraryBig,
-  Plus,
+  Layers3,
+  PencilRuler,
   Puzzle,
   Sparkles,
-  Star,
 } from "lucide-react"
+import { gsap, ScrollTrigger, SplitText, useGSAP } from "@/lib/gsap-config"
+import { getRecentVersions, type RecentPromptVersion } from "@/app/actions/prompt-version.actions"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { PromptCard } from "@/components/prompts/prompt-card"
-import { PageHeader } from "@/components/layout/page-header"
-import { SectionHeader } from "@/components/layout/section-header"
-import { StatsTile } from "@/components/layout/stats-tile"
 import { usePrompts } from "@/hooks/use-prompts"
-import { useModules } from "@/hooks/use-modules"
+
+type LocalePrompt = {
+  id: string
+  title: string
+  description: string
+  status: string
+  updatedAt: string
+}
+
+const FEATURE_DEFINITIONS = [
+  {
+    id: "playground",
+    href: "/playground",
+    icon: FlaskConical,
+  },
+  {
+    id: "prompts",
+    href: "/prompts",
+    icon: FileText,
+  },
+  {
+    id: "modules",
+    href: "/modules",
+    icon: Puzzle,
+  },
+] as const
+
+function LoadingWorkbench({ count = 3 }: { count?: number }) {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={index} className="home-workbench-row">
+          <div className="h-4 w-1/2 animate-pulse rounded-full bg-muted/70" />
+          <div className="mt-3 h-3 w-1/3 animate-pulse rounded-full bg-muted/50" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function formatPromptStatus(status: string, labels: Record<string, string>) {
+  return labels[status] ?? status
+}
+
+function formatDateTime(value: string, formatter: Intl.DateTimeFormat) {
+  return formatter.format(new Date(value))
+}
 
 export default function HomePage() {
+  const locale = useLocale()
   const t = useTranslations("home")
-  const tc = useTranslations("common")
-  const tn = useTranslations("nav")
+  const containerRef = useRef<HTMLDivElement>(null)
   const { prompts: allPrompts, loading } = usePrompts()
-  const { modules } = useModules()
+  const [recentVersions, setRecentVersions] = useState<RecentPromptVersion[]>([])
+  const [recentVersionsLoading, setRecentVersionsLoading] = useState(true)
 
-  const activePrompts = useMemo(
-    () => allPrompts.filter((prompt) => prompt.status !== "archived"),
-    [allPrompts]
-  )
-  const inboxPrompts = useMemo(
-    () => allPrompts.filter((prompt) => prompt.status === "inbox"),
-    [allPrompts]
-  )
-  const favoritePrompts = useMemo(
-    () => allPrompts.filter((prompt) => prompt.isFavorite && prompt.status !== "archived"),
-    [allPrompts]
-  )
-  const recentPrompts = useMemo(
-    () => [...activePrompts].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt)).slice(0, 6),
-    [activePrompts]
+  const dateFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(locale, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    [locale]
   )
 
-  const topTags = useMemo(() => {
-    const counts = new Map<string, number>()
-    allPrompts.forEach((prompt) =>
-      prompt.tags.forEach((tag) => counts.set(tag, (counts.get(tag) ?? 0) + 1))
-    )
-    return [...counts.entries()].sort((left, right) => right[1] - left[1]).slice(0, 8)
-  }, [allPrompts])
+  useEffect(() => {
+    let cancelled = false
 
-  if (loading) {
-    return (
-      <div className="flex min-h-[40vh] items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    )
-  }
+    const loadRecentVersions = async () => {
+      const result = await getRecentVersions(4)
+
+      if (cancelled) {
+        return
+      }
+
+      if (result.success) {
+        setRecentVersions(result.data)
+      }
+
+      setRecentVersionsLoading(false)
+    }
+
+    void loadRecentVersions()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const continueWorkPrompts = useMemo(
+    () =>
+      [...allPrompts]
+        .filter((prompt) => prompt.status !== "inbox" && prompt.status !== "archived")
+        .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt))
+        .slice(0, 4) as LocalePrompt[],
+    [allPrompts]
+  )
+
+  const featureCards = useMemo(
+    () =>
+      FEATURE_DEFINITIONS.map((feature) => ({
+        ...feature,
+        title: t(`landing.features.${feature.id}.title`),
+        strap: t(`landing.features.${feature.id}.strap`),
+        body: t(`landing.features.${feature.id}.body`),
+        hint: t(`landing.features.${feature.id}.hint`),
+      })),
+    [t]
+  )
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+      let titleSplit: SplitText | null = null
+
+      mm.add("(prefers-reduced-motion: reduce)", () => {
+        gsap.set(
+          [
+            ".gs-home-hero-frame",
+            ".gs-home-kicker",
+            ".gs-home-title",
+            ".gs-home-subcopy",
+            ".gs-home-cta",
+            ".gs-home-meta",
+            ".gs-home-feature-heading",
+            ".gs-home-feature-card",
+            ".gs-home-workbench",
+            ".gs-home-footer",
+          ],
+          { clearProps: "all", autoAlpha: 1, x: 0, y: 0, scale: 1 }
+        )
+      })
+
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        let active = true
+        let heroTl: gsap.core.Timeline | null = null
+
+        const initHomeMotion = () => {
+          if (!active) {
+            return
+          }
+
+          const shellScroller = document.querySelector(".app-main") as HTMLElement | null
+          const isShellScrollerActive =
+            Boolean(shellScroller) &&
+            window.matchMedia("(min-width: 1024px)").matches &&
+            getComputedStyle(shellScroller as HTMLElement).overflowY !== "visible"
+          const scroller = isShellScrollerActive ? shellScroller : undefined
+          const featureCards = gsap.utils.toArray<HTMLElement>(".gs-home-feature-card", containerRef.current)
+
+          titleSplit = new SplitText(".gs-home-title", { type: "words,lines" })
+
+          gsap.set(".gs-home-hero-frame", { autoAlpha: 0, y: 24 })
+          gsap.set(".gs-home-title", { autoAlpha: 1 })
+          gsap.set(".gs-home-kicker, .gs-home-subcopy, .gs-home-cta, .gs-home-meta", {
+            autoAlpha: 0,
+            y: 20,
+          })
+          gsap.set(titleSplit.words, {
+            autoAlpha: 0,
+            y: 28,
+            rotateX: -85,
+            transformOrigin: "0% 100%",
+          })
+
+          heroTl = gsap.timeline({ defaults: { ease: "power2.out" } })
+          heroTl
+            .to(".gs-home-hero-frame", { autoAlpha: 1, y: 0, duration: 0.42 })
+            .to(".gs-home-kicker", { autoAlpha: 1, y: 0, duration: 0.28 }, "-=0.18")
+            .to(
+              titleSplit.words,
+              {
+                autoAlpha: 1,
+                y: 0,
+                rotateX: 0,
+                duration: 0.58,
+                stagger: 0.05,
+              },
+              "-=0.05"
+            )
+            .to(".gs-home-subcopy", { autoAlpha: 1, y: 0, duration: 0.32 }, "-=0.24")
+            .to(".gs-home-cta", { autoAlpha: 1, y: 0, duration: 0.28, stagger: 0.08 }, "-=0.18")
+            .to(".gs-home-meta", { autoAlpha: 1, y: 0, duration: 0.28, stagger: 0.06 }, "-=0.2")
+            .eventCallback("onComplete", () => {
+              gsap.set(".gs-home-hero-frame, .gs-home-kicker, .gs-home-subcopy, .gs-home-cta, .gs-home-meta", {
+                clearProps: "opacity,transform",
+              })
+              gsap.set(titleSplit?.words ?? [], { clearProps: "opacity,transform" })
+            })
+
+          gsap.from(".gs-home-feature-heading", {
+            autoAlpha: 0,
+            y: 18,
+            duration: 0.4,
+            scrollTrigger: {
+              scroller,
+              trigger: ".gs-home-feature-band",
+              start: "top 72%",
+            },
+          })
+
+          if (featureCards.length > 0) {
+            gsap.from(featureCards, {
+              autoAlpha: 0,
+              y: 24,
+              duration: 0.42,
+              stagger: 0.08,
+              ease: "power2.out",
+              scrollTrigger: {
+                scroller,
+                trigger: ".gs-home-feature-track",
+                start: "top 70%",
+                once: true,
+              },
+              onComplete: () => {
+                gsap.set(featureCards, { visibility: "inherit" })
+                gsap.set(featureCards, { clearProps: "opacity,transform" })
+              },
+            })
+          }
+
+          gsap.from(".gs-home-workbench", {
+            autoAlpha: 0,
+            y: 20,
+            duration: 0.4,
+            stagger: 0.1,
+            scrollTrigger: {
+              scroller,
+              trigger: ".gs-home-workbench-zone",
+              start: "top 72%",
+            },
+          })
+
+          gsap.from(".gs-home-footer", {
+            autoAlpha: 0,
+            y: 14,
+            duration: 0.3,
+            scrollTrigger: {
+              scroller,
+              trigger: ".gs-home-footer",
+              start: "top bottom-=100",
+            },
+          })
+
+          ScrollTrigger.refresh()
+        }
+
+        if (document.fonts?.ready) {
+          void document.fonts.ready.then(() => {
+            initHomeMotion()
+          })
+        } else {
+          initHomeMotion()
+        }
+
+        return () => {
+          active = false
+          heroTl?.kill()
+          titleSplit?.revert()
+        }
+      })
+
+      return () => {
+        titleSplit?.revert()
+        mm.revert()
+      }
+    },
+    {
+      scope: containerRef,
+      dependencies: [continueWorkPrompts.length, recentVersions.length, loading, recentVersionsLoading],
+      revertOnUpdate: true,
+    }
+  )
 
   return (
-    <div className="space-y-7">
-      <PageHeader
-        eyebrow={
-          <>
-            <Sparkles className="h-3.5 w-3.5" />
-            {t("eyebrow")}
-          </>
-        }
-        title={t("title")}
-        description={t("description")}
-        actions={
-          <>
-            <Button asChild className="rounded-2xl">
-              <Link href="/editor">
-                <Plus className="mr-1 h-4 w-4" />
-                {tc("newPrompt")}
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="rounded-2xl">
-              <Link href="/playground">
-                <FlaskConical className="mr-1 h-4 w-4" />
-                {tn("playground")}
-              </Link>
-            </Button>
-          </>
-        }
-      >
-        <div className="chip-row">
-          {topTags.length > 0 ? (
-            topTags.map(([tag, count]) => (
-              <Link key={tag} href={`/prompts?tag=${tag}`}>
-                <Badge variant="outline" className="rounded-full border-primary/15 bg-background/70 px-3 py-1 hover:border-primary/30 hover:bg-primary/8 dark:border-primary/18 dark:bg-background/65 dark:hover:border-primary/28 dark:hover:bg-primary/10">
-                  {tag} ({count})
-                </Badge>
-              </Link>
-            ))
-          ) : (
-            <Badge variant="outline" className="rounded-full px-3 py-1">
-              {t("tags")}
-            </Badge>
-          )}
-        </div>
-      </PageHeader>
+    <div ref={containerRef} className="home-landing">
+      <section className="home-hero gs-home-hero-frame brutal-border-thick brutal-shadow-xl">
+        <div className="home-hero__grid">
+          <div className="min-w-0 space-y-6">
+            <div className="home-kicker gs-home-kicker">
+              <Sparkles className="h-3.5 w-3.5" />
+              {t("landing.kicker")}
+            </div>
 
-      <section className="grid gap-4 xl:grid-cols-4">
-        <StatsTile
-          label={t("totalPrompts")}
-          value={activePrompts.length}
-          icon={<FileText className="h-5 w-5" />}
-          hint={t("statsHints.recentAssets", { count: recentPrompts.length })}
-        />
-        <StatsTile
-          label={t("inInbox")}
-          value={inboxPrompts.length}
-          icon={<Inbox className="h-5 w-5" />}
-          hint={t("statsHints.inbox")}
-        />
-        <StatsTile
-          label={t("favorites")}
-          value={favoritePrompts.length}
-          icon={<Star className="h-5 w-5" />}
-          hint={t("statsHints.favorites")}
-        />
-        <StatsTile
-          label={t("modules")}
-          value={modules.length}
-          icon={<Puzzle className="h-5 w-5" />}
-          hint={t("statsHints.modules")}
-        />
-      </section>
+            <div className="space-y-4">
+              <h1 className="home-hero__title gs-home-title">{t("landing.title")}</h1>
+              <p className="home-hero__body gs-home-subcopy">
+                {t("landing.body")}
+              </p>
+            </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.95fr)] xl:items-start">
-        <section className="app-panel space-y-5 p-5 lg:p-6">
-          <SectionHeader
-            title={t("recentPrompts")}
-            description={t("recentDescription")}
-            action={
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/prompts">
-                  {tc("viewAll")}
-                  <ArrowRight className="ml-1 h-3.5 w-3.5" />
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button
+                asChild
+                className="gs-home-cta h-12 rounded-none border-2 border-border bg-foreground px-5 text-sm font-semibold uppercase tracking-[0.16em] text-background shadow-[6px_6px_0_0_var(--border)] transition-transform hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+              >
+                <Link href="/playground">
+                  {t("landing.cta.playground")}
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-            }
-          />
-          <div className="grid gap-4 md:grid-cols-2">
-            {recentPrompts.map((prompt) => (
-              <PromptCard key={prompt.id} prompt={prompt} />
-            ))}
-          </div>
-        </section>
-
-        <div className="space-y-5">
-          <section className="app-panel space-y-5 p-5 lg:p-6">
-          <SectionHeader
-              title={tn("inbox")}
-              description={t("inboxDescription")}
-              action={
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href="/inbox">
-                    {tc("viewAll")}
-                    <ArrowRight className="ml-1 h-3.5 w-3.5" />
-                  </Link>
-                </Button>
-              }
-            />
-            <div className="space-y-3">
-              {inboxPrompts.length > 0 ? (
-                inboxPrompts.slice(0, 3).map((prompt) => (
-                  <Link
-                    key={prompt.id}
-                    href={`/prompts/${prompt.id}`}
-                    className="block rounded-2xl border border-border/70 bg-background/70 p-4 transition hover:-translate-y-0.5 hover:border-primary/20 hover:bg-card dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))] dark:hover:border-primary/24 dark:hover:bg-[linear-gradient(180deg,rgba(17,22,37,0.92),rgba(21,27,46,0.92))]"
-                  >
-                    <div className="line-clamp-1 font-medium">{prompt.title}</div>
-                    {prompt.description ? (
-                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                        {prompt.description}
-                      </p>
-                    ) : null}
-                  </Link>
-                ))
-              ) : (
-                <div className="rounded-2xl border border-dashed border-border p-5 text-sm text-muted-foreground">
-                  {t("inboxEmpty")}
-                </div>
-              )}
+              <Button
+                asChild
+                variant="ghost"
+                className="gs-home-cta h-12 rounded-none border-2 border-border px-5 text-sm font-semibold uppercase tracking-[0.16em] hover:bg-muted"
+              >
+                <Link href="/prompts">
+                  {t("landing.cta.library")}
+                  <ArrowUpRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </div>
+          </div>
+
+          <div className="home-hero__meta">
+            <div className="home-meta-block gs-home-meta">
+              <span className="home-meta-label">{t("landing.meta.mode.label")}</span>
+              <span className="home-meta-value">{t("landing.meta.mode.value")}</span>
+            </div>
+            <div className="home-meta-block gs-home-meta">
+              <span className="home-meta-label">{t("landing.meta.surface.label")}</span>
+              <span className="home-meta-value">{t("landing.meta.surface.value")}</span>
+            </div>
+            <div className="home-meta-block gs-home-meta">
+              <span className="home-meta-label">{t("landing.meta.rule.label")}</span>
+              <span className="home-meta-value">{t("landing.meta.rule.value")}</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-feature-band gs-home-feature-band">
+        <div className="space-y-4">
+          <div className="home-section-intro gs-home-feature-heading">
+            <span className="home-kicker">
+              <PencilRuler className="h-3.5 w-3.5" />
+              {t("landing.featureKicker")}
+            </span>
+            <h2 className="home-section-title">{t("landing.featureTitle")}</h2>
+            <p className="home-section-copy">
+              {t("landing.featureBody")}
+            </p>
+          </div>
+        </div>
+
+        <div className="gs-home-feature-pin home-feature-pin">
+          <div className="gs-home-feature-track home-feature-track">
+            {featureCards.map((card) => {
+              const Icon = card.icon
+              return (
+                <article key={card.href} className="gs-home-feature-card home-feature-card brutal-border-thick brutal-shadow-lg">
+                  <div className="space-y-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-2">
+                        <span className="home-meta-label">{card.strap}</span>
+                        <h3 className="home-feature-card__title">{card.title}</h3>
+                      </div>
+                      <div className="home-feature-card__icon">
+                        <Icon className="h-6 w-6" />
+                      </div>
+                    </div>
+
+                    <p className="home-feature-card__body">{card.body}</p>
+
+                    <div className="space-y-2">
+                      <span className="home-feature-card__hint">{card.hint}</span>
+                      <Button
+                        asChild
+                        variant="ghost"
+                        className="h-11 rounded-none border-2 border-border px-4 text-sm font-semibold uppercase tracking-[0.16em] hover:bg-muted"
+                      >
+                        <Link href={card.href}>
+                          {t("landing.openAction")}
+                          <ArrowUpRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="gs-home-workbench-zone home-workbench-zone">
+        <div className="home-section-intro">
+          <span className="home-kicker">
+            <Layers3 className="h-3.5 w-3.5" />
+            {t("landing.workbench.kicker")}
+          </span>
+          <h2 className="home-section-title">{t("landing.workbench.title")}</h2>
+          <p className="home-section-copy">
+            {t("landing.workbench.body")}
+          </p>
+        </div>
+
+        <div className="home-workbench-grid">
+          <section className="gs-home-workbench home-workbench-main brutal-border-thick brutal-shadow-lg">
+            <div className="space-y-2">
+              <span className="home-meta-label">{t("landing.workbench.continueLabel")}</span>
+              <h3 className="home-workbench-title">{t("landing.workbench.continueTitle")}</h3>
+              <p className="home-workbench-copy">
+                {t("landing.workbench.continueBody")}
+              </p>
+            </div>
+
+            {loading ? (
+              <LoadingWorkbench count={4} />
+            ) : continueWorkPrompts.length > 0 ? (
+              <div className="space-y-3">
+                {continueWorkPrompts.map((prompt) => (
+                  <Link key={prompt.id} href={`/prompts/${prompt.id}`} className="home-workbench-row">
+                    <div className="min-w-0 space-y-1">
+                      <div className="truncate text-base font-semibold">{prompt.title}</div>
+                      <div className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                        {formatDateTime(prompt.updatedAt, dateFormatter)}
+                      </div>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className="rounded-none border-2 border-border bg-background px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-foreground"
+                    >
+                      {formatPromptStatus(prompt.status, {
+                        inbox: t("status.inbox"),
+                        production: t("status.production"),
+                        archived: t("status.archived"),
+                      })}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="home-workbench-empty">{t("landing.workbench.continueEmpty")}</div>
+            )}
           </section>
 
-          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-1">
-            <Link
-              href="/collections"
-              className="app-panel flex items-center justify-between gap-4 p-5 transition hover:-translate-y-0.5 hover:border-primary/20 dark:hover:border-primary/24 dark:hover:shadow-[0_24px_60px_-36px_rgba(79,246,255,0.35)]"
-            >
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                  {tn("collections")}
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {t("collectionsDescription")}
-                </p>
+          <div className="space-y-5">
+            <section className="gs-home-workbench home-workbench-mini brutal-border brutal-shadow">
+              <div className="space-y-2">
+                <span className="home-meta-label">{t("landing.workbench.versionLabel")}</span>
+                <h3 className="home-workbench-title">{t("landing.workbench.versionTitle")}</h3>
               </div>
-              <LibraryBig className="h-6 w-6 text-primary" />
-            </Link>
-            <Link
-              href="/modules"
-              className="app-panel flex items-center justify-between gap-4 p-5 transition hover:-translate-y-0.5 hover:border-primary/20 dark:hover:border-primary/24 dark:hover:shadow-[0_24px_60px_-36px_rgba(79,246,255,0.35)]"
-            >
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-                  {tn("modules")}
+
+              {recentVersionsLoading ? (
+                <LoadingWorkbench count={2} />
+              ) : recentVersions.length > 0 ? (
+                <div className="space-y-3">
+                  {recentVersions.map((version) => (
+                    <Link key={version.id} href={`/prompts/${version.promptId}`} className="home-workbench-row home-workbench-row--stack">
+                      <div className="space-y-1">
+                        <div className="text-sm font-semibold">{version.prompt.title}</div>
+                        <p className="line-clamp-2 text-sm text-muted-foreground">
+                          {version.changeSummary || t("landing.workbench.versionNoSummary")}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between gap-3 text-xs uppercase tracking-[0.12em] text-muted-foreground">
+                        <span>v{version.versionNumber}</span>
+                        <span>{formatDateTime(version.createdAt, dateFormatter)}</span>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {t("modulesDescription")}
-                </p>
+              ) : (
+                <div className="home-workbench-empty">{t("landing.workbench.versionEmpty")}</div>
+              )}
+            </section>
+
+            <section className="gs-home-workbench home-workbench-mini brutal-border brutal-shadow">
+              <div className="space-y-2">
+                <span className="home-meta-label">{t("landing.workbench.fastAccessLabel")}</span>
+                <h3 className="home-workbench-title">{t("landing.workbench.fastAccessTitle")}</h3>
               </div>
-              <Puzzle className="h-6 w-6 text-primary" />
-            </Link>
-          </section>
+              <div className="space-y-3">
+                <Link href="/playground" className="home-access-link">
+                  <span className="flex items-center gap-3">
+                    <FlaskConical className="h-4 w-4" />
+                    <span>{t("landing.workbench.links.playground")}</span>
+                  </span>
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
+                <Link href="/prompts" className="home-access-link">
+                  <span className="flex items-center gap-3">
+                    <FileText className="h-4 w-4" />
+                    <span>{t("landing.workbench.links.prompts")}</span>
+                  </span>
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
+                <Link href="/modules" className="home-access-link">
+                  <span className="flex items-center gap-3">
+                    <Puzzle className="h-4 w-4" />
+                    <span>{t("landing.workbench.links.modules")}</span>
+                  </span>
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </section>
+          </div>
         </div>
-      </div>
+      </section>
+
+      <footer className="gs-home-footer home-footer brutal-border">
+        <span>{t("landing.footer.primary")}</span>
+        <span>{t("landing.footer.secondary")}</span>
+      </footer>
     </div>
   )
 }

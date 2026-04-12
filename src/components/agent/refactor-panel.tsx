@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Link } from "@/i18n/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import { Bot, CheckSquare, FilePenLine, Puzzle, Sparkles, Variable } from "lucide-react"
 import { toast } from "sonner"
@@ -47,6 +46,7 @@ interface RefactorPanelProps {
   compact?: boolean
   onPromptApplied?: (prompt: SerializedPrompt, mode: "draft" | "variables") => void
   onEvolutionComparisonReady?: (comparison: PromptEvolutionComparison | null) => void
+  disabledReason?: string
 }
 
 export function RefactorPanel({
@@ -59,6 +59,7 @@ export function RefactorPanel({
   compact = false,
   onPromptApplied,
   onEvolutionComparisonReady,
+  disabledReason,
 }: RefactorPanelProps) {
   const locale = useLocale() as "zh" | "en"
   const t = useTranslations("agent.refactor")
@@ -241,7 +242,7 @@ export function RefactorPanel({
       return
     }
     if (!canRun) {
-      toast.error(t("saveFirst"))
+      toast.error(disabledReason ?? t("saveFirst"))
       return
     }
 
@@ -391,7 +392,7 @@ export function RefactorPanel({
 
       {!promptId || !canRun ? (
         <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-          {t("saveFirst")}
+          {disabledReason ?? t("saveFirst")}
         </div>
       ) : null}
 
@@ -688,9 +689,6 @@ export function RefactorPanel({
                 <div className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
                   <p>{t("modules.quickAdd.noCollections")}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <Button variant="link" className="px-0" asChild>
-                      <Link href="/collections">{t("modules.quickAdd.openCollections")}</Link>
-                    </Button>
                     <Button
                       variant="ghost"
                       className="px-0"

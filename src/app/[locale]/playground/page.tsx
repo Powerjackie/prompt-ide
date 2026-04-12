@@ -1,29 +1,32 @@
-"use client"
+﻿"use client"
 
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { Link } from "@/i18n/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import {
+  AlertTriangle,
+  ArrowRight,
   Bot,
-  FlaskConical,
-  PenTool,
-  Languages,
-  Headset,
   Code2,
+  CopyCheck,
+  FlaskConical,
+  Headset,
+  Languages,
+  PenTool,
   RotateCcw,
   ShieldAlert,
-  Tags,
-  CopyCheck,
-  Workflow,
   Sparkles,
+  Tags,
+  Workflow,
 } from "lucide-react"
+import { gsap, useGSAP } from "@/lib/gsap-config"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { AnalysisPanel } from "@/components/agent/analysis-panel"
 import { runStatelessAgentAnalysis } from "@/app/actions/agent.actions"
+import { getEffectiveSettings } from "@/app/actions/settings.actions"
 import type { AgentAnalysisResult, AgentTrajectoryStep } from "@/types/agent"
-import { PageHeader } from "@/components/layout/page-header"
-import { SectionHeader } from "@/components/layout/section-header"
 import { toast } from "sonner"
 
 type PlaygroundTemplate = {
@@ -32,19 +35,155 @@ type PlaygroundTemplate = {
   title: string
   description: string
   content: string
-  tone: string
-  iconTone: string
+}
+
+type LocalizedCopy = {
+  kicker: string
+  title: string
+  intro: string
+  stageLabel: string
+  stageBody: string
+  stageMode: string
+  consoleLabel: string
+  consoleBody: string
+  briefLabel: string
+  briefBody: string
+  templatesLabel: string
+  templatesBody: string
+  ledgerMode: string
+  ledgerContract: string
+  ledgerEngine: string
+  idleTitle: string
+  idleBody: string
+  runningTitle: string
+  runningBody: string
+  liveTitle: string
+  liveBody: string
+  stageReady: string
+  stageWaiting: string
+  stageRunning: string
+  variables: string
+  consoleHint: string
+  actionOpenLibrary: string
+  actionOpenModules: string
+  errorTitle: string
+  errorBody: string
+}
+
+const CONSOLE_RUNNING_STEPS = [
+  "Parse prompt structure",
+  "Extract reusable variables",
+  "Read risk and duplicate signals",
+] as const
+
+function LoadingConsoleLine() {
+  return <div className="gs-playground-running-line h-2 w-full rounded-full bg-foreground/10" />
 }
 
 export default function PlaygroundPage() {
-  const locale = useLocale() as "zh" | "en"
+  const locale = useLocale()
   const t = useTranslations("playground")
   const ta = useTranslations("agent")
+  const containerRef = useRef<HTMLDivElement>(null)
+  const stageShellRef = useRef<HTMLDivElement>(null)
   const [content, setContent] = useState("")
   const [analysis, setAnalysis] = useState<AgentAnalysisResult | null>(null)
   const [trajectory, setTrajectory] = useState<AgentTrajectoryStep[] | null>(null)
   const [analyzing, setAnalyzing] = useState(false)
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null)
+  const [analysisError, setAnalysisError] = useState<string | null>(null)
+  const [agentEnabled, setAgentEnabled] = useState(true)
+
+  const isZh = locale.startsWith("zh")
+
+  const ui = useMemo<LocalizedCopy>(
+    () =>
+      isZh
+        ? {
+            kicker: "STATELESS ANALYSIS FLOOR",
+            title: "PLAYGROUND",
+            intro: "把原始提示词放进工作台，先看结构、变量和风险，再决定它要不要进入正式界面。",
+            stageLabel: "工作台舞台",
+            stageBody: "把当前提示词当作待加工材料，不写历史、不落草稿，只做即时压力测试。",
+            stageMode: "即时模式",
+            consoleLabel: "分析控制台",
+            consoleBody: "右侧只负责承接系统返回，不承担编辑，不制造额外状态。",
+            briefLabel: "任务简报",
+            briefBody: "这是一个无状态分析现场。输入、运行、读取、清空，动作短，反馈硬。",
+            templatesLabel: "模板入口",
+            templatesBody: "模板只负责把素材送上舞台，不替代真正的编辑工作。",
+            ledgerMode: "无状态",
+            ledgerContract: "不写入历史",
+            ledgerEngine: "MiniMax-2.7",
+            idleTitle: "控制台待命",
+            idleBody: "输入任意提示词后运行分析。系统会回填分类、变量、重复信号和风险判断。",
+            runningTitle: "系统正在读取",
+            runningBody: "结构、变量与风险信号正在进入控制台。",
+            liveTitle: "实时结果",
+            liveBody: "当前结果只属于这一轮分析，不写历史，不污染工作区。",
+            stageReady: "可以运行分析",
+            stageWaiting: "等待输入素材",
+            stageRunning: "分析中",
+            variables: "变量",
+            consoleHint: "结果按可读顺序进入，不打断工作台。",
+            actionOpenLibrary: "打开 Prompt Library",
+            actionOpenModules: "查看 Modules",
+            errorTitle: "分析中断",
+            errorBody: "这次运行没有拿到结果。先看错误，再决定是重试还是换一段素材。",
+          }
+        : {
+            kicker: "STATELESS ANALYSIS FLOOR",
+            title: "PLAYGROUND",
+            intro: "Drop raw prompt text into the workspace, read structure, variables, and risk first, then decide if it deserves product surface.",
+            stageLabel: "Workspace Stage",
+            stageBody: "Treat the current prompt as working material. No history writeback. No hidden draft state. Just live analysis.",
+            stageMode: "Live Pass",
+            consoleLabel: "Analysis Console",
+            consoleBody: "The right rail only receives system output. It does not edit, and it does not invent extra state.",
+            briefLabel: "Brief",
+            briefBody: "This is a stateless analysis floor. Input, run, read, clear. Short motions. Hard feedback.",
+            templatesLabel: "Template Feed",
+            templatesBody: "Templates are just fast source material. They do not replace the real workspace.",
+            ledgerMode: "Stateless",
+            ledgerContract: "No history writeback",
+            ledgerEngine: "MiniMax-2.7",
+            idleTitle: "Console Standing By",
+            idleBody: "Run any prompt to receive structure, variables, duplicate signals, and risk reads.",
+            runningTitle: "System Reading",
+            runningBody: "Structure, variables, and risk signals are moving into the console now.",
+            liveTitle: "Live Result",
+            liveBody: "This result belongs to the current pass only. It does not write history or mutate the workbench.",
+            stageReady: "Ready to analyze",
+            stageWaiting: "Waiting for source text",
+            stageRunning: "Running analysis",
+            variables: "Variables",
+            consoleHint: "Results arrive in reading order so the workspace stays legible.",
+            actionOpenLibrary: "Open Prompt Library",
+            actionOpenModules: "Inspect Modules",
+            errorTitle: "Analysis Interrupted",
+            errorBody: "This pass did not return a live result. Read the failure first, then retry or change the source text.",
+          },
+    [isZh]
+  )
+
+  useEffect(() => {
+    let active = true
+
+    getEffectiveSettings().then((result) => {
+      if (!active) return
+      if (result.success) {
+        setAgentEnabled(result.data.agent.enabled)
+      }
+    })
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  useEffect(() => {
+    document.title = "Playground | Prompt IDE"
+  }, [])
 
   const templates = useMemo<PlaygroundTemplate[]>(
     () => [
@@ -54,8 +193,6 @@ export default function PlaygroundPage() {
         title: t("templates.writing.title"),
         description: t("templates.writing.description"),
         content: t.raw("templates.writing.content") as string,
-        tone: "border-violet-200/80 bg-violet-50/80 hover:border-violet-300 dark:border-fuchsia-300/60 dark:bg-[linear-gradient(180deg,rgba(255,225,248,0.98),rgba(255,192,236,0.92))] dark:text-[#311236] dark:hover:border-fuchsia-300/80 dark:hover:bg-[linear-gradient(180deg,rgba(255,236,251,1),rgba(255,204,241,0.96))]",
-        iconTone: "border-violet-200/80 bg-violet-100/80 text-violet-700 dark:border-fuchsia-300/52 dark:bg-fuchsia-200/72 dark:text-[#6d1f68]",
       },
       {
         id: "translation",
@@ -63,8 +200,6 @@ export default function PlaygroundPage() {
         title: t("templates.translation.title"),
         description: t("templates.translation.description"),
         content: t.raw("templates.translation.content") as string,
-        tone: "border-sky-200/80 bg-sky-50/80 hover:border-sky-300 dark:border-cyan-300/60 dark:bg-[linear-gradient(180deg,rgba(229,252,255,0.98),rgba(190,241,255,0.94))] dark:text-[#123142] dark:hover:border-cyan-300/82 dark:hover:bg-[linear-gradient(180deg,rgba(238,253,255,1),rgba(204,246,255,0.98))]",
-        iconTone: "border-sky-200/80 bg-sky-100/80 text-sky-700 dark:border-cyan-300/54 dark:bg-cyan-200/72 dark:text-[#155a6b]",
       },
       {
         id: "support",
@@ -72,8 +207,6 @@ export default function PlaygroundPage() {
         title: t("templates.support.title"),
         description: t("templates.support.description"),
         content: t.raw("templates.support.content") as string,
-        tone: "border-emerald-200/80 bg-emerald-50/80 hover:border-emerald-300 dark:border-lime-300/56 dark:bg-[linear-gradient(180deg,rgba(245,255,220,0.98),rgba(216,244,162,0.94))] dark:text-[#24321a] dark:hover:border-lime-300/78 dark:hover:bg-[linear-gradient(180deg,rgba(250,255,232,1),rgba(224,247,175,0.98))]",
-        iconTone: "border-emerald-200/80 bg-emerald-100/80 text-emerald-700 dark:border-lime-300/50 dark:bg-lime-200/72 dark:text-[#4c6418]",
       },
       {
         id: "code",
@@ -81,15 +214,253 @@ export default function PlaygroundPage() {
         title: t("templates.code.title"),
         description: t("templates.code.description"),
         content: t.raw("templates.code.content") as string,
-        tone: "border-amber-200/80 bg-amber-50/80 hover:border-amber-300 dark:border-indigo-300/56 dark:bg-[linear-gradient(180deg,rgba(240,242,255,0.99),rgba(204,214,255,0.95))] dark:text-[#1c2252] dark:hover:border-indigo-300/78 dark:hover:bg-[linear-gradient(180deg,rgba(245,247,255,1),rgba(214,222,255,0.98))]",
-        iconTone: "border-amber-200/80 bg-amber-100/80 text-amber-700 dark:border-indigo-300/50 dark:bg-indigo-200/72 dark:text-[#3946a7]",
       },
     ],
     [t]
   )
 
+  const selectedTemplate = useMemo(
+    () => templates.find((template) => template.id === selectedTemplateId) ?? null,
+    [selectedTemplateId, templates]
+  )
+
   const characterCount = content.length
   const lineCount = content.length === 0 ? 0 : content.split(/\r?\n/).length
+  const variableCount = useMemo(() => {
+    const names = new Set<string>()
+
+    for (const match of content.matchAll(
+      /\{\{\s*([\w.-]+)\s*\}\}|\{([A-Za-z_][\w.-]*)\}|\$\{([A-Za-z_][\w.-]*)\}/g
+    )) {
+      const name = match[1] ?? match[2] ?? match[3]
+      if (name) {
+        names.add(name)
+      }
+    }
+
+    return names.size
+  }, [content])
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+      const entranceTargets = {
+        header: ".gs-playground-header",
+        stage: ".gs-playground-stage",
+        console: ".gs-playground-console",
+        aux: ".gs-playground-aux",
+      }
+
+      mm.add("(prefers-reduced-motion: reduce)", () => {
+        gsap.set(Object.values(entranceTargets), {
+          autoAlpha: 1,
+          x: 0,
+          y: 0,
+          clearProps: "opacity,transform",
+        })
+      })
+
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.set(entranceTargets.header, { autoAlpha: 0, y: 16 })
+        gsap.set(entranceTargets.stage, { autoAlpha: 0, y: 20, scale: 0.985 })
+        gsap.set(entranceTargets.console, { autoAlpha: 0, x: 24 })
+        gsap.set(entranceTargets.aux, { autoAlpha: 0, y: 24 })
+
+        const tl = gsap.timeline({ defaults: { ease: "power2.out" } })
+
+        tl.to(entranceTargets.header, {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.34,
+        })
+          .to(
+            entranceTargets.stage,
+            {
+              autoAlpha: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.44,
+            },
+            "-=0.16"
+          )
+          .to(
+            entranceTargets.console,
+            {
+              autoAlpha: 1,
+              x: 0,
+              duration: 0.4,
+            },
+            "-=0.18"
+          )
+          .to(
+            entranceTargets.aux,
+            {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.36,
+              stagger: 0.08,
+            },
+            "-=0.14"
+          )
+
+        tl.eventCallback("onComplete", () => {
+          gsap.set(Object.values(entranceTargets), { clearProps: "opacity,transform" })
+        })
+
+        return () => {
+          tl.kill()
+        }
+      })
+
+      return () => mm.revert()
+    },
+    { scope: containerRef }
+  )
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+
+      mm.add("(prefers-reduced-motion: reduce)", () => {
+        gsap.set(".gs-playground-metric", {
+          autoAlpha: 1,
+          y: 0,
+          clearProps: "opacity,transform",
+        })
+      })
+
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.fromTo(
+          ".gs-playground-metric",
+          { autoAlpha: 0.45, y: 8 },
+          {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.24,
+            stagger: 0.04,
+            ease: "power2.out",
+            clearProps: "opacity,transform",
+          }
+        )
+      })
+
+      return () => mm.revert()
+    },
+    {
+      scope: containerRef,
+      dependencies: [characterCount, lineCount, variableCount, selectedTemplateId],
+      revertOnUpdate: true,
+    }
+  )
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+
+      mm.add("(prefers-reduced-motion: reduce)", () => {
+        gsap.set(".gs-playground-console-module", {
+          autoAlpha: 1,
+          x: 0,
+          y: 0,
+          visibility: "inherit",
+        })
+        gsap.set(".gs-playground-stage-signal", {
+          autoAlpha: 1,
+          x: 0,
+          visibility: "inherit",
+        })
+      })
+
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        if (analyzing) {
+          gsap.set(".gs-playground-console-module", {
+            autoAlpha: 1,
+            x: 0,
+            y: 0,
+            visibility: "inherit",
+          })
+
+          gsap.fromTo(
+            ".gs-playground-running-line",
+            { transformOrigin: "0% 50%", scaleX: 0.18, autoAlpha: 0.3 },
+            {
+              scaleX: 1,
+              autoAlpha: 1,
+              duration: 0.9,
+              repeat: -1,
+              yoyo: true,
+              ease: "power1.inOut",
+              stagger: 0.12,
+            }
+          )
+
+          gsap.fromTo(
+            ".gs-playground-stage-signal",
+            { autoAlpha: 0.55, x: -6 },
+            {
+              autoAlpha: 1,
+              x: 0,
+              duration: 0.45,
+              repeat: -1,
+              yoyo: true,
+              ease: "power2.inOut",
+            }
+          )
+
+          return
+        }
+
+        gsap.killTweensOf(".gs-playground-running-line")
+        gsap.killTweensOf(".gs-playground-stage-signal")
+
+        if (analysis) {
+          gsap.fromTo(
+            ".gs-playground-console-module",
+            { autoAlpha: 0, x: 18, y: 10 },
+            {
+              autoAlpha: 1,
+              x: 0,
+              y: 0,
+              duration: 0.4,
+              stagger: 0.08,
+              ease: "power2.out",
+              clearProps: "opacity,transform",
+            }
+          )
+
+          gsap.set(".gs-playground-stage-signal", {
+            autoAlpha: 1,
+            x: 0,
+            visibility: "inherit",
+          })
+          return
+        }
+
+        gsap.set(".gs-playground-console-module", {
+          autoAlpha: 1,
+          x: 0,
+          y: 0,
+          visibility: "inherit",
+        })
+        gsap.set(".gs-playground-stage-signal", {
+          autoAlpha: 1,
+          x: 0,
+          visibility: "inherit",
+        })
+      })
+
+      return () => {
+        mm.revert()
+        gsap.killTweensOf(".gs-playground-running-line")
+        gsap.killTweensOf(".gs-playground-stage-signal")
+      }
+    },
+    {
+      scope: containerRef,
+      dependencies: [analyzing, analysis, trajectory?.length ?? 0],
+      revertOnUpdate: true,
+    }
+  )
 
   const handleMobileFocus = useCallback((element: HTMLTextAreaElement | null) => {
     if (!element || typeof window === "undefined") return
@@ -101,15 +472,26 @@ export default function PlaygroundPage() {
   }, [])
 
   const handleAnalyze = async () => {
+    if (!agentEnabled) {
+      const message = ta("disabled")
+      setAnalysisError(message)
+      toast.error(message)
+      return
+    }
     if (!content.trim()) return
 
     setAnalyzing(true)
+    setAnalysis(null)
+    setTrajectory(null)
+    setAnalysisError(null)
 
-    const result = await runStatelessAgentAnalysis(content, locale)
+    const result = await runStatelessAgentAnalysis(content, locale as "zh" | "en")
+
     if (result.success) {
       setAnalysis(result.data.analysis)
       setTrajectory(result.data.trajectory)
     } else {
+      setAnalysisError(result.error)
       toast.error(result.error)
     }
 
@@ -126,250 +508,327 @@ export default function PlaygroundPage() {
     setAnalysis(null)
     setTrajectory(null)
     setSelectedTemplateId(null)
+    setAnalysisError(null)
   }
 
   return (
-    <div className="space-y-7">
-      <PageHeader
-        eyebrow={
-          <>
-            <FlaskConical className="h-3.5 w-3.5" />
-            {t("eyebrow")}
-          </>
-        }
-        title={t("title")}
-        description={t("description")}
-      />
-
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-        <div className="space-y-5 xl:col-start-1 xl:row-start-1">
-          <section className="app-panel space-y-4 p-5 lg:p-6">
-            <SectionHeader
-              title={t("brief.title")}
-              description={t("brief.description")}
-            />
-            <div className="chip-row">
-              <Badge variant="outline" className="rounded-full px-3 py-1">
-                {t("signals.variables")}
-              </Badge>
-              <Badge variant="outline" className="rounded-full px-3 py-1">
-                {t("signals.risk")}
-              </Badge>
-              <Badge variant="outline" className="rounded-full px-3 py-1">
-                {t("signals.similar")}
-              </Badge>
-              <Badge variant="outline" className="rounded-full px-3 py-1">
-                {t("signals.trajectory")}
-              </Badge>
-            </div>
-            <p className="text-sm leading-6 text-muted-foreground">
-              {t("brief.stateless")}
-            </p>
-          </section>
-
-          <section className="app-panel overflow-hidden p-0">
-            <div className="flex flex-col items-start gap-4 border-b border-border/70 px-5 py-4 sm:flex-row sm:justify-between lg:px-6">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  {t("workspace.title")}
-                </div>
-                <p className="text-sm text-muted-foreground">{t("workspace.description")}</p>
-              </div>
-              <Badge variant="outline" className="rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.16em]">
-                {t("workspace.mode")}
-              </Badge>
-            </div>
-
-            <div className="space-y-4 px-5 py-5 lg:px-6 lg:py-6">
-              <Textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder={t("placeholder")}
-                className="min-h-[280px] rounded-[1.5rem] border-border/70 bg-background/80 px-4 py-4 font-mono text-sm leading-6 shadow-inner focus-visible:border-primary/30 focus-visible:ring-primary/15 sm:min-h-[360px] dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.74),rgba(17,22,37,0.88))] dark:text-slate-100 dark:caret-primary"
-                onFocus={(event) => handleMobileFocus(event.currentTarget)}
-              />
-
-              <div className="flex flex-col gap-3 rounded-[1.5rem] border border-border/70 bg-muted/35 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-cyan-200/34 dark:bg-[linear-gradient(180deg,rgba(18,25,42,0.98),rgba(12,18,31,0.98))] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_0_1px_rgba(79,246,255,0.08),0_16px_32px_-18px_rgba(79,246,255,0.28)]">
-                <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground dark:text-slate-100">
-                  <span className="font-medium tracking-[0.01em] dark:text-slate-100">{t("workspace.characters", { count: characterCount })}</span>
-                  <span className="font-medium tracking-[0.01em] dark:text-slate-100">{t("workspace.lines", { count: lineCount })}</span>
-                  <span className="font-medium dark:text-cyan-50">
-                    {content.trim() ? t("workspace.ready") : t("workspace.waiting")}
-                  </span>
-                </div>
-                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="w-full rounded-2xl sm:w-auto dark:text-slate-100 dark:hover:bg-white/7 dark:hover:text-white dark:disabled:opacity-100 dark:disabled:text-slate-100/80"
-                    onClick={handleClear}
-                    disabled={!content && !analysis && !trajectory}
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                    {t("workspace.clear")}
-                  </Button>
-                  <Button
-                    onClick={handleAnalyze}
-                    disabled={analyzing || !content.trim()}
-                    className="w-full rounded-2xl sm:w-auto dark:disabled:opacity-100 dark:disabled:bg-[linear-gradient(135deg,rgba(109,248,255,0.98),rgba(131,145,255,0.92))] dark:disabled:text-[#07131b] dark:disabled:shadow-[0_0_0_1px_rgba(79,246,255,0.22),0_18px_38px_-18px_rgba(79,246,255,0.42)]"
-                  >
-                    <Bot className="h-4 w-4 mr-1" />
-                    {analyzing ? ta("analyzing") : t("analyze")}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </section>
-
+    <div ref={containerRef} className="playground-theater">
+      <header className="playground-theater__header gs-playground-header brutal-border-thick brutal-shadow-lg">
+        <div className="playground-kicker">
+          <FlaskConical className="h-3.5 w-3.5" />
+          {ui.kicker}
         </div>
 
-        <section className="app-panel space-y-4 p-5 lg:p-6 xl:col-start-2 xl:row-start-1 xl:row-span-2">
-          <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between">
-            <SectionHeader
-              title={t("results")}
-              description={t("resultsDescription")}
-            />
-            <Badge variant="outline" className="rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.16em]">
-              {analyzing
-                ? t("resultsState.running")
-                : analysis
-                  ? t("resultsState.live")
-                  : t("resultsState.idle")}
-            </Badge>
+        <div className="playground-theater__hero">
+          <div className="space-y-4">
+            <h1 className="playground-theater__title">{ui.title}</h1>
+            <p className="playground-theater__copy">{ui.intro}</p>
           </div>
-          <div className="rounded-[1.75rem] border border-border/70 bg-background/70 p-4 lg:p-5 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.76),rgba(17,22,37,0.9))]">
-            {!analysis && !analyzing ? (
-              <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 px-6 py-10 text-center sm:min-h-[420px]">
-                <span className="flex h-14 w-14 items-center justify-center rounded-[1.5rem] border border-primary/15 bg-primary/8 text-primary dark:border-primary/28 dark:bg-primary/12 dark:shadow-[0_0_34px_-16px_rgba(79,246,255,0.82)]">
-                  <Bot className="h-6 w-6" />
-                </span>
-                <div className="space-y-2">
-                  <div className="text-lg font-semibold">{t("emptyState.title")}</div>
-                  <p className="max-w-md text-sm leading-6 text-muted-foreground">
-                    {t("emptyState.description")}
-                  </p>
-                </div>
-                <div className="chip-row justify-center">
-                  <Badge variant="outline" className="rounded-full px-3 py-1">
-                    {t("signals.variables")}
-                  </Badge>
-                  <Badge variant="outline" className="rounded-full px-3 py-1">
-                    {t("signals.risk")}
-                  </Badge>
-                  <Badge variant="outline" className="rounded-full px-3 py-1">
-                    {t("signals.similar")}
-                  </Badge>
-                  <Badge variant="outline" className="rounded-full px-3 py-1">
-                    {t("signals.trajectory")}
-                  </Badge>
-                </div>
-              </div>
-            ) : (
-              <AnalysisPanel
-                analysis={analysis}
-                trajectory={trajectory}
-                analyzing={analyzing}
-                analyzingLabel={ta("analyzingWithEngine", { engine: "MiniMax-2.7" })}
-              />
-            )}
-          </div>
-        </section>
 
-        <div className="space-y-5 xl:col-start-1 xl:row-start-2">
-          <section className="app-panel space-y-4 p-5 lg:p-6">
-            <SectionHeader
-              title={t("templates.title")}
-              description={t("templates.description")}
-            />
-            <div className="grid gap-3 md:grid-cols-2">
+          <div className="playground-theater__ledger">
+            <div className="playground-ledger-row">
+              <span className="playground-ledger-label">ENGINE</span>
+              <span className="playground-ledger-value">{ui.ledgerEngine}</span>
+            </div>
+            <div className="playground-ledger-row">
+              <span className="playground-ledger-label">MODE</span>
+              <span className="playground-ledger-value">{ui.ledgerMode}</span>
+            </div>
+            <div className="playground-ledger-row">
+              <span className="playground-ledger-label">CONTRACT</span>
+              <span className="playground-ledger-value">{ui.ledgerContract}</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="playground-theater__grid">
+        <aside className="playground-brief-rail order-3 space-y-5 lg:order-1">
+          <section className="gs-playground-aux playground-side-panel brutal-border brutal-shadow">
+            <div className="flex flex-col gap-3">
+              <span className="playground-panel-label">{ui.briefLabel}</span>
+              <Badge variant="outline" className="rounded-none border-2 px-2 py-1 text-[10px] h-auto !whitespace-normal !w-full leading-[1.4]">
+                {t("brief.stateless")}
+              </Badge>
+            </div>
+            <p className="playground-panel-copy">{ui.briefBody}</p>
+            <div className="playground-brief-signals">
+              <div className="playground-brief-signal">
+                <span className="playground-brief-signal__label">{t("signals.variables")}</span>
+                <span className="playground-brief-signal__value">{ui.consoleHint}</span>
+              </div>
+              <div className="playground-brief-signal">
+                <span className="playground-brief-signal__label">{t("signals.risk")}</span>
+                <span className="playground-brief-signal__value">{t("brief.description")}</span>
+              </div>
+            </div>
+          </section>
+
+          <section className="gs-playground-aux playground-side-panel brutal-border brutal-shadow">
+            <div className="space-y-2">
+              <div className="playground-panel-label">{ui.templatesLabel}</div>
+              <p className="playground-panel-copy">{ui.templatesBody}</p>
+            </div>
+
+            <div className="space-y-3">
               {templates.map((template) => {
                 const Icon = template.icon
+
                 return (
                   <button
                     key={template.id}
                     type="button"
                     onClick={() => handleTemplate(template)}
                     className={[
-                      "rounded-[1.5rem] border p-4 text-left transition hover:-translate-y-0.5",
-                      template.tone,
-                      selectedTemplateId === template.id
-                        ? "ring-2 ring-primary/30 shadow-[0_18px_45px_-35px_rgba(79,70,229,0.45)] dark:shadow-[0_20px_50px_-32px_rgba(79,246,255,0.52)]"
-                        : "",
+                      "playground-template",
+                      selectedTemplateId === template.id ? "playground-template--active" : "",
                     ].join(" ")}
                   >
-                    <div className="flex items-start gap-3">
-                      <span className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border ${template.iconTone}`}>
-                        <Icon className="h-4 w-4" />
-                      </span>
-                      <div className="space-y-1">
-                        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-                          <div className="font-medium">{template.title}</div>
-                          {selectedTemplateId === template.id ? (
-                            <Badge variant="secondary" className="rounded-full px-2 py-0.5 text-[10px] dark:bg-primary/10 dark:text-primary">
-                              {t("templates.loaded")}
-                            </Badge>
-                          ) : null}
-                        </div>
-                        <p className="text-sm leading-6 text-muted-foreground dark:text-black/68">
-                          {template.description}
-                        </p>
-                      </div>
-                    </div>
+                    <span className="playground-template__icon brutal-border">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <span className="space-y-1">
+                      <span className="playground-template__title">{template.title}</span>
+                      <span className="playground-template__copy">{template.description}</span>
+                    </span>
                   </button>
                 )
               })}
             </div>
           </section>
+        </aside>
 
-          <section className="app-panel space-y-4 p-5 lg:p-6">
-            <SectionHeader
-              title={t("outputs.title")}
-              description={t("outputs.description")}
-            />
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="rounded-[1.5rem] border border-border/70 bg-background/70 p-4 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.84))]">
-                <div className="flex items-center gap-2 font-medium">
-                  <Tags className="h-4 w-4 text-primary" />
-                  {t("outputs.suggestions")}
-                </div>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  {t("outputs.suggestionsDescription")}
-                </p>
+        <section className="order-1 lg:order-2">
+          <div className="gs-playground-stage playground-stage-shell brutal-border-thick brutal-shadow-xl" ref={stageShellRef}>
+            <div className="playground-stage-head">
+              <div className="space-y-2">
+                <div className="playground-panel-label">{ui.stageLabel}</div>
+                <p className="playground-panel-copy">{ui.stageBody}</p>
               </div>
-              <div className="rounded-[1.5rem] border border-border/70 bg-background/70 p-4 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.84))]">
-                <div className="flex items-center gap-2 font-medium">
-                  <CopyCheck className="h-4 w-4 text-primary" />
-                  {t("outputs.variables")}
-                </div>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  {t("outputs.variablesDescription")}
-                </p>
-              </div>
-              <div className="rounded-[1.5rem] border border-border/70 bg-background/70 p-4 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.84))]">
-                <div className="flex items-center gap-2 font-medium">
-                  <ShieldAlert className="h-4 w-4 text-primary" />
-                  {t("outputs.risk")}
-                </div>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  {t("outputs.riskDescription")}
-                </p>
-              </div>
-              <div className="rounded-[1.5rem] border border-border/70 bg-background/70 p-4 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.84))]">
-                <div className="flex items-center gap-2 font-medium">
-                  <Workflow className="h-4 w-4 text-primary" />
-                  {t("outputs.trajectory")}
-                </div>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  {t("outputs.trajectoryDescription")}
-                </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="rounded-none border-2 px-2 py-1 text-[10px] uppercase tracking-[0.18em]">
+                  {ui.stageMode}
+                </Badge>
+                {selectedTemplate ? (
+                  <Badge variant="secondary" className="rounded-none border-2 border-border bg-primary text-primary-foreground">
+                    {selectedTemplate.title}
+                  </Badge>
+                ) : null}
               </div>
             </div>
+
+            <div className="playground-stage-metrics">
+              <div className="gs-playground-metric playground-stage-metric brutal-border brutal-shadow-sm">
+                <span className="playground-stage-metric__label">{t("workspace.characters", { count: characterCount })}</span>
+                <span className="playground-stage-metric__value">{characterCount}</span>
+              </div>
+              <div className="gs-playground-metric playground-stage-metric brutal-border brutal-shadow-sm">
+                <span className="playground-stage-metric__label">{t("workspace.lines", { count: lineCount })}</span>
+                <span className="playground-stage-metric__value">{lineCount}</span>
+              </div>
+              <div className="gs-playground-metric playground-stage-metric brutal-border brutal-shadow-sm">
+                <span className="playground-stage-metric__label">{ui.variables}</span>
+                <span className="playground-stage-metric__value">{variableCount}</span>
+              </div>
+            </div>
+
+            <div className="playground-stage-editor brutal-border brutal-shadow-sm">
+              <Textarea
+                value={content}
+                onChange={(event) => setContent(event.target.value)}
+                placeholder={t("placeholder")}
+                className="playground-stage-textarea"
+                onFocus={(event) => handleMobileFocus(event.currentTarget)}
+                aria-label={isZh ? "提示词输入" : "Prompt input"}
+              />
+            </div>
+
+            <div className="playground-stage-footer">
+              <div className="playground-stage-status">
+                <span className="gs-playground-stage-signal playground-stage-status__dot" />
+                <span className="playground-stage-status__text">
+                  {analyzing ? ui.stageRunning : content.trim() ? ui.stageReady : ui.stageWaiting}
+                </span>
+              </div>
+
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                <Button
+                  variant="ghost"
+                  onClick={handleClear}
+                  disabled={!content && !analysis && !trajectory}
+                  className="rounded-none border-2 border-transparent px-4 py-5 sm:w-auto"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  {t("workspace.clear")}
+                </Button>
+                <Button
+                  onClick={handleAnalyze}
+                  disabled={analyzing || !content.trim() || !agentEnabled}
+                  className="rounded-none border-2 border-border px-4 py-5"
+                >
+                  <Bot className="mr-1 h-4 w-4" />
+                  {analyzing ? ta("analyzing") : t("analyze")}
+                </Button>
+              </div>
+            </div>
+
+            {!agentEnabled ? (
+              <p className="mt-3 text-xs font-medium text-destructive">{ta("disabled")}</p>
+            ) : null}
+          </div>
+        </section>
+
+        <aside className="order-2 lg:order-3">
+          <section className="gs-playground-console playground-console-shell brutal-border-thick brutal-shadow-lg">
+            <div className="playground-console-head">
+              <div className="space-y-2">
+                <div className="playground-panel-label">{ui.consoleLabel}</div>
+                <p className="playground-panel-copy">{ui.consoleBody}</p>
+              </div>
+              <Badge variant="outline" className="rounded-none border-2 px-2 py-1 text-[10px] uppercase tracking-[0.18em]">
+                {analyzing
+                  ? t("resultsState.running")
+                  : analysis
+                    ? t("resultsState.live")
+                    : t("resultsState.idle")}
+              </Badge>
+            </div>
+
+            <div className="playground-console-body">
+              {analysisError && !analyzing && !analysis ? (
+                <div className="gs-playground-console-module playground-console-error brutal-border brutal-shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <span className="playground-console-error__icon brutal-border">
+                      <AlertTriangle className="h-5 w-5" />
+                    </span>
+                    <div className="space-y-2">
+                      <h2 className="playground-console-title">{ui.errorTitle}</h2>
+                      <p className="playground-panel-copy">{ui.errorBody}</p>
+                    </div>
+                  </div>
+                  <div className="playground-console-error__body brutal-border">
+                    {analysisError}
+                  </div>
+                </div>
+              ) : null}
+
+              {!analysis && !analyzing && !analysisError ? (
+                <div className="gs-playground-console-module playground-console-idle">
+                  <span className="playground-console-idle__icon brutal-border">
+                    <Sparkles className="h-5 w-5" />
+                  </span>
+                  <div className="space-y-2">
+                    <h2 className="playground-console-title">{ui.idleTitle}</h2>
+                    <p className="playground-panel-copy">{ui.idleBody}</p>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="playground-console-note brutal-border">
+                      <Tags className="h-4 w-4 text-primary" />
+                      <div>
+                        <div className="playground-console-note__title">{t("outputs.suggestions")}</div>
+                        <p className="playground-console-note__copy">{t("outputs.suggestionsDescription")}</p>
+                      </div>
+                    </div>
+                    <div className="playground-console-note brutal-border">
+                      <CopyCheck className="h-4 w-4 text-primary" />
+                      <div>
+                        <div className="playground-console-note__title">{t("outputs.variables")}</div>
+                        <p className="playground-console-note__copy">{t("outputs.variablesDescription")}</p>
+                      </div>
+                    </div>
+                    <div className="playground-console-note brutal-border">
+                      <ShieldAlert className="h-4 w-4 text-primary" />
+                      <div>
+                        <div className="playground-console-note__title">{t("outputs.risk")}</div>
+                        <p className="playground-console-note__copy">{t("outputs.riskDescription")}</p>
+                      </div>
+                    </div>
+                    <div className="playground-console-note brutal-border">
+                      <Workflow className="h-4 w-4 text-primary" />
+                      <div>
+                        <div className="playground-console-note__title">{t("outputs.trajectory")}</div>
+                        <p className="playground-console-note__copy">{t("outputs.trajectoryDescription")}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="playground-console-actions">
+                    <Link href="/prompts" className="playground-inline-link">
+                      {ui.actionOpenLibrary}
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                    <Link href="/modules" className="playground-inline-link">
+                      {ui.actionOpenModules}
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                </div>
+              ) : null}
+
+              {analyzing ? (
+                <div className="gs-playground-console-module playground-console-running">
+                  <div className="space-y-2">
+                    <div className="playground-panel-label">{ui.runningTitle}</div>
+                    <p className="playground-panel-copy">{ui.runningBody}</p>
+                  </div>
+                  <div className="space-y-3">
+                    <LoadingConsoleLine />
+                    <LoadingConsoleLine />
+                    <LoadingConsoleLine />
+                  </div>
+                  <div className="space-y-3">
+                    {CONSOLE_RUNNING_STEPS.map((step) => (
+                      <div key={step} className="playground-running-step brutal-border">
+                        <span className="playground-running-step__index" />
+                        <span>{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {analysis ? (
+                <>
+                  <div className="gs-playground-console-module playground-console-live-head brutal-border brutal-shadow-sm">
+                    <div className="space-y-2">
+                      <div className="playground-panel-label">{ui.liveTitle}</div>
+                      <p className="playground-panel-copy">{ui.liveBody}</p>
+                    </div>
+
+                    <div className="playground-console-summary">
+                      <div className="playground-console-summary__item">
+                        <span className="playground-console-summary__label">{t("signals.risk")}</span>
+                        <span className="playground-console-summary__value">{analysis.riskLevel.toUpperCase()}</span>
+                      </div>
+                      <div className="playground-console-summary__item">
+                        <span className="playground-console-summary__label">{t("outputs.variables")}</span>
+                        <span className="playground-console-summary__value">{analysis.extractedVariables.length}</span>
+                      </div>
+                      <div className="playground-console-summary__item">
+                        <span className="playground-console-summary__label">{ta("confidence")}</span>
+                        <span className="playground-console-summary__value">
+                          {Math.round(analysis.confidence * 100)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="gs-playground-console-module playground-console-live-panel brutal-border">
+                    <AnalysisPanel
+                      analysis={analysis}
+                      trajectory={trajectory}
+                      analyzing={analyzing}
+                      analyzingLabel={ta("analyzingWithEngine", { engine: "MiniMax-2.7" })}
+                    />
+                  </div>
+                </>
+              ) : null}
+            </div>
           </section>
-        </div>
-
-
+        </aside>
       </div>
     </div>
   )
 }
+

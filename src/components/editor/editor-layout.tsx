@@ -17,28 +17,36 @@ import { AnalysisPanel } from "@/components/agent/analysis-panel"
 import { RefactorPanel } from "@/components/agent/refactor-panel"
 import { VersionHistoryPanel } from "@/components/prompts/version-history-panel"
 import {
-  getPromptById,
-  createPrompt,
-  updatePrompt as updatePromptAction,
   type SerializedPrompt,
 } from "@/app/actions/prompt.actions"
+import {
+  createPrompt,
+  updatePrompt as updatePromptAction,
+} from "@/app/actions/prompt-editor.actions"
+import { getPromptById } from "@/app/actions/prompt-surface.actions"
 import { runAgentAnalysis } from "@/app/actions/agent.actions"
 import { getHistoryByPromptId } from "@/app/actions/agent-history.actions"
-import type { Variable } from "@/types/prompt"
+import type { ModelType, PromptStatus, Variable } from "@/types/prompt"
 import type { AgentAnalysisResult, AgentTrajectoryStep } from "@/types/agent"
 import type { PromptVersionSnapshot } from "@/types/prompt-version"
 import { toast } from "sonner"
 
 interface EditorLayoutProps {
   promptId?: string
+  defaultModel?: ModelType
+  defaultStatus?: PromptStatus
+  agentEnabled?: boolean
 }
 
-function createInitialMeta(prompt?: SerializedPrompt | null): MetadataValues {
+function createInitialMeta(
+  prompt?: SerializedPrompt | null,
+  defaults?: { model: ModelType; status: PromptStatus }
+): MetadataValues {
   return {
     title: prompt?.title ?? "",
     description: prompt?.description ?? "",
-    model: prompt?.model ?? "universal",
-    status: prompt?.status ?? "inbox",
+    model: prompt?.model ?? defaults?.model ?? "universal",
+    status: prompt?.status ?? defaults?.status ?? "inbox",
     category: prompt?.category ?? "general",
     source: prompt?.source ?? "",
     tags: prompt?.tags ?? [],
@@ -65,7 +73,12 @@ function createSnapshotFromEditorState(
   }
 }
 
-export function EditorLayout({ promptId }: EditorLayoutProps) {
+export function EditorLayout({
+  promptId,
+  defaultModel = "universal",
+  defaultStatus = "inbox",
+  agentEnabled = true,
+}: EditorLayoutProps) {
   const tc = useTranslations("common")
   const tp = useTranslations("prompts")
   // Load existing prompt from DB
@@ -101,24 +114,45 @@ export function EditorLayout({ promptId }: EditorLayoutProps) {
     )
   }
 
-  return <EditorForm key={existing?.id ?? "new"} promptId={promptId} existing={existing} />
+  return (
+    <EditorForm
+      key={existing?.id ?? "new"}
+      promptId={promptId}
+      existing={existing}
+      defaultModel={defaultModel}
+      defaultStatus={defaultStatus}
+      agentEnabled={agentEnabled}
+    />
+  )
 }
 
 interface EditorFormProps {
   promptId?: string
   existing: SerializedPrompt | null
+  defaultModel: ModelType
+  defaultStatus: PromptStatus
+  agentEnabled: boolean
 }
 
-function EditorForm({ promptId, existing }: EditorFormProps) {
+function EditorForm({
+  promptId,
+  existing,
+  defaultModel,
+  defaultStatus,
+  agentEnabled,
+}: EditorFormProps) {
   const router = useRouter()
   const locale = useLocale() as "zh" | "en"
   const t = useTranslations("editor")
   const tc = useTranslations("common")
   const ta = useTranslations("agent")
+  const agentDisabledReason = agentEnabled ? undefined : ta("disabled")
   const [pending, startTransition] = useTransition()
   const [savedPrompt, setSavedPrompt] = useState(existing)
   const [content, setContent] = useState(existing?.content ?? "")
-  const [meta, setMeta] = useState<MetadataValues>(() => createInitialMeta(existing))
+  const [meta, setMeta] = useState<MetadataValues>(() =>
+    createInitialMeta(existing, { model: defaultModel, status: defaultStatus })
+  )
   const [dirty, setDirty] = useState(false)
   const [analysis, setAnalysis] = useState<AgentAnalysisResult | null>(
     existing?.agentAnalysis ?? null
@@ -240,6 +274,10 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
 
   // Run analysis
   const handleAnalyze = useCallback(async () => {
+    if (!agentEnabled) {
+      toast.error(ta("disabled"))
+      return
+    }
     if (!content.trim()) {
       toast.error(ta("writeFirst"))
       return
@@ -272,7 +310,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
       }
       setAnalyzing(false)
     })
-  }, [content, dirty, locale, savedPrompt, startTransition, ta])
+  }, [agentEnabled, content, dirty, locale, savedPrompt, startTransition, ta])
 
   const handleRefactorApplied = useCallback(
     (updatedPrompt: SerializedPrompt, mode: "draft" | "variables") => {
@@ -282,12 +320,12 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
 
       if (mode === "draft") {
         setContent(updatedPrompt.content)
-        setMeta(createInitialMeta(updatedPrompt))
+        setMeta(createInitialMeta(updatedPrompt, { model: defaultModel, status: defaultStatus }))
       }
 
       setDirty(false)
     },
-    []
+    [defaultModel, defaultStatus]
   )
 
   // Ctrl+S shortcut
@@ -344,7 +382,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
                 {tc("back")}
               </Link>
             </Button>
-            <Button onClick={handleSave} disabled={pending} className="rounded-2xl">
+            <Button id="editor-save-button" onClick={handleSave} disabled={pending} className="rounded-2xl">
               <Save className="mr-1 h-4 w-4" />
               {isEdit ? tc("save") : tc("create")}
             </Button>
@@ -366,7 +404,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(380px,0.92fr)] xl:items-start">
         {/* Left: Metadata + Editor */}
         <div className="space-y-6">
-          <div className="app-panel p-4 sm:p-6">
+          <div className="app-panel p-4 dark:shadow-none sm:p-6">
             <SectionHeader
               title={t("metadataTitle")}
               description={t("metadataDescription")}
@@ -376,7 +414,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
             </div>
           </div>
 
-          <div className="app-panel space-y-4 p-4 sm:p-6">
+          <div className="app-panel space-y-4 p-4 dark:shadow-none sm:p-6">
             <SectionHeader
               title={t("contentLabel")}
               description={t("contentDescription")}
@@ -390,7 +428,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
         </div>
 
         {/* Right: Preview / Agent / Modules tabs */}
-        <div className="app-panel flex min-h-[420px] flex-col overflow-hidden p-4 sm:p-5 md:min-h-[680px] xl:self-start xl:max-h-[min(920px,calc(100vh-8rem))] xl:p-6 dark:shadow-[0_28px_92px_-42px_rgba(0,0,0,0.88),0_0_24px_-20px_rgba(79,246,255,0.4)]">
+        <div className="app-panel flex min-h-[420px] flex-col overflow-hidden p-4 dark:shadow-none sm:p-5 md:min-h-[680px] xl:self-start xl:max-h-[min(920px,calc(100vh-8rem))] xl:p-6">
           <div className="mb-4">
             <SectionHeader
               title={t("toolsTitle")}
@@ -415,7 +453,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="mt-4 min-h-0 flex-1 overflow-y-auto">
-              <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
+              <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12">
                 <PreviewPanel content={content} variables={variables} />
               </div>
             </TabsContent>
@@ -426,7 +464,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
                   <TabsTrigger value="refactor">{ta("modes.refactor")}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="analysis" className="mt-4 min-h-0 flex-1 overflow-y-auto">
-                  <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
+                  <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12">
                     <AnalysisPanel
                       analysis={analysis}
                       trajectory={trajectory}
@@ -434,11 +472,13 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
                       onAnalyze={handleAnalyze}
                       analyzing={analyzing}
                       analyzingLabel={ta("analyzingWithEngine", { engine: "MiniMax-2.7" })}
+                      runDisabled={!agentEnabled}
+                      runDisabledReason={agentDisabledReason}
                     />
                   </div>
                 </TabsContent>
                 <TabsContent value="refactor" className="mt-4 min-h-0 flex-1 overflow-y-auto">
-                  <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
+                  <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12">
                     <RefactorPanel
                       promptId={savedPrompt?.id}
                       promptContent={content}
@@ -448,8 +488,9 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
                         content,
                         tags: meta.tags,
                       }}
-                      canRun={Boolean(savedPrompt?.id) && !dirty}
-                      canApply={Boolean(savedPrompt?.id) && !dirty}
+                      canRun={agentEnabled && Boolean(savedPrompt?.id) && !dirty}
+                      canApply={agentEnabled && Boolean(savedPrompt?.id) && !dirty}
+                      disabledReason={agentDisabledReason}
                       refreshKey={savedPrompt?.updatedAt}
                       onPromptApplied={handleRefactorApplied}
                     />
@@ -459,7 +500,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
             </TabsContent>
             {savedPrompt?.id && (
               <TabsContent value="versions" className="mt-4 min-h-0 flex-1 overflow-y-auto">
-                <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
+                <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12">
                   <VersionHistoryPanel
                     promptId={savedPrompt.id}
                     currentSnapshot={currentSnapshot}
@@ -467,7 +508,12 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
                     onRestore={(restoredPrompt) => {
                       setSavedPrompt(restoredPrompt)
                       setContent(restoredPrompt.content)
-                      setMeta(createInitialMeta(restoredPrompt))
+                      setMeta(
+                        createInitialMeta(restoredPrompt, {
+                          model: defaultModel,
+                          status: defaultStatus,
+                        })
+                      )
                       setAnalysis(restoredPrompt.agentAnalysis ?? null)
                       setTrajectory(null)
                       setDirty(false)
@@ -477,7 +523,7 @@ function EditorForm({ promptId, existing }: EditorFormProps) {
               </TabsContent>
             )}
             <TabsContent value="modules" className="mt-4 min-h-0 flex-1 overflow-y-auto">
-              <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
+              <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12">
                 <ModuleInserter onInsert={handleInsertModule} />
               </div>
             </TabsContent>

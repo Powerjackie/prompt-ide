@@ -6,8 +6,9 @@ import { prisma } from "@/lib/prisma"
 import { analyzePromptWithAgent, refactorPromptWithAgent } from "@/agent/llm-agent"
 import type { AgentTrajectoryStep } from "@/types/agent"
 import { isPromptRefactorRunOutput, type PromptRefactorResult } from "@/types/refactor"
-import { updatePrompt, type SerializedPrompt } from "@/app/actions/prompt.actions"
+import { updatePrompt, type SerializedPrompt } from "@/app/actions/prompt-editor.actions"
 import { revalidatePath } from "next/cache"
+import { getDefaultSettings, getEffectiveSettings } from "@/lib/settings/effective-settings"
 
 type ActionResult<T = unknown> =
   | { success: true; data: T }
@@ -19,6 +20,22 @@ function formatAgentError(error: unknown, locale: "zh" | "en" | undefined) {
 
 function revalidateAll() {
   revalidatePath("/[locale]", "layout")
+}
+
+async function ensureAgentEnabled() {
+  const result = await getEffectiveSettings()
+  const enabled = result.success
+    ? result.data.agent.enabled
+    : getDefaultSettings().agent.enabled
+
+  if (!enabled) {
+    return {
+      ok: false as const,
+      message: "Agent features are disabled by admin settings.",
+    }
+  }
+
+  return { ok: true as const }
 }
 
 async function resolvePromptEvolutionVersions(promptId: string) {
@@ -54,6 +71,11 @@ export async function runAgentAnalysis(
 > {
   if (!(await ensureAuthenticated())) {
     return { success: false, error: "Unauthorized" }
+  }
+
+  const gate = await ensureAgentEnabled()
+  if (!gate.ok) {
+    return { success: false, error: gate.message }
   }
 
   try {
@@ -107,6 +129,11 @@ export async function runStatelessAgentAnalysis(
     return { success: false, error: "Unauthorized" }
   }
 
+  const gate = await ensureAgentEnabled()
+  if (!gate.ok) {
+    return { success: false, error: gate.message }
+  }
+
   try {
     const result = await analyzePromptWithAgent(content, "playground-ephemeral", locale)
 
@@ -158,6 +185,11 @@ export async function runPromptRefactor(
 > {
   if (!(await ensureAuthenticated())) {
     return { success: false, error: "Unauthorized" }
+  }
+
+  const gate = await ensureAgentEnabled()
+  if (!gate.ok) {
+    return { success: false, error: gate.message }
   }
 
   try {

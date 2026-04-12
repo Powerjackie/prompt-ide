@@ -3,8 +3,10 @@
 import type { ReactNode } from "react"
 import dynamic from "next/dynamic"
 import { usePathname } from "@/i18n/navigation"
-import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/sonner"
+import { RouteTransitionOverlay } from "@/components/layout/route-transition-overlay"
+import { CursorMagnet } from "@/components/layout/cursor-magnet"
+import { GlobalMarquee } from "@/components/layout/global-marquee"
 
 interface AppShellProps {
   children: ReactNode
@@ -29,7 +31,7 @@ export function AppShell({ children }: AppShellProps) {
   if (isAuthRoute) {
     return (
       <div className="auth-shell">
-        <div className="relative z-10 w-full max-w-[1080px]">{children}</div>
+        {children}
         <Toaster />
       </div>
     )
@@ -45,13 +47,16 @@ export function AppShell({ children }: AppShellProps) {
           <div className="app-shell__main-frame">
             <div className="app-shell__content">
               <TopBar />
-              <main className="app-main">
-                <div className={cn("app-main__inner")}>{children}</div>
+              <main id="main-content" className="app-main">
+                <div className="app-main__inner">{children}</div>
               </main>
+              <GlobalMarquee />
             </div>
           </div>
         </div>
       </div>
+      <RouteTransitionOverlay />
+      <CursorMagnet />
       <SearchDialog />
       <Toaster />
     </div>

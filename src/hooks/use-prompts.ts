@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { getPrompts, type SerializedPrompt } from "@/app/actions/prompt.actions"
+import { getPrompts, type SerializedPrompt } from "@/app/actions/prompt-surface.actions"
 
 /**
  * Client-side hook to fetch prompts from the database via server actions.

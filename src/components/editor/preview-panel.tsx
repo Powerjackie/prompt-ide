@@ -26,7 +26,7 @@ export function PreviewPanel({ content, variables }: PreviewPanelProps) {
 
   if (!content) {
     return (
-      <div className="flex min-h-[320px] flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-border/70 bg-muted/15 px-6 py-12 text-center dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.82))]">
+        <div className="flex min-h-[320px] flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-border/70 bg-muted/15 px-6 py-12 text-center dark:border-primary/12">
         <div className="mb-3 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.24em] text-muted-foreground dark:border-primary/12 dark:bg-background/70">
           {t("previewLiveTitle")}
         </div>
@@ -68,7 +68,7 @@ export function PreviewPanel({ content, variables }: PreviewPanelProps) {
         </div>
       )}
 
-      <div className="rounded-[1.5rem] border border-border/70 bg-muted/20 p-4 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.74),rgba(17,22,37,0.88))]">
+      <div className="rounded-[1.5rem] border border-border/70 bg-muted/20 p-4 dark:border-primary/12">
         <div className="mb-3 flex items-center justify-between gap-3 border-b border-border/60 pb-3">
           <div>
             <p className="text-sm font-semibold tracking-tight">{t("previewRenderedTitle")}</p>

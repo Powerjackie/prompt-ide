@@ -1,0 +1,98 @@
+name: Playwright Production Acceptance Gate
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  retained-surface-production-smoke:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: file:./ci-playwright.db
+      ADMIN_PASSWORD: ci-admin-password
+      MEMBER_PASSWORD: ci-member-password
+      MINIMAX_API_KEY: ci-minimax-key
+      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      NEXT_TELEMETRY_DISABLED: "1"
+      PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+      PLAYWRIGHT_MANAGE_SERVER: "1"
+      PLAYWRIGHT_SERVER_MODE: prod
+      LHCI_BASE_URL: http://127.0.0.1:3000
+      LHCI_PORT: "3000"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Reset CI SQLite database
+        run: rm -f ci-playwright.db ci-playwright.db-journal
+
+      - name: Push Prisma schema to SQLite
+        run: npm run db:push
+
+      - name: Seed retained-surface smoke data
+        run: npm run db:seed
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Resolve Chromium path for LHCI
+        run: echo "LHCI_CHROME_PATH=$(node -e \"console.log(require('playwright').chromium.executablePath())\")" >> $GITHUB_ENV
+
+      - name: Build production app
+        run: npm run build
+
+      - name: Run production-mode retained-surface smoke
+        run: npm run smoke:browser:prod:ci
+
+      - name: Run accessibility gate on retained routes
+        run: npm run smoke:browser:a11y:ci
+
+      - name: Run Lighthouse performance baseline
+        run: npm run perf:lhci:run
+
+      - name: Upload Playwright HTML report
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: playwright-report
+          path: output/playwright/report/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload Playwright test results
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: playwright-test-results
+          path: |
+            output/playwright/test-results/
+            output/playwright/smoke/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload Lighthouse baseline artifacts
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: lighthouse-baseline
+          path: .lighthouseci/
+          if-no-files-found: warn
+          retention-days: 30

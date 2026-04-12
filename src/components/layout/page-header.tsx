@@ -19,7 +19,7 @@ export function PageHeader({
   className,
 }: PageHeaderProps) {
   return (
-    <section className={cn("page-header", className)}>
+    <section className={cn("page-header dark:shadow-none", className)}>
       <div className="page-header__top">
         <div className="space-y-3">
           {eyebrow ? <div className="page-header__eyebrow">{eyebrow}</div> : null}

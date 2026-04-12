@@ -37,12 +37,14 @@ import {
 import {
   clonePrompt,
   deletePrompt as deletePromptAction,
-  getPromptById,
-  markPromptLastUsed,
   setPromptStatus,
-  toggleFavorite,
   type SerializedPrompt,
 } from "@/app/actions/prompt.actions"
+import {
+  getPromptById,
+  markPromptLastUsed,
+  toggleFavorite,
+} from "@/app/actions/prompt-surface.actions"
 import { runAgentAnalysis } from "@/app/actions/agent.actions"
 import { getHistoryByPromptId } from "@/app/actions/agent-history.actions"
 import { getPromptVersionsByPromptId } from "@/app/actions/prompt-version.actions"
@@ -530,7 +532,7 @@ export default function PromptDetailPage({
               </Button>
             </CardHeader>
             <CardContent>
-              <pre className="max-h-[36rem] overflow-auto whitespace-pre-wrap break-words rounded-[1.5rem] border border-border/60 bg-muted/40 p-4 font-mono text-sm leading-7 sm:p-5 dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.72),rgba(17,22,37,0.86))]">
+                    <pre className="max-h-[36rem] overflow-auto whitespace-pre-wrap break-words rounded-[1.5rem] border border-border/60 bg-muted/40 p-4 font-mono text-sm leading-7 sm:p-5 dark:border-primary/12">
                 {prompt.content}
               </pre>
             </CardContent>

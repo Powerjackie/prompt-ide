@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 import {
@@ -14,192 +14,213 @@ import {
   CommandSeparator,
 } from "@/components/ui/command"
 import {
+  BookOpen,
   FileText,
   Puzzle,
   PenSquare,
-  Inbox,
-  Star,
-  Archive,
-  Tags,
-  Settings,
   FlaskConical,
   LayoutDashboard,
-  LibraryBig,
-  Layers3,
+  ShieldCheck,
 } from "lucide-react"
-import { useAuthz } from "@/components/auth/authz-provider"
-import { getPrompts, type SerializedPrompt } from "@/app/actions/prompt.actions"
+import { getPrompts, type SerializedPrompt } from "@/app/actions/prompt-surface.actions"
 import { getModules, type SerializedModule } from "@/app/actions/module.actions"
-import { getCollections } from "@/app/actions/collection.actions"
-import { getSkills } from "@/app/actions/skill.actions"
-import type { Collection } from "@/types/collection"
-import type { Skill } from "@/types/skill"
+import { gsap, useGSAP } from "@/lib/gsap-config"
+import { emitNavigationStart, SEARCH_DIALOG_OPEN_EVENT } from "@/components/layout/motion-events"
 
 const PAGES = [
   { nameKey: "home", href: "/", icon: LayoutDashboard },
+  { nameKey: "playground", href: "/playground", icon: FlaskConical },
   { nameKey: "prompts", href: "/prompts", icon: FileText },
   { nameKey: "editor", href: "/editor", icon: PenSquare },
-  { nameKey: "inbox", href: "/inbox", icon: Inbox },
   { nameKey: "modules", href: "/modules", icon: Puzzle },
-  { nameKey: "collections", href: "/collections", icon: LibraryBig },
-  { nameKey: "skills", href: "/skills", icon: Layers3 },
-  { nameKey: "favorites", href: "/favorites", icon: Star },
-  { nameKey: "archive", href: "/archive", icon: Archive },
-  { nameKey: "tags", href: "/tags", icon: Tags },
-  { nameKey: "playground", href: "/playground", icon: FlaskConical },
-  { nameKey: "settings", href: "/settings", icon: Settings },
+  { nameKey: "docs", href: "/docs", icon: BookOpen },
+  { nameKey: "admin", href: "/admin", icon: ShieldCheck },
 ] as const
 
 export function SearchDialog() {
   const [open, setOpen] = useState(false)
+  const shellRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
-  const { canManageSettings } = useAuthz()
   const [prompts, setPrompts] = useState<SerializedPrompt[]>([])
   const [modules, setModules] = useState<SerializedModule[]>([])
-  const [collections, setCollections] = useState<Collection[]>([])
-  const [skills, setSkills] = useState<Skill[]>([])
   const t = useTranslations("search")
   const tn = useTranslations("nav")
   const tc = useTranslations("common")
 
-  // Fetch prompts and modules when dialog opens
   useEffect(() => {
     if (!open) return
+
     getPrompts().then((result) => {
       if (result.success) setPrompts(result.data)
     })
     getModules().then((result) => {
       if (result.success) setModules(result.data)
     })
-    getCollections().then((result) => {
-      if (result.success) setCollections(result.data)
-    })
-    getSkills().then((result) => {
-      if (result.success) setSkills(result.data)
-    })
   }, [open])
 
   const activePrompts = useMemo(
-    () => prompts.filter((p) => p.status !== "archived"),
+    () => prompts.filter((prompt) => prompt.status !== "archived"),
     [prompts]
-  )
-  const visiblePages = useMemo(
-    () => (canManageSettings ? PAGES : PAGES.filter((page) => page.href !== "/settings")),
-    [canManageSettings]
   )
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault()
-        setOpen((v) => !v)
+    const handler = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+        event.preventDefault()
+        setOpen((value) => !value)
       }
     }
+
     window.addEventListener("keydown", handler)
     return () => window.removeEventListener("keydown", handler)
   }, [])
 
+  useEffect(() => {
+    const handleOpen = () => setOpen(true)
+    window.addEventListener(SEARCH_DIALOG_OPEN_EVENT, handleOpen as EventListener)
+    return () => window.removeEventListener(SEARCH_DIALOG_OPEN_EVENT, handleOpen as EventListener)
+  }, [])
+
   const navigate = (href: string) => {
     setOpen(false)
+    emitNavigationStart(href)
     router.push(href)
   }
 
+  useGSAP(
+    () => {
+      if (!open) return
+
+      const overlay = document.querySelector("[data-slot='dialog-overlay']")
+      const content = document.querySelector("[data-slot='dialog-content']")
+      const items = Array.from(document.querySelectorAll("[data-slot='command-item']"))
+      const input = document.querySelector("[data-slot='command-input-wrapper']")
+      const headings = Array.from(document.querySelectorAll("[cmdk-group-heading]"))
+      if (!overlay || !content || !input) return
+
+      const mm = gsap.matchMedia()
+      mm.add(
+        {
+          normal: "(prefers-reduced-motion: no-preference)",
+          reduced: "(prefers-reduced-motion: reduce)",
+        },
+        (context) => {
+          if (context.conditions?.reduced) {
+            gsap.set([overlay, content, input, ...items, ...headings], {
+              clearProps: "all",
+            })
+            return
+          }
+
+          gsap.set(content, { transformPerspective: 900 })
+
+          gsap
+            .timeline({ defaults: { ease: "power3.out" } })
+            .fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.2 }, 0)
+            .fromTo(
+              content,
+              { y: 28, autoAlpha: 0, rotateX: -8, scale: 0.96 },
+              { y: 0, autoAlpha: 1, rotateX: 0, scale: 1, duration: 0.32 },
+              0
+            )
+            .fromTo(input, { y: 10, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.22 }, 0.08)
+            .fromTo(
+              headings,
+              { x: -10, autoAlpha: 0 },
+              { x: 0, autoAlpha: 1, duration: 0.18, stagger: 0.03 },
+              0.12
+            )
+            .fromTo(
+              items,
+              { y: 12, autoAlpha: 0 },
+              { y: 0, autoAlpha: 1, duration: 0.22, stagger: 0.018 },
+              0.12
+            )
+        }
+      )
+
+      return () => {
+        mm.revert()
+      }
+    },
+    { scope: shellRef, dependencies: [open, activePrompts.length, modules.length] }
+  )
+
   return (
-    <CommandDialog
-      open={open}
-      onOpenChange={setOpen}
-      title={t("dialogTitle")}
-      description={t("dialogDescription")}
-    >
-      <Command>
-        <CommandInput placeholder={t("placeholder")} />
-        <CommandList>
-          <CommandEmpty>{tc("noResults")}</CommandEmpty>
+    <div ref={shellRef}>
+      <CommandDialog
+        open={open}
+        onOpenChange={setOpen}
+        title={t("dialogTitle")}
+        description={t("dialogDescription")}
+        className="command-palette-shell brutal-border brutal-shadow-lg max-w-[min(42rem,calc(100%-1.5rem))]! rounded-none! border-[3px]! bg-card! p-0!"
+      >
+        <Command className="rounded-none! border-0 bg-card p-0">
+          <CommandInput placeholder={t("placeholder")} />
+          <CommandList className="max-h-[min(65vh,32rem)] px-2 pb-2">
+            <CommandEmpty>{tc("noResults")}</CommandEmpty>
 
-          <CommandGroup heading={t("pages")}>
-            {visiblePages.map((page) => (
-              <CommandItem key={page.href} onSelect={() => navigate(page.href)}>
-                <page.icon className="h-4 w-4 mr-2 text-muted-foreground" />
-                {tn(page.nameKey)}
-              </CommandItem>
-            ))}
-          </CommandGroup>
+            <CommandGroup className="command-palette-group" heading={t("pages")}>
+              {PAGES.map((page) => (
+                <CommandItem
+                  key={page.href}
+                  onSelect={() => navigate(page.href)}
+                  className="command-palette-item"
+                  data-magnet-target
+                >
+                  <page.icon className="mr-2 h-4 w-4 text-muted-foreground" />
+                  {tn(page.nameKey)}
+                </CommandItem>
+              ))}
+            </CommandGroup>
 
-          <CommandSeparator />
+            <CommandSeparator />
 
-          <CommandGroup heading={t("prompts")}>
-            {activePrompts.map((p) => (
-              <CommandItem key={p.id} onSelect={() => navigate(`/prompts/${p.id}`)}>
-                <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm truncate">{p.title}</div>
-                  {p.description && (
-                    <div className="text-xs text-muted-foreground truncate">{p.description}</div>
-                  )}
-                </div>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-
-          {modules.length > 0 && (
-            <>
-              <CommandSeparator />
-              <CommandGroup heading={t("modules")}>
-                {modules.map((m) => (
-                  <CommandItem key={m.id} onSelect={() => navigate("/modules")}>
-                    <Puzzle className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm truncate">{m.title}</div>
-                      <div className="text-xs text-muted-foreground truncate">{m.type}</div>
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </>
-          )}
-
-          {collections.length > 0 && (
-            <>
-              <CommandSeparator />
-              <CommandGroup heading={t("collections")}>
-                {collections.map((collection) => (
-                  <CommandItem
-                    key={collection.id}
-                    onSelect={() => navigate(`/collections/${collection.id}`)}
-                  >
-                    <LibraryBig className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm truncate">{collection.title}</div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {collection.description || tn(`collections`)}
+            <CommandGroup className="command-palette-group" heading={t("prompts")}>
+              {activePrompts.map((prompt) => (
+                <CommandItem
+                  key={prompt.id}
+                  onSelect={() => navigate(`/prompts/${prompt.id}`)}
+                  className="command-palette-item"
+                  data-magnet-target
+                >
+                  <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm">{prompt.title}</div>
+                    {prompt.description ? (
+                      <div className="truncate text-xs text-muted-foreground">
+                        {prompt.description}
                       </div>
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </>
-          )}
+                    ) : null}
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
 
-          {skills.length > 0 && (
-            <>
-              <CommandSeparator />
-              <CommandGroup heading={t("skills")}>
-                {skills.map((skill) => (
-                  <CommandItem key={skill.id} onSelect={() => navigate(`/skills/${skill.id}`)}>
-                    <Layers3 className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm truncate">{skill.name}</div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {skill.goal || skill.description || tn("skills")}
+            {modules.length > 0 ? (
+              <>
+                <CommandSeparator />
+                <CommandGroup className="command-palette-group" heading={t("modules")}>
+                  {modules.map((module) => (
+                    <CommandItem
+                      key={module.id}
+                      onSelect={() => navigate("/modules")}
+                      className="command-palette-item"
+                      data-magnet-target
+                    >
+                      <Puzzle className="mr-2 h-4 w-4 text-muted-foreground" />
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm">{module.title}</div>
+                        <div className="truncate text-xs text-muted-foreground">{module.type}</div>
                       </div>
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </>
-          )}
-        </CommandList>
-      </Command>
-    </CommandDialog>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </>
+            ) : null}
+          </CommandList>
+        </Command>
+      </CommandDialog>
+    </div>
   )
 }

@@ -83,9 +83,9 @@ export function MetadataForm({ values, onChange }: MetadataFormProps) {
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="space-y-1.5">
-          <Label>{tp("model")}</Label>
+          <Label htmlFor="editor-model">{tp("model")}</Label>
           <Select value={values.model} onValueChange={(v) => v && update("model", v as ModelType)}>
-            <SelectTrigger className="w-full rounded-2xl">
+            <SelectTrigger id="editor-model" className="w-full rounded-2xl">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -99,9 +99,9 @@ export function MetadataForm({ values, onChange }: MetadataFormProps) {
         </div>
 
         <div className="space-y-1.5">
-          <Label>{tp("status")}</Label>
+          <Label htmlFor="editor-status">{tp("status")}</Label>
           <Select value={values.status} onValueChange={(v) => v && update("status", v as PromptStatus)}>
-            <SelectTrigger className="w-full rounded-2xl">
+            <SelectTrigger id="editor-status" className="w-full rounded-2xl">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -115,9 +115,9 @@ export function MetadataForm({ values, onChange }: MetadataFormProps) {
         </div>
 
         <div className="space-y-1.5">
-          <Label>{tp("category")}</Label>
+          <Label htmlFor="editor-category">{tp("category")}</Label>
           <Select value={values.category} onValueChange={(v) => v && update("category", v)}>
-            <SelectTrigger className="w-full rounded-2xl">
+            <SelectTrigger id="editor-category" className="w-full rounded-2xl">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -143,19 +143,25 @@ export function MetadataForm({ values, onChange }: MetadataFormProps) {
       </div>
 
       <div className="space-y-1.5">
-        <Label>{t("tagsLabel")}</Label>
+        <Label htmlFor="tag-input">{t("tagsLabel")}</Label>
         <div className="rounded-[1.5rem] border border-border/70 bg-muted/25 p-3">
           <div className="mb-2 flex min-h-8 flex-wrap gap-1.5">
             {values.tags.map((tag) => (
               <Badge key={tag} variant="secondary" className="gap-1 rounded-full">
                 {tag}
-                <button type="button" onClick={() => removeTag(tag)} className="hover:text-destructive">
+                <button
+                  type="button"
+                  onClick={() => removeTag(tag)}
+                  className="hover:text-destructive"
+                  aria-label={`${t("tagsLabel")}: ${tag}`}
+                >
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
             ))}
           </div>
           <Input
+            id="tag-input"
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={(e) => {

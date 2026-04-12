@@ -20,6 +20,8 @@ interface AnalysisPanelProps {
   analyzing?: boolean
   compact?: boolean
   analyzingLabel?: string
+  runDisabled?: boolean
+  runDisabledReason?: string
 }
 
 function normalizeAgentKey(key: string) {
@@ -73,6 +75,8 @@ export function AnalysisPanel({
   analyzing,
   compact,
   analyzingLabel,
+  runDisabled = false,
+  runDisabledReason,
 }: AnalysisPanelProps) {
   const messages = useMessages()
   const t = useTranslations("agent")
@@ -95,10 +99,13 @@ export function AnalysisPanel({
           </>
         )}
         {onAnalyze ? (
-          <Button size="sm" onClick={onAnalyze} disabled={analyzing}>
+          <Button size="sm" onClick={onAnalyze} disabled={analyzing || runDisabled}>
             <Bot className="mr-1 h-4 w-4" />
             {analyzing ? loadingText : t("runAnalysis")}
           </Button>
+        ) : null}
+        {runDisabledReason ? (
+          <p className="text-xs text-destructive">{runDisabledReason}</p>
         ) : null}
       </div>
     )
@@ -368,12 +375,15 @@ export function AnalysisPanel({
           size="sm"
           variant="outline"
           onClick={onAnalyze}
-          disabled={analyzing}
+          disabled={analyzing || runDisabled}
           className="w-full"
         >
           <Bot className="mr-1 h-4 w-4" />
           {analyzing ? loadingText : t("reanalyze")}
         </Button>
+      ) : null}
+      {runDisabledReason ? (
+        <p className="text-xs text-destructive">{runDisabledReason}</p>
       ) : null}
     </div>
   )

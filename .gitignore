@@ -12,8 +12,8 @@
 
 # testing
 /coverage
-/.playwright-cli/
 /output/playwright/
+/output/perf/
 
 # next.js
 /.next/
@@ -51,3 +51,12 @@ next-env.d.ts
 # prisma
 prisma/dev.db
 prisma/dev.db-journal
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+/.lighthouseci/

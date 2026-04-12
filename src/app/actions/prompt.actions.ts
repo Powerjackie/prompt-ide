@@ -4,6 +4,7 @@ import { AUTH_ERRORS, ensureAdmin, ensureAuthenticated } from "@/lib/action-auth
 import { prisma } from "@/lib/prisma"
 import { buildChangeSummary, deserializePromptSnapshot, serializePromptSnapshot } from "@/lib/prompt-version"
 import { revalidatePath } from "next/cache"
+import { getDefaultSettings, getEffectiveSettings } from "@/lib/settings/effective-settings"
 import type { Variable, PromptStatus, ModelType } from "@/types/prompt"
 import type { AgentAnalysisResult } from "@/types/agent"
 import type { PromptVersionSnapshot } from "@/types/prompt-version"
@@ -213,7 +214,14 @@ export async function createPrompt(data: {
   }
 
   try {
-    const snapshot = createSnapshotFromInput(data)
+    const settingsResult = await getEffectiveSettings()
+    const settings = settingsResult.success ? settingsResult.data : getDefaultSettings()
+    const resolvedData = {
+      ...data,
+      model: data.model ?? settings.defaultModel,
+      status: data.status ?? settings.defaultStatus,
+    }
+    const snapshot = createSnapshotFromInput(resolvedData)
     const row = await prisma.$transaction(async (tx) => {
       const created = await tx.prompt.create({
         data: {

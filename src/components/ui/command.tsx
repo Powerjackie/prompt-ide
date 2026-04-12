@@ -59,6 +59,7 @@ function CommandDialog({
           className
         )}
         showCloseButton={showCloseButton}
+        aria-modal="true"
       >
         {children}
       </DialogContent>

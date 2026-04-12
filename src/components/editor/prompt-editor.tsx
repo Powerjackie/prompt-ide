@@ -43,7 +43,7 @@ export function PromptEditor({ value, onChange, cursorRef, className }: PromptEd
   const highlighted = value.split(VAR_PATTERN).map((part, i) => {
     if (i % 2 === 1) {
       return (
-        <span key={i} className="rounded-sm bg-primary/16 text-transparent shadow-[0_0_0_1px_rgba(79,246,255,0.12)] dark:bg-primary/22 dark:shadow-[0_0_18px_-10px_rgba(79,246,255,0.7)]">
+        <span key={i} className="rounded-sm bg-primary/16 text-transparent shadow-sm dark:bg-primary/22 dark:shadow-none">
           {"{{" + part + "}}"}
         </span>
       )
@@ -52,7 +52,7 @@ export function PromptEditor({ value, onChange, cursorRef, className }: PromptEd
   })
 
   return (
-    <div className={cn("rounded-[1.75rem] border border-border/70 bg-muted/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] dark:border-primary/12 dark:bg-[linear-gradient(180deg,rgba(9,12,20,0.78),rgba(17,22,37,0.92))] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.03),0_24px_58px_-36px_rgba(79,246,255,0.22)]", className)}>
+      <div className={cn("rounded-[1.75rem] border border-border/70 bg-muted/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] dark:border-primary/12", className)}>
       <div className="flex flex-col items-start gap-3 border-b border-border/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold tracking-tight">{t("canvasTitle")}</p>
@@ -83,6 +83,7 @@ export function PromptEditor({ value, onChange, cursorRef, className }: PromptEd
           className="relative z-10 min-h-[280px] resize-y border-0 bg-transparent px-4 py-4 font-mono text-sm leading-7 shadow-none focus-visible:ring-0 sm:min-h-[420px] dark:text-slate-100 dark:caret-primary"
           onFocus={(event) => handleFocus(event.currentTarget)}
           spellCheck={false}
+          aria-label={String(t("canvasTitle"))}
         />
       </div>
 

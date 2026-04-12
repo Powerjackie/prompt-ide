@@ -48,6 +48,7 @@
     "playground": "Playground",
     "settings": "Settings",
     "collapse": "Collapse",
+    "library": "Library",
     "brandTagline": "Discovery-first prompt workspace",
     "promptsSubtitle": "Prompt library",
     "playgroundSubtitle": "MiniMax lab",
@@ -55,12 +56,100 @@
     "sidebarPitchDescription": "Move from capture to analysis, refactor, benchmark, and packaging in one place.",
     "toggleTheme": "Toggle theme",
     "logout": "Logout",
-    "docs": "Docs"
+    "docs": "Docs",
+    "admin": "Admin"
   },
   "home": {
     "eyebrow": "Prompt R&D",
     "title": "Home",
     "description": "Build, analyze, benchmark, and package prompts inside a discovery-first workbench designed for iteration.",
+    "heroCta": {
+      "title": "Run a Stateless Analysis",
+      "description": "Paste any prompt in the Playground for instant classification, variable extraction, and risk identification.",
+      "action": "Open Playground"
+    },
+    "landing": {
+      "kicker": "Private Workbench / Live System",
+      "title": "PROMPT OPERATIONS",
+      "body": "Build prompts. Stress them. Version the wins. Keep the working surface clean.",
+      "cta": {
+        "playground": "Open Playground",
+        "library": "Browse Library"
+      },
+      "meta": {
+        "mode": {
+          "label": "Mode",
+          "value": "Author / Test / Release"
+        },
+        "surface": {
+          "label": "Surface",
+          "value": "Playground + Library + Modules"
+        },
+        "rule": {
+          "label": "Rule",
+          "value": "Draft hard. Keep the good copy."
+        }
+      },
+      "featureKicker": "System Flow",
+      "featureTitle": "Three surfaces. One operating rhythm.",
+      "featureBody": "Use the landing flow to explain what the workbench does before the workbench asks for effort.",
+      "openAction": "Open",
+      "features": {
+        "playground": {
+          "title": "Playground",
+          "strap": "Stateless Analysis",
+          "body": "Drop in raw prompt text. Read variables, structure, and risk before it turns into product surface.",
+          "hint": "Run a stress pass"
+        },
+        "prompts": {
+          "title": "Prompt Library",
+          "strap": "Working Copies + History",
+          "body": "Keep the editable draft close to the snapshot trail so good instructions survive revision pressure.",
+          "hint": "Browse prompt records"
+        },
+        "modules": {
+          "title": "Modules",
+          "strap": "Reusable Operators",
+          "body": "Pull recurring instructions, tone blocks, and system fragments into one place instead of cloning them blind.",
+          "hint": "Inspect reusable parts"
+        }
+      },
+      "workbench": {
+        "kicker": "Workbench",
+        "title": "Back to the active surface.",
+        "body": "Keep the lower half tight. This is where the marketing stops and the current work resumes.",
+        "continueLabel": "Continue Work",
+        "continueTitle": "Latest production drafts",
+        "continueBody": "Jump back into prompts that are already carrying real instructions.",
+        "continueEmpty": "No production prompts on deck yet.",
+        "versionLabel": "Version Trail",
+        "versionTitle": "Recent immutable cuts",
+        "versionNoSummary": "No change summary recorded.",
+        "versionEmpty": "No version trail yet.",
+        "fastAccessLabel": "Fast Access",
+        "fastAccessTitle": "Keep the core routes close.",
+        "links": {
+          "playground": "Open Playground",
+          "prompts": "Browse prompt library",
+          "modules": "Review module blocks"
+        }
+      },
+      "footer": {
+        "primary": "Visual Refactor / Accepted",
+        "secondary": "Home + Playground + Library / Live"
+      }
+    },
+    "status": {
+      "inbox": "Inbox",
+      "production": "Production",
+      "archived": "Archived"
+    },
+    "continueWork": "Continue Where You Left Off",
+    "continueWorkDescription": "Quickly return to prompts you recently worked on.",
+    "recentVersions": "Recent Version Changes",
+    "recentVersionsDescription": "Track the iteration history of your prompts.",
+    "recentVersionsEmpty": "No version records yet.",
+    "skillsDescription": "Manage and run your reusable prompt skills.",
     "totalPrompts": "Total Prompts",
     "inInbox": "In Inbox",
     "favorites": "Favorites",
@@ -813,15 +902,7 @@
     "eyebrow": "Vault Access",
     "title": "Sign in",
     "description": "Enter your workspace password to unlock Prompt IDE.",
-    "discoveryTitle": "Discovery",
-    "discoveryDescription": "Capture prompts, compare versions, benchmark improvements, and package modules into reusable collections.",
-    "agentTitle": "MiniMax Agent",
-    "agentDescription": "Analyze, refactor, and benchmark prompts inside one focused workspace built for iteration.",
-    "highlights": {
-      "promptCapture": "Prompt capture",
-      "versionCompare": "Version compare",
-      "skillOperations": "Skill operations"
-    },
+    "playgroundHint": "Log in to access the Playground",
     "passwordLabel": "Password",
     "passwordPlaceholder": "Enter your password",
     "submit": "Unlock",
@@ -849,6 +930,7 @@
     "analysisComplete": "Analysis complete",
     "writeFirst": "Write some content first",
     "savePromptFirst": "Save the prompt before running agent analysis.",
+    "disabled": "Agent features are disabled by admin settings.",
     "category": "Category",
     "model": "Model",
     "status": "Status",
@@ -1928,6 +2010,306 @@
       "text": "Text & Words",
       "interpreter": "Terminal & Interpreter",
       "fun": "Fun & Trivia"
+    }
+  },
+  "docsSurface": {
+    "eyebrow": "Current Surface Guide",
+    "title": "Usage Docs",
+    "description": "A single-page guide to the current Prompt IDE product truth after the accepted post-refactor initiatives. It documents the live surface, the intentionally absent surface, and the real contracts that now drive Prompts, Editor, Admin, and Playground.",
+    "open": "Open",
+    "currentPage": "Current Page",
+    "productSurface": {
+      "title": "Product Surface",
+      "body": "The current live surface is intentionally compact. The routes below are real, retained, and safe to treat as the working product boundary.",
+      "liveRoutes": {
+        "root": "/",
+        "login": "/login",
+        "playground": "/playground",
+        "prompts": "/prompts",
+        "promptDetail": "/prompts/[id]",
+        "editor": "/editor",
+        "editorDetail": "/editor/[id]",
+        "modules": "/modules",
+        "docs": "/docs",
+        "admin": "/admin"
+      }
+    },
+    "adminPermissions": {
+      "title": "Admin & Permissions",
+      "body": "Admin tooling is live, but the old Settings route was not restored. Permissions remain explicit and server-enforced.",
+      "items": {
+        "liveRoute": "/admin is the only live admin surface, and it is editable rather than read-only.",
+        "memberDenied": "Member users still see a denial state instead of writable admin controls.",
+        "serverGuard": "Settings reads and writes continue to rely on server-side ensureAdmin() protection.",
+        "settingsAbsent": "/settings remains intentionally absent instead of being revived as a parallel control surface."
+      }
+    },
+    "verification": {
+      "title": "Verification Baseline",
+      "body": "Retained-surface browser smoke is part of the accepted product baseline, but it has a defined scope.",
+      "items": {
+        "smokeCoverage": "The accepted smoke baseline covers retained live routes, editable /admin, member /admin denial, mobile 390x844, reduced motion, and command palette Docs/Admin discoverability.",
+        "excludedSuccessPath": "Default smoke does not require MiniMax provider success-path completion inside Playground; that remains a separate deeper acceptance path.",
+        "port": "The project baseline port remains 3000. On this Windows host, the current browser-verification fallback is 5173, and that fallback does not change the project port contract."
+      }
+    },
+    "workflowSection": {
+      "title": "Working Routes",
+      "body": "These are the routes people should actually use in the accepted product. This page stays single-surface on purpose and does not recreate the old multi-page docs tree."
+    },
+    "workflow": {
+      "home": {
+        "title": "Home",
+        "description": "Start from the landing workbench, then jump into the active product routes."
+      },
+      "playground": {
+        "title": "Playground",
+        "description": "Run stateless prompt analysis without writing the result into history."
+      },
+      "prompts": {
+        "title": "Prompts",
+        "description": "Browse the prompt library, switch card/list views, and open prompt detail pages."
+      },
+      "editor": {
+        "title": "Editor",
+        "description": "Create or edit a working prompt copy before saving versions."
+      },
+      "modules": {
+        "title": "Modules",
+        "description": "Manage reusable instruction blocks that support prompt composition."
+      },
+      "docs": {
+        "title": "Docs",
+        "description": "Stay on this single-page usage guide when you need the current product surface, permission model, and verification rules."
+      },
+      "admin": {
+        "title": "Admin",
+        "description": "Use the live editable Admin Console for workspace defaults, agent settings, and guarded reset operations."
+      }
+    },
+    "settingsHydration": {
+      "title": "Settings Hydration",
+      "body": "Admin-managed settings are no longer just writable fields. They now drive real product defaults through authenticated, server-backed hydration.",
+      "items": {
+        "promptsDesktop": "Desktop /prompts now consumes the server-backed defaultView instead of hardcoding card view.",
+        "promptsMobile": "Mobile /prompts still forces card so the safer small-screen layout is preserved.",
+        "editorNew": "New /editor prompt creation now consumes defaultModel and defaultStatus from effective settings.",
+        "editorExisting": "Existing /editor/[id] prompts keep their persisted model and status instead of being overwritten by defaults.",
+        "createPrompt": "createPrompt fallback now resolves missing model and status from effective settings before snapshot creation.",
+        "agentEnabled": "agent.enabled now gates both UI affordances and server action paths, including Playground and saved-prompt agent actions."
+      }
+    },
+    "playgroundContract": {
+      "title": "Playground Contract",
+      "body": "Playground remains a stateless analysis surface even after the admin console and settings hydration work.",
+      "items": {
+        "stateless": "Playground analysis is still stateless and does not write Prompt history as part of its default run path.",
+        "smokeBaseline": "Daily retained-surface smoke only verifies Playground UI reachability: stage visible, template fill works, and Analyze becomes available when allowed.",
+        "deepAcceptance": "Provider-backed live-result success remains a separate deeper acceptance path rather than part of the default smoke baseline."
+      }
+    },
+    "removed": {
+      "title": "Removed / Absent Surfaces",
+      "body": "These routes are intentionally absent from the current product. They are documented here as product truth, not exposed as live links.",
+      "items": {
+        "settings": "/settings is replaced by /admin",
+        "skills": "/skills/** is not in the live surface",
+        "oldDocs": "old /docs/** child routes were not restored",
+        "collections": "/collections is not in the live surface",
+        "archive": "/archive is not in the live surface",
+        "favorites": "/favorites is not in the live surface",
+        "inbox": "/inbox is not in the live surface",
+        "tags": "/tags is not in the live surface"
+      }
+    }
+  },
+  "adminConsole": {
+    "eyebrow": "Admin Console",
+    "title": "Admin Console",
+    "description": "Edit workspace defaults, agent behavior, and guarded reset operations from one admin-only console.",
+    "roleLabel": "Current role",
+    "liveTitle": "Editable settings surface",
+    "liveBody": "This route is now the only live admin surface. It upgrades the previous read-only console without restoring /settings or weakening ensureAdmin().",
+    "deniedEyebrow": "Admin Required",
+    "deniedTitle": "Access Denied",
+    "deniedBody": "You are signed in as a member. Admin settings remain protected by server-side ensureAdmin guards.",
+    "readDocs": "Read Docs",
+    "settingsUnavailable": "Settings unavailable",
+    "settingsUnavailableBody": "The settings action returned no data for this request.",
+    "saveFailed": "Settings update failed.",
+    "workspace": {
+      "title": "Workspace Defaults",
+      "description": "Set the baseline defaults that new prompts and live operators inherit.",
+      "theme": "Theme",
+      "view": "Default view",
+      "model": "Default model",
+      "status": "Default status",
+      "action": "Save workspace defaults",
+      "pending": "Saving...",
+      "saved": "Workspace defaults saved.",
+      "themeOptions": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      },
+      "viewOptions": {
+        "card": "Card",
+        "list": "List"
+      },
+      "statusOptions": {
+        "inbox": "Inbox",
+        "production": "Production",
+        "archived": "Archived"
+      },
+      "modelOptions": {
+        "universal": "Universal",
+        "claude": "Claude",
+        "gpt4": "GPT",
+        "gemini": "Gemini",
+        "deepseek": "DeepSeek"
+      }
+    },
+    "agent": {
+      "title": "Agent Settings",
+      "description": "Tune provider behavior, automatic analysis, and threshold sensitivity without changing the current route architecture.",
+      "enabled": "Agent enabled",
+      "enabledHelp": "Master switch for all admin-managed agent behavior.",
+      "autoAnalyze": "Auto analyze",
+      "autoAnalyzeHelp": "Trigger analysis automatically when the workflow is ready.",
+      "analyzeOnPaste": "Analyze on paste",
+      "analyzeOnPasteHelp": "Run analysis immediately after new prompt text is pasted.",
+      "enableNormalization": "Enable normalization",
+      "enableNormalizationHelp": "Normalize prompt text before deeper analysis runs.",
+      "enableModuleExtraction": "Enable module extraction",
+      "enableModuleExtractionHelp": "Allow the agent layer to surface reusable prompt modules.",
+      "provider": "Provider",
+      "depth": "Analysis depth",
+      "riskThreshold": "Risk threshold",
+      "confidenceThreshold": "Confidence threshold",
+      "similarityThreshold": "Similarity threshold",
+      "thresholdHelp": "Use values between 0 and 1.",
+      "action": "Save agent settings",
+      "pending": "Saving...",
+      "saved": "Agent settings saved.",
+      "providerOptions": {
+        "mock": "Mock",
+        "openai": "OpenAI",
+        "claude": "Claude",
+        "gemini": "Gemini",
+        "minimax": "MiniMax",
+        "zhipu": "Zhipu"
+      },
+      "depthOptions": {
+        "quick": "Quick",
+        "standard": "Standard",
+        "deep": "Deep"
+      },
+      "riskOptions": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High"
+      }
+    },
+    "danger": {
+      "title": "Danger Zone",
+      "body": "Reset restores the accepted baseline for workspace and agent settings. Use it only when you need a clean operations console again.",
+      "action": "Reset to defaults",
+      "pending": "Resetting...",
+      "resetDone": "Settings reset to defaults."
+    },
+    "resetDialog": {
+      "title": "Reset admin settings?",
+      "description": "This will overwrite the current workspace and agent settings with the default baseline. Use it only when you want to discard the current configuration.",
+      "confirm": "Reset now",
+      "cancel": "Cancel"
+    },
+    "validation": {
+      "thresholdRange": "Thresholds must be numbers between 0 and 1."
+    },
+    "portability": {
+      "title": "Settings Portability",
+      "description": "Export the current effective settings as JSON or validate and import a full replacement payload through the guarded admin path.",
+      "copy": "Copy JSON",
+      "download": "Download JSON",
+      "copySuccess": "Settings JSON copied.",
+      "copyFailed": "Failed to copy settings JSON.",
+      "importLabel": "Import settings JSON",
+      "importHelp": "Paste a full AppSettings JSON payload. Import only runs after validation and confirmation, and invalid payloads do not write partially.",
+      "validate": "Validate JSON",
+      "validating": "Validating...",
+      "validateSuccess": "Settings JSON validated.",
+      "validateFailed": "Settings JSON validation failed.",
+      "validateFirst": "Validate the current JSON payload before importing.",
+      "import": "Import settings",
+      "importing": "Importing...",
+      "importSuccess": "Settings imported.",
+      "importFailed": "Settings import failed.",
+      "confirmTitle": "Overwrite current settings?",
+      "confirmBody": "This will replace the persisted AppSettings payload with the validated import. Use it only when you are ready to overwrite the current admin baseline.",
+      "confirmCancel": "Cancel",
+      "confirmAction": "Import now",
+      "validatedTitle": "Validated payload summary"
+    },
+    "sync": {
+      "title": "Sync state",
+      "body": "Edits save through the existing server actions and then re-hydrate from the persisted result, so the console stays aligned with the true stored state.",
+      "pending": "Unsaved changes",
+      "clean": "Saved and aligned"
+    },
+    "diagnostics": {
+      "title": "Runtime Diagnostics",
+      "description": "A non-secret runtime summary of the current admin state, storage condition, and effective defaults.",
+      "refreshFailed": "Failed to refresh runtime diagnostics.",
+      "role": {
+        "title": "Role"
+      },
+      "storage": {
+        "title": "Settings storage",
+        "key": "Settings key",
+        "rowExists": "Row exists",
+        "source": "Current source",
+        "sourcePersisted": "Persisted row",
+        "sourceFallback": "Default fallback"
+      },
+      "database": {
+        "title": "Database summary",
+        "provider": "Provider",
+        "target": "Target hint",
+        "mode": "Storage mode",
+        "modeFile": "File-based SQLite"
+      },
+      "defaults": {
+        "title": "Effective defaults",
+        "view": "Default view",
+        "model": "Default model",
+        "status": "Default status",
+        "agentEnabled": "Agent enabled",
+        "provider": "Agent provider",
+        "depth": "Analysis depth"
+      },
+      "values": {
+        "yes": "Yes",
+        "no": "No",
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      },
+      "guardrails": {
+        "title": "Guardrails",
+        "ensureAdmin": "Admin writes still require ensureAdmin().",
+        "settingsAbsent": "/settings remains absent.",
+        "adminOnly": "/admin remains the only live admin route."
+      }
+    },
+    "guards": {
+      "title": "Server Guards",
+      "body": "This page does not weaken the existing action contract. Reads, writes, and reset actions continue to rely on ensureAdmin().",
+      "ensureAdmin": "ensureAdmin active"
+    },
+    "notes": {
+      "title": "Operating notes",
+      "workspace": "Workspace defaults affect the live baseline for theme, default prompt view, model, and initial status.",
+      "agent": "Agent settings tune provider selection, analysis depth, and automatic analysis behavior without changing the stateless analysis contract.",
+      "reset": "Reset is the only dangerous action here and always requires explicit confirmation."
     }
   }
 }

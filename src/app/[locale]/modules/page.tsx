@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useTransition } from "react"
+import { useState, useMemo, useTransition, useEffect } from "react"
 import { useTranslations } from "next-intl"
 import { Puzzle, Plus, PenSquare, Trash2, Copy } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -25,6 +25,10 @@ export default function ModulesPage() {
   const [pending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingModule, setEditingModule] = useState<SerializedModule | null>(null)
+
+  useEffect(() => {
+    document.title = "Modules | Prompt IDE"
+  }, [])
 
   const filtered = useMemo(
     () => activeFilter === "all" ? modules : modules.filter((m) => m.type === activeFilter),
@@ -156,6 +160,7 @@ export default function ModulesPage() {
                     variant="ghost"
                     className="h-7 text-xs"
                     onClick={() => openEdit(m)}
+                    aria-label={`${tc("edit")} ${m.title}`}
                   >
                     <PenSquare className="h-3 w-3 mr-1" /> {tc("edit")}
                   </Button>
@@ -167,6 +172,7 @@ export default function ModulesPage() {
                       await copyToClipboard(m.content)
                       toast.success(tc("copied"))
                     }}
+                    aria-label={`${tc("copy")} ${m.title}`}
                   >
                     <Copy className="h-3 w-3 mr-1" /> {tc("copy")}
                   </Button>
@@ -176,6 +182,7 @@ export default function ModulesPage() {
                       variant="ghost"
                       className="h-7 text-xs text-destructive hover:text-destructive"
                       onClick={() => handleDelete(m.id)}
+                      aria-label={`${tc("delete")} ${m.title}`}
                     >
                       <Trash2 className="h-3 w-3 mr-1" /> {tc("delete")}
                     </Button>

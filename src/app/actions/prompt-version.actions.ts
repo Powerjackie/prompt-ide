@@ -11,6 +11,17 @@ type ActionResult<T = unknown> =
   | { success: true; data: T }
   | { success: false; error: string }
 
+export type RecentPromptVersion = {
+  id: string
+  promptId: string
+  versionNumber: number
+  changeSummary: string
+  createdAt: string
+  prompt: {
+    title: string
+  }
+}
+
 function revalidateAll() {
   revalidatePath("/[locale]", "layout")
 }
@@ -94,6 +105,43 @@ export async function getPromptVersionsByPromptId(
       orderBy: { versionNumber: "desc" },
     })
     return { success: true, data: rows.map(deserializePromptVersion) }
+  } catch (error) {
+    return { success: false, error: (error as Error).message }
+  }
+}
+
+export async function getRecentVersions(
+  limit = 5
+): Promise<ActionResult<RecentPromptVersion[]>> {
+  if (!(await ensureAuthenticated())) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  try {
+    const safeLimit = Number.isFinite(limit) ? Math.min(20, Math.max(1, Math.floor(limit))) : 5
+    const rows = await prisma.promptVersion.findMany({
+      orderBy: { createdAt: "desc" },
+      take: safeLimit,
+      include: {
+        prompt: {
+          select: { title: true },
+        },
+      },
+    })
+
+    return {
+      success: true,
+      data: rows.map((row) => ({
+        id: row.id,
+        promptId: row.promptId,
+        versionNumber: row.versionNumber,
+        changeSummary: row.changeSummary,
+        createdAt: row.createdAt.toISOString(),
+        prompt: {
+          title: row.prompt.title,
+        },
+      })),
+    }
   } catch (error) {
     return { success: false, error: (error as Error).message }
   }

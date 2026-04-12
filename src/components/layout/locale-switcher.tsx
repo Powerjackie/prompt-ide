@@ -4,6 +4,7 @@ import { useLocale, useTranslations } from "next-intl"
 import { useRouter, usePathname } from "@/i18n/navigation"
 import { routing } from "@/i18n/routing"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +13,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Languages } from "lucide-react"
 
-export function LocaleSwitcher() {
+interface LocaleSwitcherProps {
+  className?: string
+  showLabel?: boolean
+}
+
+export function LocaleSwitcher({ className, showLabel = false }: LocaleSwitcherProps) {
   const locale = useLocale()
   const router = useRouter()
   const pathname = usePathname()
@@ -25,9 +31,19 @@ export function LocaleSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        render={<Button variant="ghost" size="icon" />}
+        render={
+          <Button
+            variant="ghost"
+            size={showLabel ? "default" : "icon"}
+            className={cn("rounded-none border-2 border-border hover:bg-muted", className)}
+            data-magnet-target
+          />
+        }
       >
         <Languages className="h-4 w-4" />
+        {showLabel ? (
+          <span className="text-xs font-semibold uppercase tracking-[0.16em]">{t(locale)}</span>
+        ) : null}
         <span className="sr-only">{t("switchLocale")}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

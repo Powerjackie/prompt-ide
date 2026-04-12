@@ -1,0 +1,85 @@
+name: Playwright Nightly Cross-Browser Gate
+
+# Gate responsibility:
+#   PR gate (playwright.yml)       — fast Chromium production-mode acceptance on every push/PR
+#   This gate (nightly)            — Firefox + WebKit retained-surface compatibility, scheduled nightly
+#
+# Nightly failure is a compatibility signal, not a production outage signal.
+# It is tracked and must be investigated, but does not by itself block deploys
+# (the Chromium PR gate is the primary deploy gate).
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # 02:00 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cross-browser-smoke:
+    name: Cross-Browser Retained-Surface Smoke (Firefox + WebKit)
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: file:./ci-nightly.db
+      ADMIN_PASSWORD: ci-admin-password
+      MEMBER_PASSWORD: ci-member-password
+      MINIMAX_API_KEY: ci-minimax-key
+      NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      NEXT_TELEMETRY_DISABLED: "1"
+      PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+      PLAYWRIGHT_MANAGE_SERVER: "1"
+      # No PLAYWRIGHT_SERVER_MODE: dev mode is intentional for the cross-browser gate.
+      # Production-build semantics are already covered by the Chromium PR gate.
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Reset CI SQLite database
+        run: rm -f ci-nightly.db ci-nightly.db-journal
+
+      - name: Push Prisma schema to SQLite
+        run: npm run db:push
+
+      - name: Seed retained-surface smoke data
+        run: npm run db:seed
+
+      - name: Install Firefox and WebKit browsers
+        run: npm run smoke:browser:cross-browser:install
+
+      - name: Run cross-browser retained-surface smoke (Firefox + WebKit)
+        run: npm run smoke:browser:cross-browser:ci
+
+      - name: Upload Playwright HTML report
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: cross-browser-playwright-report-${{ github.run_id }}
+          path: output/playwright/cross-browser-report/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload Playwright test results and traces
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: cross-browser-test-results-${{ github.run_id }}
+          path: |
+            output/playwright/test-results/
+            output/playwright/smoke/cross-browser-smoke-report.json
+          if-no-files-found: warn
+          retention-days: 14
