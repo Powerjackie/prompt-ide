@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
 import { Grid2X2, List, Search, SlidersHorizontal, X } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -27,6 +27,8 @@ interface Props {
   resultCount: number
 }
 
+const VISIBLE_TAG_COUNT = 8
+
 export function PromptFiltersBar({
   filters,
   updateFilter,
@@ -41,7 +43,13 @@ export function PromptFiltersBar({
   const tm = useTranslations("models")
   const ts = useTranslations("status")
 
-  const featuredTags = useMemo(() => allTags.slice(0, 8), [allTags])
+  const [tagsExpanded, setTagsExpanded] = useState(false)
+  const visibleTags = useMemo(
+    () => (tagsExpanded ? allTags : allTags.slice(0, VISIBLE_TAG_COUNT)),
+    [allTags, tagsExpanded]
+  )
+  const hasMoreTags = allTags.length > VISIBLE_TAG_COUNT
+
   const hasFilters =
     filters.search ||
     filters.status !== "all" ||
@@ -171,7 +179,7 @@ export function PromptFiltersBar({
         >
           {t("allTags")}
         </Badge>
-        {featuredTags.map((tag) => (
+        {visibleTags.map((tag) => (
           <Badge
             key={tag}
             variant={filters.tag === tag ? "default" : "outline"}
@@ -184,6 +192,15 @@ export function PromptFiltersBar({
             {tag}
           </Badge>
         ))}
+        {hasMoreTags && (
+          <Badge
+            variant="outline"
+            className="cursor-pointer rounded-none border-2 border-dashed border-border bg-background px-3 py-1 font-mono text-[11px] uppercase text-muted-foreground transition-transform hover:translate-x-[2px] hover:translate-y-[2px] hover:text-foreground"
+            onClick={() => setTagsExpanded((prev) => !prev)}
+          >
+            {tagsExpanded ? "−" : `+${allTags.length - VISIBLE_TAG_COUNT}`}
+          </Badge>
+        )}
       </div>
     </div>
   )

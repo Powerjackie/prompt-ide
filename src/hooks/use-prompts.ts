@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { getPrompts, getPromptsPaginated, type SerializedPrompt } from "@/app/actions/prompt-surface.actions"
+import type { PromptFilterParams } from "@/app/actions/prompt-surface.actions"
 
 /**
  * Client-side hook to fetch prompts from the database via server actions.
@@ -42,7 +43,7 @@ export function usePrompts() {
   return { prompts, loading, refetch }
 }
 
-export function usePromptsPaginated(pageSize: number = 24) {
+export function usePromptsPaginated(pageSize: number = 24, filters?: PromptFilterParams) {
   const [prompts, setPrompts] = useState<SerializedPrompt[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -50,9 +51,12 @@ export function usePromptsPaginated(pageSize: number = 24) {
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
 
-  const fetchPage = useCallback(async (p: number) => {
+  const filtersKey = JSON.stringify(filters ?? {})
+  const filtersRef = useRef(filtersKey)
+
+  const fetchPage = useCallback(async (p: number, f?: PromptFilterParams) => {
     setLoading(true)
-    const result = await getPromptsPaginated(p, pageSize)
+    const result = await getPromptsPaginated(p, pageSize, f)
     if (result.success) {
       setPrompts(result.data.prompts)
       setTotal(result.data.total)
@@ -61,10 +65,17 @@ export function usePromptsPaginated(pageSize: number = 24) {
     setLoading(false)
   }, [pageSize])
 
+  // Initial load + re-fetch when filters change
   useEffect(() => {
     let cancelled = false
+    const parsedFilters = JSON.parse(filtersKey) as PromptFilterParams | undefined
+    const filtersChanged = filtersRef.current !== filtersKey
+    filtersRef.current = filtersKey
+
     const load = async () => {
-      const result = await getPromptsPaginated(1, pageSize)
+      // Reset to page 1 when filters change
+      const targetPage = filtersChanged ? 1 : page
+      const result = await getPromptsPaginated(filtersChanged ? 1 : targetPage, pageSize, parsedFilters)
       if (cancelled) return
       if (result.success) {
         setPrompts(result.data.prompts)
@@ -75,10 +86,12 @@ export function usePromptsPaginated(pageSize: number = 24) {
     }
     void load()
     return () => { cancelled = true }
-  }, [pageSize])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageSize, filtersKey])
 
   const goToPage = useCallback((p: number) => {
-    if (p >= 1 && p <= totalPages) void fetchPage(p)
+    const parsedFilters = JSON.parse(filtersRef.current) as PromptFilterParams | undefined
+    if (p >= 1 && p <= totalPages) void fetchPage(p, parsedFilters)
   }, [fetchPage, totalPages])
 
   return {
@@ -86,6 +99,9 @@ export function usePromptsPaginated(pageSize: number = 24) {
     goToPage,
     nextPage: useCallback(() => goToPage(page + 1), [goToPage, page]),
     prevPage: useCallback(() => goToPage(page - 1), [goToPage, page]),
-    refetch: () => fetchPage(page),
+    refetch: () => {
+      const parsedFilters = JSON.parse(filtersRef.current) as PromptFilterParams | undefined
+      return fetchPage(page, parsedFilters)
+    },
   }
 }

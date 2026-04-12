@@ -15,7 +15,8 @@ import { PromptFiltersBar } from "@/components/prompts/prompt-filters"
 import { usePromptsPaginated } from "@/hooks/use-prompts"
 import { usePromptFilters } from "@/hooks/use-prompt-filters"
 import { useStaggerReveal } from "@/hooks/use-stagger-reveal"
-import { markPromptLastUsed, toggleFavorite } from "@/app/actions/prompt-surface.actions"
+import { getAllTags, markPromptLastUsed, toggleFavorite } from "@/app/actions/prompt-surface.actions"
+import type { PromptFilterParams } from "@/app/actions/prompt-surface.actions"
 import { STATUS_OPTIONS } from "@/lib/constants"
 import { Draggable, Flip, gsap, useGSAP } from "@/lib/gsap-config"
 import { cn, copyToClipboard, formatDate } from "@/lib/utils"
@@ -48,6 +49,35 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
   const tm = useTranslations("models")
   const ts = useTranslations("status")
   const searchParams = useSearchParams()
+  const [pending, startTransition] = useTransition()
+  const [view, setView] = useState<"card" | "list">(() => initialView)
+  const [manualOrderIds, setManualOrderIds] = useState<string[]>([])
+  const pageRef = useRef<HTMLDivElement>(null)
+  const cardGridRef = useRef<HTMLDivElement>(null)
+
+  // --- Filter state (no longer filters data client-side) ---
+  const { filters, updateFilter, resetFilters } = usePromptFilters()
+
+  // --- Debounced search ---
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+  useEffect(() => {
+    if (!filters.search) {
+      setDebouncedSearch("")
+      return
+    }
+    const timer = setTimeout(() => setDebouncedSearch(filters.search), 300)
+    return () => clearTimeout(timer)
+  }, [filters.search])
+
+  // --- Server filter params ---
+  const serverFilters = useMemo<PromptFilterParams>(() => ({
+    search: debouncedSearch || undefined,
+    status: filters.status !== "all" ? filters.status : undefined,
+    model: filters.model !== "all" ? filters.model : undefined,
+    tag: filters.tag !== "all" ? filters.tag : undefined,
+  }), [debouncedSearch, filters.status, filters.model, filters.tag])
+
+  // --- Paginated prompts with server-side filtering ---
   const {
     prompts: pagePrompts,
     loading,
@@ -56,13 +86,22 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
     totalPages,
     nextPage,
     prevPage,
-  } = usePromptsPaginated(12)
-  const [pending, startTransition] = useTransition()
-  const [view, setView] = useState<"card" | "list">(() => initialView)
-  const [manualOrderIds, setManualOrderIds] = useState<string[]>([])
-  const pageRef = useRef<HTMLDivElement>(null)
-  const cardGridRef = useRef<HTMLDivElement>(null)
+  } = usePromptsPaginated(12, serverFilters)
 
+  // --- All tags from DB (fetched once on mount) ---
+  const [allTags, setAllTags] = useState<string[]>([])
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      const result = await getAllTags()
+      if (cancelled) return
+      if (result.success) setAllTags(result.data)
+    }
+    void load()
+    return () => { cancelled = true }
+  }, [])
+
+  // --- Mobile view sync ---
   useEffect(() => {
     if (typeof window === "undefined") return
 
@@ -84,29 +123,46 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
     return () => media.removeListener(syncView)
   }, [])
 
-  const prompts = pagePrompts
+  // --- Client-side sort (sort doesn't change which items are in the page) ---
+  const sorted = useMemo(() => {
+    const result = [...pagePrompts]
+    result.sort((a, b) => {
+      switch (filters.sort) {
+        case "updated":
+          return b.updatedAt.localeCompare(a.updatedAt)
+        case "created":
+          return b.createdAt.localeCompare(a.createdAt)
+        case "title":
+          return a.title.localeCompare(b.title)
+        case "lastUsed":
+          return (b.lastUsedAt ?? "").localeCompare(a.lastUsedAt ?? "")
+        default:
+          return 0
+      }
+    })
+    return result
+  }, [pagePrompts, filters.sort])
 
-  const { filters, filtered, updateFilter, resetFilters } = usePromptFilters(prompts)
   const promptCardsRef = useStaggerReveal(
     ".gs-prompt-card",
     { stagger: 0.04, y: 15 },
-    [loading, view, filtered.length]
+    [loading, view, sorted.length]
   )
 
   const displayPrompts = useMemo(() => {
-    if (!manualOrderIds.length) return filtered
+    if (!manualOrderIds.length) return sorted
 
-    const promptById = new Map(filtered.map((prompt) => [prompt.id, prompt]))
+    const promptById = new Map(sorted.map((prompt) => [prompt.id, prompt]))
     const ordered = manualOrderIds
       .map((id) => promptById.get(id))
       .filter((prompt): prompt is Prompt => Boolean(prompt))
     const orderedIds = new Set(ordered.map((prompt) => prompt.id))
-    const missing = filtered.filter((prompt) => !orderedIds.has(prompt.id))
+    const missing = sorted.filter((prompt) => !orderedIds.has(prompt.id))
 
     return [...ordered, ...missing]
-  }, [filtered, manualOrderIds])
+  }, [sorted, manualOrderIds])
 
-  const filteredIdsKey = useMemo(() => filtered.map((prompt) => prompt.id).join("|"), [filtered])
+  const filteredIdsKey = useMemo(() => sorted.map((prompt) => prompt.id).join("|"), [sorted])
   const displayIdsKey = useMemo(
     () => displayPrompts.map((prompt) => prompt.id).join("|"),
     [displayPrompts]
@@ -292,15 +348,9 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
     }
   }, [filters.tag, tagParam, updateFilter])
 
-  const allTags = useMemo(() => {
-    const tags = new Set<string>()
-    prompts.forEach((prompt) => prompt.tags.forEach((tag) => tags.add(tag)))
-    return Array.from(tags).sort()
-  }, [prompts])
-
   const highlightedPrompts = displayPrompts.slice(0, 3)
 
-  if (loading) {
+  if (loading && pagePrompts.length === 0) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
         <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -361,7 +411,7 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
           allTags={allTags}
           view={view}
           onViewChange={handleViewChange}
-          resultCount={filtered.length}
+          resultCount={total}
         />
 
         {view === "card" ? (
@@ -533,7 +583,7 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
           </div>
         )}
 
-        {filtered.length === 0 ? (
+        {displayPrompts.length === 0 && !loading ? (
           <div className="app-panel flex flex-col items-center justify-center gap-3 px-6 py-16 text-center dark:shadow-none">
             <FileText className="h-12 w-12 text-muted-foreground/40" />
             <div className="space-y-1">
