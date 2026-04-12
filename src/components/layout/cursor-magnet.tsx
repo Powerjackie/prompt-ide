@@ -32,7 +32,7 @@ export function CursorMagnet() {
         (context) => {
           enabledRef.current = Boolean(context.conditions?.enabled)
           gsap.set(nodeRef.current, {
-            autoAlpha: enabledRef.current ? 0.82 : 0,
+            autoAlpha: 0,
             xPercent: -50,
             yPercent: -50,
             width: 18,
@@ -93,7 +93,9 @@ export function CursorMagnet() {
     const yTo = gsap.quickTo(nodeRef.current, "y", { duration: 0.16, ease: "power3.out" })
 
     const handlePointerMove = (event: PointerEvent) => {
-      if (!enabledRef.current) return
+      if (!enabledRef.current || !nodeRef.current) return
+
+      gsap.set(nodeRef.current, { autoAlpha: 0.82 })
 
       const target = event.target instanceof Element
         ? (event.target.closest(MAGNET_SELECTOR) as HTMLElement | null)
@@ -113,6 +115,7 @@ export function CursorMagnet() {
       if (!enabledRef.current) return
       activeTargetRef.current = null
       syncToTargetRef.current(null)
+      if (nodeRef.current) gsap.set(nodeRef.current, { autoAlpha: 0 })
     }
 
     const syncActiveRect = () => {
