@@ -453,7 +453,7 @@ function EditorForm({
               </TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="mt-4 min-h-0 flex-1 overflow-y-auto">
-              <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12">
+              <div className="border-2 border-border bg-background p-4 pr-3">
                 <PreviewPanel content={content} variables={variables} />
               </div>
             </TabsContent>
@@ -464,7 +464,7 @@ function EditorForm({
                   <TabsTrigger value="refactor">{ta("modes.refactor")}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="analysis" className="mt-4 min-h-0 flex-1 overflow-y-auto">
-                  <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12">
+                  <div className="border-2 border-border bg-background p-4 pr-3">
                     <AnalysisPanel
                       analysis={analysis}
                       trajectory={trajectory}
@@ -478,7 +478,7 @@ function EditorForm({
                   </div>
                 </TabsContent>
                 <TabsContent value="refactor" className="mt-4 min-h-0 flex-1 overflow-y-auto">
-                  <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12">
+                  <div className="border-2 border-border bg-background p-4 pr-3">
                     <RefactorPanel
                       promptId={savedPrompt?.id}
                       promptContent={content}
@@ -500,7 +500,7 @@ function EditorForm({
             </TabsContent>
             {savedPrompt?.id && (
               <TabsContent value="versions" className="mt-4 min-h-0 flex-1 overflow-y-auto">
-                <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12">
+                <div className="border-2 border-border bg-background p-4 pr-3">
                   <VersionHistoryPanel
                     promptId={savedPrompt.id}
                     currentSnapshot={currentSnapshot}
@@ -523,7 +523,7 @@ function EditorForm({
               </TabsContent>
             )}
             <TabsContent value="modules" className="mt-4 min-h-0 flex-1 overflow-y-auto">
-              <div className="rounded-[1.5rem] border border-border/60 bg-background/55 p-4 pr-3 dark:border-primary/12">
+              <div className="border-2 border-border bg-background p-4 pr-3">
                 <ModuleInserter onInsert={handleInsertModule} />
               </div>
             </TabsContent>

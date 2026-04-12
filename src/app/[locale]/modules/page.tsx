@@ -129,7 +129,7 @@ export default function ModulesPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="app-panel py-14 text-center text-muted-foreground">
+        <div className="brutal-border bg-card py-14 text-center text-muted-foreground">
           <Puzzle className="h-12 w-12 mx-auto mb-3 opacity-30" />
           <p>{t("noModules")}</p>
         </div>
@@ -140,7 +140,7 @@ export default function ModulesPage() {
             return (
               <div
                 key={m.id}
-                className="app-panel rounded-[1.75rem] p-5 space-y-3 hover:border-primary/20 hover:bg-accent/20 transition-colors"
+                className="brutal-border brutal-shadow-lg bg-card p-5 space-y-3 transition-transform duration-200 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
               >
                 <div className="flex items-start justify-between">
                   <div>
