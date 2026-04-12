@@ -13,7 +13,7 @@ import {
   Puzzle,
   Sparkles,
 } from "lucide-react"
-import { gsap, ScrollTrigger, SplitText, useGSAP } from "@/lib/gsap-config"
+import { gsap, SplitText, useGSAP } from "@/lib/gsap-config"
 import { getRecentVersions, type RecentPromptVersion } from "@/app/actions/prompt-version.actions"
 import { getRecentPrompts, type SerializedPrompt } from "@/app/actions/prompt-surface.actions"
 import { Badge } from "@/components/ui/badge"
@@ -169,14 +169,6 @@ export default function HomePage() {
             return
           }
 
-          const shellScroller = document.querySelector(".app-main") as HTMLElement | null
-          const isShellScrollerActive =
-            Boolean(shellScroller) &&
-            window.matchMedia("(min-width: 1024px)").matches &&
-            getComputedStyle(shellScroller as HTMLElement).overflowY !== "visible"
-          const scroller = isShellScrollerActive ? shellScroller : undefined
-          const featureCards = gsap.utils.toArray<HTMLElement>(".gs-home-feature-card", containerRef.current)
-
           titleSplit = new SplitText(".gs-home-title", { type: "words,lines" })
 
           gsap.set(".gs-home-hero-frame", { autoAlpha: 0, y: 24 })
@@ -217,61 +209,11 @@ export default function HomePage() {
               gsap.set(titleSplit?.words ?? [], { clearProps: "opacity,transform" })
             })
 
-          gsap.from(".gs-home-feature-heading", {
-            autoAlpha: 0,
-            y: 18,
-            duration: 0.4,
-            scrollTrigger: {
-              scroller,
-              trigger: ".gs-home-feature-band",
-              start: "top 72%",
-            },
-          })
-
-          if (featureCards.length > 0) {
-            gsap.from(featureCards, {
-              autoAlpha: 0,
-              y: 24,
-              duration: 0.42,
-              stagger: 0.08,
-              ease: "power2.out",
-              scrollTrigger: {
-                scroller,
-                trigger: ".gs-home-feature-track",
-                start: "top 70%",
-                once: true,
-              },
-              onComplete: () => {
-                gsap.set(featureCards, { visibility: "inherit" })
-                gsap.set(featureCards, { clearProps: "opacity,transform" })
-              },
-            })
-          }
-
-          gsap.from(".gs-home-workbench", {
-            autoAlpha: 0,
-            y: 20,
-            duration: 0.4,
-            stagger: 0.1,
-            scrollTrigger: {
-              scroller,
-              trigger: ".gs-home-workbench-zone",
-              start: "top 72%",
-            },
-          })
-
-          gsap.from(".gs-home-footer", {
-            autoAlpha: 0,
-            y: 14,
-            duration: 0.3,
-            scrollTrigger: {
-              scroller,
-              trigger: ".gs-home-footer",
-              start: "top bottom-=100",
-            },
-          })
-
-          ScrollTrigger.refresh()
+          // Reveal below-fold elements immediately (no ScrollTrigger dependency)
+          gsap.set(
+            ".gs-home-feature-heading, .gs-home-feature-card, .gs-home-workbench, .gs-home-footer",
+            { autoAlpha: 1, y: 0 }
+          )
         }
 
         if (document.fonts?.ready) {

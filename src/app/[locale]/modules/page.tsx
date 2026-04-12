@@ -16,6 +16,8 @@ import { formatDate, copyToClipboard } from "@/lib/utils"
 import type { SerializedModule } from "@/app/actions/module.actions"
 import { toast } from "sonner"
 
+const PAGE_SIZE = 12
+
 export default function ModulesPage() {
   const t = useTranslations("modules")
   const tc = useTranslations("common")
@@ -25,14 +27,26 @@ export default function ModulesPage() {
   const [pending, startTransition] = useTransition()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingModule, setEditingModule] = useState<SerializedModule | null>(null)
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
     document.title = "Modules | Prompt IDE"
   }, [])
 
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter)
+    setPage(1)
+  }
+
   const filtered = useMemo(
     () => activeFilter === "all" ? modules : modules.filter((m) => m.type === activeFilter),
     [modules, activeFilter]
+  )
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const paged = useMemo(
+    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filtered, page]
   )
 
   const openCreate = () => {
@@ -95,7 +109,7 @@ export default function ModulesPage() {
         <Badge
           variant={activeFilter === "all" ? "default" : "outline"}
           className="cursor-pointer"
-          onClick={() => setActiveFilter("all")}
+          onClick={() => handleFilterChange("all")}
         >
           {t("all")} ({modules.length})
         </Badge>
@@ -106,7 +120,7 @@ export default function ModulesPage() {
               key={mt.value}
               variant={activeFilter === mt.value ? "default" : "outline"}
               className="cursor-pointer"
-              onClick={() => setActiveFilter(mt.value)}
+              onClick={() => handleFilterChange(mt.value)}
             >
               {t(mt.value)} ({count})
             </Badge>
@@ -121,7 +135,7 @@ export default function ModulesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filtered.map((m) => {
+          {paged.map((m) => {
             const typeLabel = t(m.type)
             return (
               <div
@@ -191,6 +205,30 @@ export default function ModulesPage() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3 pt-4">
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="brutal-border brutal-shadow-sm px-4 py-2 font-mono text-sm font-semibold disabled:opacity-40 disabled:shadow-none hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-transform"
+          >
+            ←
+          </button>
+          <span className="font-mono text-sm text-muted-foreground">
+            {page} / {totalPages}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages}
+            className="brutal-border brutal-shadow-sm px-4 py-2 font-mono text-sm font-semibold disabled:opacity-40 disabled:shadow-none hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-transform"
+          >
+            →
+          </button>
         </div>
       )}
 
