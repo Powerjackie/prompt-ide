@@ -50,6 +50,14 @@
 }
 
 :root {
+  /* Brutalist design tokens */
+  --brutal-border-w: 2px;
+  --brutal-border-w-thick: 3px;
+  --brutal-shadow-sm: 2px;
+  --brutal-shadow: 3px;
+  --brutal-shadow-lg: 4px;
+  --brutal-shadow-xl: 6px;
+
   --background: oklch(0.985 0.004 85);
   --foreground: oklch(0.12 0.015 260);
   --card: oklch(1 0 0);
@@ -393,8 +401,9 @@
   }
 
   .app-panel {
-    @apply relative border-2 border-[color:var(--border)] bg-card;
-    box-shadow: 3px 3px 0 0 var(--border);
+    @apply relative bg-card;
+    border: var(--brutal-border-w) solid var(--border);
+    box-shadow: var(--brutal-shadow) var(--brutal-shadow) 0 0 var(--border);
   }
 
   .app-panel--muted {
@@ -402,8 +411,9 @@
   }
 
   .page-header {
-    @apply relative flex flex-col gap-4 border-[3px] border-[color:var(--border)] bg-card p-5 lg:p-6;
-    box-shadow: 6px 6px 0 0 var(--border);
+    @apply relative flex flex-col gap-4 bg-card p-5 lg:p-6;
+    border: var(--brutal-border-w-thick) solid var(--border);
+    box-shadow: var(--brutal-shadow-xl) var(--brutal-shadow-xl) 0 0 var(--border);
   }
 
   .page-header__top {
@@ -485,27 +495,27 @@
   }
 
   .brutal-shadow-sm {
-    box-shadow: 2px 2px 0 0 var(--border);
+    box-shadow: var(--brutal-shadow-sm) var(--brutal-shadow-sm) 0 0 var(--border);
   }
 
   .brutal-shadow {
-    box-shadow: 3px 3px 0 0 var(--border);
+    box-shadow: var(--brutal-shadow) var(--brutal-shadow) 0 0 var(--border);
   }
 
   .brutal-shadow-lg {
-    box-shadow: 4px 4px 0 0 var(--border);
+    box-shadow: var(--brutal-shadow-lg) var(--brutal-shadow-lg) 0 0 var(--border);
   }
 
   .brutal-shadow-xl {
-    box-shadow: 6px 6px 0 0 var(--border);
+    box-shadow: var(--brutal-shadow-xl) var(--brutal-shadow-xl) 0 0 var(--border);
   }
 
   .brutal-border {
-    @apply border-2 border-[color:var(--border)];
+    border: var(--brutal-border-w) solid var(--border);
   }
 
   .brutal-border-thick {
-    @apply border-[3px] border-[color:var(--border)];
+    border: var(--brutal-border-w-thick) solid var(--border);
   }
 
   .soft-divider {

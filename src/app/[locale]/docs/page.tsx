@@ -14,6 +14,7 @@ import {
   Puzzle,
   ShieldCheck,
 } from "lucide-react"
+import { BrutalCard } from "@/components/ui/brutal-card"
 
 const workflowItems = [
   { key: "home", href: "/", icon: Home, current: false },
@@ -67,7 +68,7 @@ export default async function DocsPage() {
 
   return (
     <div className="space-y-8">
-      <section className="brutal-border-thick brutal-shadow-lg bg-card p-6 sm:p-8 lg:p-10">
+      <BrutalCard as="section" border="thick" shadow="lg" padding="xl">
         <div className="max-w-5xl space-y-6">
           <span className="inline-flex border-2 border-border bg-primary px-3 py-1 font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary-foreground">
             {t("eyebrow")}
@@ -79,10 +80,10 @@ export default async function DocsPage() {
             <p className="max-w-4xl text-lg leading-8 text-muted-foreground">{t("description")}</p>
           </div>
         </div>
-      </section>
+      </BrutalCard>
 
       <section className="grid gap-4 xl:grid-cols-[1.3fr_1fr_1fr]">
-        <div className="brutal-border-thick brutal-shadow-lg bg-card p-6">
+        <BrutalCard border="thick" shadow="lg" padding="lg">
           <h2 className="text-2xl font-black uppercase tracking-[-0.03em]">
             {t("productSurface.title")}
           </h2>
@@ -97,7 +98,7 @@ export default async function DocsPage() {
               </span>
             ))}
           </div>
-        </div>
+        </BrutalCard>
 
         <div className="brutal-border bg-foreground p-6 text-background">
           <LockKeyhole className="mb-5 h-8 w-8 text-primary" />
@@ -114,7 +115,7 @@ export default async function DocsPage() {
           </ul>
         </div>
 
-        <div className="brutal-border bg-card p-6">
+        <BrutalCard shadow="none" padding="lg">
           <h2 className="text-2xl font-black uppercase tracking-[-0.03em]">
             {t("verification.title")}
           </h2>
@@ -126,7 +127,7 @@ export default async function DocsPage() {
               </li>
             ))}
           </ul>
-        </div>
+        </BrutalCard>
       </section>
 
       <section className="space-y-4">
@@ -173,31 +174,38 @@ export default async function DocsPage() {
 
             if (item.current) {
               return (
-                <div
+                <BrutalCard
                   key={item.key}
-                  className="brutal-border brutal-shadow flex min-h-52 flex-col justify-between bg-card p-5"
+                  shadow="default"
+                  className="flex min-h-52 flex-col justify-between"
                 >
                   {content}
-                </div>
+                </BrutalCard>
               )
             }
 
             return (
-              <Link
+              <BrutalCard
                 key={item.key}
-                href={item.href}
-                className="brutal-border brutal-shadow flex min-h-52 flex-col justify-between bg-card p-5 transition-transform hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
-                data-magnet-target
+                shadow="default"
+                hover="shift"
+                className="flex min-h-52 flex-col justify-between"
               >
-                {content}
-              </Link>
+                <Link
+                  href={item.href}
+                  className="flex flex-1 flex-col justify-between"
+                  data-magnet-target
+                >
+                  {content}
+                </Link>
+              </BrutalCard>
             )
           })}
         </div>
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
-        <div className="brutal-border-thick bg-card p-6">
+        <BrutalCard border="thick" shadow="none" padding="lg">
           <h2 className="text-2xl font-black uppercase tracking-[-0.03em]">
             {t("settingsHydration.title")}
           </h2>
@@ -212,10 +220,10 @@ export default async function DocsPage() {
               </li>
             ))}
           </ul>
-        </div>
+        </BrutalCard>
 
         <div className="space-y-4">
-          <div className="brutal-border bg-card p-6">
+          <BrutalCard shadow="none" padding="lg">
             <h2 className="text-2xl font-black uppercase tracking-[-0.03em]">
               {t("playgroundContract.title")}
             </h2>
@@ -229,9 +237,9 @@ export default async function DocsPage() {
                 </li>
               ))}
             </ul>
-          </div>
+          </BrutalCard>
 
-          <div className="brutal-border bg-card p-6">
+          <BrutalCard shadow="none" padding="lg">
             <h2 className="text-2xl font-black uppercase tracking-[-0.03em]">
               {t("removed.title")}
             </h2>
@@ -246,7 +254,7 @@ export default async function DocsPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </BrutalCard>
         </div>
       </section>
     </div>

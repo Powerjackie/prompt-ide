@@ -7,6 +7,7 @@ import { getAdminDiagnostics, getSettings } from "@/app/actions/settings.actions
 import { getViewerAuthz } from "@/lib/action-auth"
 import { AlertTriangle, ArrowRight, LockKeyhole, ShieldCheck } from "lucide-react"
 import { AdminConsoleEditor } from "@/components/admin/admin-console-editor"
+import { BrutalCard } from "@/components/ui/brutal-card"
 
 export default async function AdminPage() {
   const t = await getTranslations("adminConsole")
@@ -15,7 +16,7 @@ export default async function AdminPage() {
   if (!authz.canManageSettings) {
     return (
       <div className="space-y-6">
-        <section className="brutal-border-thick brutal-shadow-lg bg-card p-6 sm:p-8 lg:p-10">
+        <BrutalCard as="section" border="thick" shadow="lg" padding="xl">
           <div className="max-w-3xl space-y-5">
             <span className="inline-flex border-2 border-border bg-background px-3 py-1 font-mono text-xs font-bold uppercase tracking-[0.18em]">
               {t("deniedEyebrow")}
@@ -34,7 +35,7 @@ export default async function AdminPage() {
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
-        </section>
+        </BrutalCard>
       </div>
     )
   }
@@ -54,7 +55,7 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-8">
-      <section className="brutal-border-thick brutal-shadow-lg bg-card p-6 sm:p-8 lg:p-10">
+      <BrutalCard as="section" border="thick" shadow="lg" padding="xl">
         <div className="grid gap-8 lg:grid-cols-[1fr_18rem] lg:items-start">
           <div className="max-w-4xl space-y-5">
             <span className="inline-flex border-2 border-border bg-primary px-3 py-1 font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary-foreground">
@@ -73,16 +74,16 @@ export default async function AdminPage() {
             <div className="mt-2 text-3xl font-black uppercase">{authz.role}</div>
           </div>
         </div>
-      </section>
+      </BrutalCard>
 
       {!settings || !diagnostics ? (
-        <section className="brutal-border bg-card p-6">
+        <BrutalCard as="section" shadow="none" padding="lg">
           <AlertTriangle className="mb-4 h-6 w-6 text-destructive" />
           <h2 className="text-2xl font-black uppercase tracking-[-0.03em]">
             {t("settingsUnavailable")}
           </h2>
           <p className="mt-3 text-sm leading-7 text-muted-foreground">{settingsUnavailableMessage}</p>
-        </section>
+        </BrutalCard>
       ) : (
         <section className="space-y-4">
           <div className="brutal-border bg-foreground p-5 text-background">

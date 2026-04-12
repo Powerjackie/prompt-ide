@@ -21,6 +21,7 @@ import { Draggable, Flip, gsap, useGSAP } from "@/lib/gsap-config"
 import { cn, copyToClipboard, formatDate } from "@/lib/utils"
 import { toast } from "sonner"
 import type { Prompt } from "@/types/prompt"
+import { BrutalCard } from "@/components/ui/brutal-card"
 
 export interface PromptsClientProps {
   initialView?: "card" | "list"
@@ -390,7 +391,7 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
             ))}
           </div>
         ) : (
-          <div className="brutal-border brutal-shadow bg-card overflow-hidden dark:shadow-none">
+          <BrutalCard padding="none" className="overflow-hidden dark:shadow-none">
             <div className="overflow-x-auto">
               <div className="grid min-w-[720px] grid-cols-[minmax(0,2.3fr)_auto_auto_auto] items-center gap-4 border-b-2 border-border bg-foreground px-5 py-3 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-background">
                 <span>{t("listHeaders.prompt")}</span>
@@ -505,7 +506,7 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
                 })}
               </div>
             </div>
-          </div>
+          </BrutalCard>
         )}
 
         {totalPages > 1 && (

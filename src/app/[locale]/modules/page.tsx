@@ -15,6 +15,7 @@ import { ModuleEditorDialog } from "@/components/modules/module-editor"
 import { formatDate, copyToClipboard } from "@/lib/utils"
 import type { SerializedModule } from "@/app/actions/module.actions"
 import { toast } from "sonner"
+import { BrutalCard } from "@/components/ui/brutal-card"
 
 const PAGE_SIZE = 12
 
@@ -129,18 +130,20 @@ export default function ModulesPage() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="brutal-border bg-card py-14 text-center text-muted-foreground">
+        <BrutalCard shadow="none" padding="none" className="py-14 text-center text-muted-foreground">
           <Puzzle className="h-12 w-12 mx-auto mb-3 opacity-30" />
           <p>{t("noModules")}</p>
-        </div>
+        </BrutalCard>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {paged.map((m) => {
             const typeLabel = t(m.type)
             return (
-              <div
+              <BrutalCard
                 key={m.id}
-                className="brutal-border brutal-shadow-lg bg-card p-5 space-y-3 transition-transform duration-200 hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+                shadow="lg"
+                hover="shift"
+                className="space-y-3"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -202,7 +205,7 @@ export default function ModulesPage() {
                     </Button>
                   ) : null}
                 </div>
-              </div>
+              </BrutalCard>
             )
           })}
         </div>
