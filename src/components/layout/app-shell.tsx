@@ -5,7 +5,9 @@ import dynamic from "next/dynamic"
 import { usePathname } from "@/i18n/navigation"
 import { Toaster } from "@/components/ui/sonner"
 import { RouteTransitionOverlay } from "@/components/layout/route-transition-overlay"
-import { CursorMagnet } from "@/components/layout/cursor-magnet"
+// CursorMagnet disabled — decorative custom cursor caused persistent
+// visibility issues (squares lingering after mouse stops/leaves)
+// import { CursorMagnet } from "@/components/layout/cursor-magnet"
 import { GlobalMarquee } from "@/components/layout/global-marquee"
 
 interface AppShellProps {
@@ -56,7 +58,7 @@ export function AppShell({ children }: AppShellProps) {
         </div>
       </div>
       <RouteTransitionOverlay />
-      <CursorMagnet />
+      {/* <CursorMagnet /> */}
       <SearchDialog />
       <Toaster />
     </div>
