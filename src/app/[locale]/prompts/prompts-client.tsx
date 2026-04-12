@@ -55,7 +55,7 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
     totalPages,
     nextPage,
     prevPage,
-  } = usePromptsPaginated(24)
+  } = usePromptsPaginated(12)
   const [pending, startTransition] = useTransition()
   const [view, setView] = useState<"card" | "list">(() => initialView)
   const [manualOrderIds, setManualOrderIds] = useState<string[]>([])

@@ -124,7 +124,7 @@ export function RouteTransitionOverlay() {
 
       hideTimerRef.current = window.setTimeout(() => {
         closeOverlayRef.current()
-      }, 1400)
+      }, 700)
     }
   }, [locale, pathname])
 

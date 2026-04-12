@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { X } from "lucide-react"
-import { MODEL_OPTIONS, STATUS_OPTIONS, CATEGORY_OPTIONS } from "@/lib/constants"
+import { MODEL_OPTIONS, CATEGORY_OPTIONS } from "@/lib/constants"
 import type { ModelType, PromptStatus } from "@/types/prompt"
 import { useState } from "react"
 
@@ -37,7 +37,6 @@ export function MetadataForm({ values, onChange }: MetadataFormProps) {
   const t = useTranslations("editor")
   const tp = useTranslations("prompts")
   const tm = useTranslations("models")
-  const ts = useTranslations("status")
   const tcg = useTranslations("categories")
   const [tagInput, setTagInput] = useState("")
 
@@ -81,7 +80,7 @@ export function MetadataForm({ values, onChange }: MetadataFormProps) {
         />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label htmlFor="editor-model">{tp("model")}</Label>
           <Select value={values.model} onValueChange={(v) => v && update("model", v as ModelType)}>
@@ -92,22 +91,6 @@ export function MetadataForm({ values, onChange }: MetadataFormProps) {
               {MODEL_OPTIONS.map((m) => (
                 <SelectItem key={m.value} value={m.value}>
                   {tm(m.value)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="editor-status">{tp("status")}</Label>
-          <Select value={values.status} onValueChange={(v) => v && update("status", v as PromptStatus)}>
-            <SelectTrigger id="editor-status" className="w-full rounded-2xl">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
-                  {ts(s.value)}
                 </SelectItem>
               ))}
             </SelectContent>
