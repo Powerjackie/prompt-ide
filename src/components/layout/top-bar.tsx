@@ -38,7 +38,7 @@ export function TopBar() {
   }
 
   return (
-    <header className="border-b-2 border-border bg-background px-4 py-3 sm:px-6 lg:px-8">
+    <header className="flex h-14 items-center border-b-2 border-border bg-background px-4 sm:px-6 lg:h-20 lg:px-8">
       <div className="mx-auto flex w-full max-w-[1480px] items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
