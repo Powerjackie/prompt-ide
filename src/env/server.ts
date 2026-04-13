@@ -18,6 +18,7 @@ export const serverEnvSchema = z.object({
   ADMIN_PASSWORD: z.string().min(1, "ADMIN_PASSWORD is required"),
   MEMBER_PASSWORD: z.string().optional(),
   MINIMAX_API_KEY: z.string().min(1, "MINIMAX_API_KEY is required"),
+  TAVILY_API_KEY: z.string().optional(),
   NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: base64AesKey,
 })
 

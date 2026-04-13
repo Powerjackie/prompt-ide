@@ -50,8 +50,11 @@ interface ModuleAwareLoopResult {
 const MINIMAX_BASE_URL = "https://api.minimax.chat/v1"
 const MINIMAX_MODEL = "MiniMax-M2.7"
 const SEARCH_PROMPT_MODULES_TOOL = "search_prompt_modules"
+const WEB_SEARCH_TOOL = "web_search"
+const TAVILY_BASE_URL = "https://api.tavily.com"
 const MAX_REACT_ITERATIONS = 5
 const MAX_MODULE_RESULTS = 5
+const MAX_SEARCH_RESULTS = 5
 const MINIMAX_ANALYSIS_TIMEOUT_MS = 45_000
 const MINIMAX_BENCHMARK_TIMEOUT_MS = 90_000
 const MINIMAX_REFACTOR_TIMEOUT_MS = 120_000
@@ -72,6 +75,26 @@ const AGENT_TOOLS: ChatCompletionTool[] = [
             type: "string",
             description:
               "A short search query with the most relevant module keywords, roles, constraints, or task phrases from the prompt.",
+          },
+        },
+        required: ["query"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: WEB_SEARCH_TOOL,
+      description:
+        "Search the web for relevant context, best practices, or terminology related to the prompt being analyzed. Use when the prompt references specific domains, technologies, or concepts that benefit from external knowledge.",
+      parameters: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          query: {
+            type: "string",
+            description:
+              "A focused web search query derived from the prompt's key topic, domain, or terminology.",
           },
         },
         required: ["query"],
@@ -100,9 +123,10 @@ You are a Prompt Engineering Expert running a ReAct analysis loop for a personal
 Operating rules:
 1. You MUST use the search_prompt_modules tool before you finalize the analysis.
 2. Use the tool to inspect reusable saved modules that may apply to the prompt.
-3. After you receive tool observations, produce the final answer as JSON only.
-4. Do not wrap the JSON in markdown fences.
-5. Match the exact AgentAnalysisResult shape and field names below.
+3. You MAY use the web_search tool to look up domain-specific context, best practices, or terminology when the prompt references specific fields or technologies. If the search returns useful sources, include them in the webSources field.
+4. After you receive tool observations, produce the final answer as JSON only.
+5. Do not wrap the JSON in markdown fences.
+6. Match the exact AgentAnalysisResult shape and field names below.
 
 Required JSON shape:
 {
@@ -132,6 +156,9 @@ Required JSON shape:
     { "key": "string", "params": {} }
   ],
   "matchedRules": ["string"],
+  "webSources": [
+    { "title": "string", "url": "string", "snippet": "string" }
+  ],
   "analysisVersion": "string",
   "analyzedAt": "ISO timestamp string"
 }
@@ -885,58 +912,109 @@ async function runModuleAwareLoop(options: {
       messages.push(assistantMessage)
 
       for (const toolCall of toolCalls) {
-        if (toolCall.type !== "function" || toolCall.function.name !== SEARCH_PROMPT_MODULES_TOOL) {
-          continue
-        }
+        if (toolCall.type !== "function") continue
+        const toolName = toolCall.function.name
 
-        const args = parseToolArguments(toolCall.function.arguments)
-        const query = ensureString(
-          args.query,
-          deriveTitle(options.promptContent, options.narrationLocale)
-        )
-        usedModuleTool = true
-
-        pushTrajectoryStep(
-          trajectory,
-          "action",
-          localizeNarration(
-            options.narrationLocale,
-            `使用查询“${query}”请求可复用提示词模块。`,
-            `Requested reusable prompt modules using the query "${query}".`
-          ),
-          SEARCH_PROMPT_MODULES_TOOL,
-          { query, promptId: options.promptId, iteration },
-          null
-        )
-
-        let toolResult: string
-        try {
-          toolResult = await searchPromptModules(query, options.narrationLocale)
-          fallbackModuleCandidates = await fetchModuleCandidates(query)
-        } catch (error) {
-          const message = error instanceof Error ? error.message : "Unknown module search failure."
-          toolResult = localizeNarration(
-            options.narrationLocale,
-            `查询“${query}”的模块搜索失败：${message}`,
-            `Module search failed for query "${query}": ${message}`
+        if (toolName === SEARCH_PROMPT_MODULES_TOOL) {
+          const args = parseToolArguments(toolCall.function.arguments)
+          const query = ensureString(
+            args.query,
+            deriveTitle(options.promptContent, options.narrationLocale)
           )
-        }
+          usedModuleTool = true
 
-        pushTrajectoryStep(
-          trajectory,
-          "observation",
-          toolResult,
-          null,
-          null,
-          buildToolObservationData(query, toolResult, fallbackModuleCandidates)
-        )
+          pushTrajectoryStep(
+            trajectory,
+            "action",
+            localizeNarration(
+              options.narrationLocale,
+              `使用查询"${query}"请求可复用提示词模块。`,
+              `Requested reusable prompt modules using the query "${query}".`
+            ),
+            SEARCH_PROMPT_MODULES_TOOL,
+            { query, promptId: options.promptId, iteration },
+            null
+          )
 
-        const toolMessage: ChatCompletionToolMessageParam = {
-          role: "tool",
-          tool_call_id: toolCall.id,
-          content: toolResult,
+          let toolResult: string
+          try {
+            toolResult = await searchPromptModules(query, options.narrationLocale)
+            fallbackModuleCandidates = await fetchModuleCandidates(query)
+          } catch (error) {
+            const msg = error instanceof Error ? error.message : "Unknown module search failure."
+            toolResult = localizeNarration(
+              options.narrationLocale,
+              `查询"${query}"的模块搜索失败：${msg}`,
+              `Module search failed for query "${query}": ${msg}`
+            )
+          }
+
+          pushTrajectoryStep(
+            trajectory,
+            "observation",
+            toolResult,
+            null,
+            null,
+            buildToolObservationData(query, toolResult, fallbackModuleCandidates)
+          )
+
+          const toolMessage: ChatCompletionToolMessageParam = {
+            role: "tool",
+            tool_call_id: toolCall.id,
+            content: toolResult,
+          }
+          messages.push(toolMessage)
+        } else if (toolName === WEB_SEARCH_TOOL) {
+          const args = parseToolArguments(toolCall.function.arguments)
+          const query = ensureString(
+            args.query,
+            deriveTitle(options.promptContent, options.narrationLocale)
+          )
+
+          pushTrajectoryStep(
+            trajectory,
+            "action",
+            localizeNarration(
+              options.narrationLocale,
+              `使用查询"${query}"进行网络搜索。`,
+              `Searching the web for "${query}".`
+            ),
+            WEB_SEARCH_TOOL,
+            { query, iteration },
+            null
+          )
+
+          let toolResult: string
+          let searchResults: TavilySearchResult[] = []
+          try {
+            const output = await searchWeb(query, options.narrationLocale)
+            toolResult = output.formattedText
+            searchResults = output.results
+          } catch (error) {
+            const msg = error instanceof Error ? error.message : "Unknown web search failure."
+            toolResult = localizeNarration(
+              options.narrationLocale,
+              `网络搜索"${query}"失败：${msg}`,
+              `Web search failed for "${query}": ${msg}`
+            )
+          }
+
+          pushTrajectoryStep(
+            trajectory,
+            "observation",
+            toolResult,
+            null,
+            null,
+            buildWebSearchObservationData(query, toolResult, searchResults)
+          )
+
+          const toolMessage: ChatCompletionToolMessageParam = {
+            role: "tool",
+            tool_call_id: toolCall.id,
+            content: toolResult,
+          }
+          messages.push(toolMessage)
         }
-        messages.push(toolMessage)
       }
 
       continue
@@ -957,6 +1035,96 @@ async function runModuleAwareLoop(options: {
     usedModuleTool,
     fallbackModuleCandidates,
     termination: "iteration_limit",
+  }
+}
+
+interface TavilySearchResult {
+  title: string
+  url: string
+  content: string
+}
+
+interface TavilyResponse {
+  answer?: string
+  results: TavilySearchResult[]
+}
+
+interface WebSearchOutput {
+  formattedText: string
+  results: TavilySearchResult[]
+}
+
+async function searchWeb(query: string, locale: NarrationLocale): Promise<WebSearchOutput> {
+  const apiKey = process.env.TAVILY_API_KEY
+  if (!apiKey) {
+    return {
+      formattedText: localizeNarration(
+        locale,
+        "网络搜索不可用（未配置 API 密钥）。",
+        "Web search unavailable (API key not configured)."
+      ),
+      results: [],
+    }
+  }
+
+  const response = await fetch(`${TAVILY_BASE_URL}/search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      api_key: apiKey,
+      query,
+      max_results: MAX_SEARCH_RESULTS,
+      search_depth: "basic",
+      include_answer: true,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Tavily API error: ${response.status}`)
+  }
+
+  const data = (await response.json()) as TavilyResponse
+  const results = data.results?.slice(0, MAX_SEARCH_RESULTS) ?? []
+
+  const parts: string[] = []
+  if (data.answer) {
+    parts.push(
+      localizeNarration(locale, `摘要：${data.answer}`, `Summary: ${data.answer}`)
+    )
+  }
+
+  for (const result of results) {
+    parts.push(`- [${result.title}](${result.url})\n  ${summarizeText(result.content, 200)}`)
+  }
+
+  if (parts.length === 0) {
+    return {
+      formattedText: localizeNarration(
+        locale,
+        `未找到与"${query}"相关的网络搜索结果。`,
+        `No web search results found for "${query}".`
+      ),
+      results: [],
+    }
+  }
+
+  return { formattedText: parts.join("\n\n"), results }
+}
+
+function buildWebSearchObservationData(
+  query: string,
+  toolResult: string,
+  results: TavilySearchResult[]
+) {
+  return {
+    query,
+    resultCount: results.length,
+    sources: results.slice(0, MAX_SEARCH_RESULTS).map((r) => ({
+      title: r.title,
+      url: r.url,
+      snippet: summarizeText(r.content, 200),
+    })),
+    resultPreview: summarizeText(toolResult, 220),
   }
 }
 
@@ -981,7 +1149,7 @@ async function searchPromptModules(query: string, locale: NarrationLocale = "zh"
   if (modules.length === 0) {
     return localizeNarration(
       locale,
-      `没有任何提示词模块匹配查询“${trimmedQuery}”。`,
+      `没有任何提示词模块匹配查询"${trimmedQuery}"。`,
       `No prompt modules matched the query "${trimmedQuery}".`
     )
   }
@@ -1172,7 +1340,7 @@ export async function analyzePromptWithAgent(
     "thought",
     localizeNarration(
       narrationLocale,
-      `已完成分析，建议标题为“${analysis.suggestedTitle}”，风险等级为“${analysis.riskLevel}”。`,
+      `已完成分析，建议标题为"${analysis.suggestedTitle}"，风险等级为"${analysis.riskLevel}"。`,
       `Finalized analysis with suggested title "${analysis.suggestedTitle}" and risk "${analysis.riskLevel}".`
     )
   )

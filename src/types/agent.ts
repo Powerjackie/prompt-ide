@@ -57,6 +57,7 @@ export interface AgentAnalysisResult {
   summaryParts: AgentSummaryPart[]
   reasons: AgentReason[]
   matchedRules: string[]
+  webSources?: { title: string; url: string; snippet: string }[]
   analysisVersion: string
   analyzedAt: string
 }
