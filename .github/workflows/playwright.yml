@@ -69,7 +69,7 @@ jobs:
         run: npm run perf:lhci:run
 
       - name: Upload Playwright HTML report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ always() }}
         with:
           name: playwright-report
@@ -78,7 +78,7 @@ jobs:
           retention-days: 30
 
       - name: Upload Playwright test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ always() }}
         with:
           name: playwright-test-results
@@ -89,7 +89,7 @@ jobs:
           retention-days: 30
 
       - name: Upload Lighthouse baseline artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ always() }}
         with:
           name: lighthouse-baseline

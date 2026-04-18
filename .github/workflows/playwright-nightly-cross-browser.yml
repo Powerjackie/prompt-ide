@@ -65,7 +65,7 @@ jobs:
         run: npm run smoke:browser:cross-browser:ci
 
       - name: Upload Playwright HTML report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ always() }}
         with:
           name: cross-browser-playwright-report-${{ github.run_id }}
@@ -74,7 +74,7 @@ jobs:
           retention-days: 14
 
       - name: Upload Playwright test results and traces
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ always() }}
         with:
           name: cross-browser-test-results-${{ github.run_id }}
