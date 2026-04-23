@@ -65,3 +65,6 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 /.lighthouseci/
+
+# Agent memory (local, not committed)
+.agent-memory/
