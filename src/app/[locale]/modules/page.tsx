@@ -1,21 +1,23 @@
 "use client"
 
-import { useState, useMemo, useTransition, useEffect } from "react"
+import { useEffect, useMemo, useState, useTransition } from "react"
 import { useTranslations } from "next-intl"
-import { Puzzle, Plus, PenSquare, Trash2, Copy } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { PageHeader } from "@/components/layout/page-header"
-import { useAuthz } from "@/components/auth/authz-provider"
-import { useModules } from "@/hooks/use-modules"
-import { useModuleUIStore } from "@/stores/module-store"
-import { deleteModule as deleteModuleAction } from "@/app/actions/module.actions"
-import { MODULE_TYPES } from "@/lib/constants"
-import { ModuleEditorDialog } from "@/components/modules/module-editor"
-import { formatDate, copyToClipboard } from "@/lib/utils"
-import type { SerializedModule } from "@/app/actions/module.actions"
+import { Copy, PenSquare, Plus, Puzzle, Trash2 } from "lucide-react"
 import { toast } from "sonner"
-import { BrutalCard } from "@/components/ui/brutal-card"
+import { deleteModule as deleteModuleAction } from "@/app/actions/module.actions"
+import type { SerializedModule } from "@/app/actions/module.actions"
+import { useAuthz } from "@/components/auth/authz-provider"
+import { ModuleEditorDialog } from "@/components/modules/module-editor"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Folio } from "@/components/ui/folio"
+import { PageHeader } from "@/components/ui/page-header"
+import { PageShell } from "@/components/ui/page-shell"
+import { SurfaceCard } from "@/components/ui/surface-card"
+import { useModules } from "@/hooks/use-modules"
+import { MODULE_TYPES } from "@/lib/constants"
+import { copyToClipboard, formatDate } from "@/lib/utils"
+import { useModuleUIStore } from "@/stores/module-store"
 
 const PAGE_SIZE = 12
 
@@ -40,23 +42,19 @@ export default function ModulesPage() {
   }
 
   const filtered = useMemo(
-    () => activeFilter === "all" ? modules : modules.filter((m) => m.type === activeFilter),
+    () => (activeFilter === "all" ? modules : modules.filter((module) => module.type === activeFilter)),
     [modules, activeFilter]
   )
-
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const paged = useMemo(
-    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-    [filtered, page]
-  )
+  const paged = useMemo(() => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [filtered, page])
 
   const openCreate = () => {
     setEditingModule(null)
     setDialogOpen(true)
   }
 
-  const openEdit = (mod: SerializedModule) => {
-    setEditingModule(mod)
+  const openEdit = (module: SerializedModule) => {
+    setEditingModule(module)
     setDialogOpen(true)
   }
 
@@ -74,39 +72,34 @@ export default function ModulesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
+      <PageShell>
+        <div className="flex items-center justify-center py-12">
+          <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      </PageShell>
     )
   }
 
   return (
-    <div className={pending ? "pointer-events-none space-y-8 opacity-70" : "space-y-8"}>
+    <PageShell width="wide" className={pending ? "pointer-events-none space-y-8 opacity-70" : "space-y-8"}>
       <PageHeader
         eyebrow={
-          <>
-            <Puzzle className="h-3.5 w-3.5" />
+          <span className="inline-flex items-center gap-2">
+            <Puzzle className="size-4" />
             {t("title")}
-          </>
+          </span>
         }
         title={t("title")}
         description={t("pageDescription")}
         actions={
-          <Button onClick={openCreate} className="rounded-2xl">
-            <Plus className="mr-1 h-4 w-4" />
+          <Button onClick={openCreate} data-variant="primary">
+            <Plus className="mr-1 size-4" />
             {t("newModule")}
           </Button>
         }
-      >
-        <div className="chip-row">
-          <Badge variant="outline" className="rounded-full px-3 py-1">
-            {t("assetCount", { count: modules.length })}
-          </Badge>
-        </div>
-      </PageHeader>
+      />
 
-      {/* Type filter tabs */}
-      <div className="flex flex-wrap gap-1.5">
+      <SurfaceCard inset className="flex flex-wrap gap-1.5">
         <Badge
           variant={activeFilter === "all" ? "default" : "outline"}
           className="cursor-pointer"
@@ -114,126 +107,101 @@ export default function ModulesPage() {
         >
           {t("all")} ({modules.length})
         </Badge>
-        {MODULE_TYPES.map((mt) => {
-          const count = modules.filter((m) => m.type === mt.value).length
+        {MODULE_TYPES.map((type) => {
+          const count = modules.filter((module) => module.type === type.value).length
           return (
             <Badge
-              key={mt.value}
-              variant={activeFilter === mt.value ? "default" : "outline"}
+              key={type.value}
+              variant={activeFilter === type.value ? "default" : "outline"}
               className="cursor-pointer"
-              onClick={() => handleFilterChange(mt.value)}
+              onClick={() => handleFilterChange(type.value)}
             >
-              {t(mt.value)} ({count})
+              {t(type.value)} ({count})
             </Badge>
           )
         })}
-      </div>
+      </SurfaceCard>
 
       {filtered.length === 0 ? (
-        <BrutalCard shadow="none" padding="none" className="py-14 text-center text-muted-foreground">
-          <Puzzle className="h-12 w-12 mx-auto mb-3 opacity-30" />
+        <SurfaceCard className="py-14 text-center text-muted-foreground">
+          <Puzzle className="mx-auto mb-3 size-12 opacity-30" />
           <p>{t("noModules")}</p>
-        </BrutalCard>
+        </SurfaceCard>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {paged.map((m) => {
-            const typeLabel = t(m.type)
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {paged.map((module) => {
+            const typeLabel = t(module.type)
             return (
-              <BrutalCard
-                key={m.id}
-                shadow="lg"
-                hover="shift"
-                className="space-y-3"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="font-medium text-sm">{m.title}</div>
-                    <Badge variant="outline" className="text-[10px] mt-1">
-                      {typeLabel}
-                    </Badge>
+              <SurfaceCard key={module.id} interactive className="space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <Folio>{typeLabel}</Folio>
+                    <h2 className="mt-2 line-clamp-1 text-2xl">{module.title}</h2>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDate(m.updatedAt)}
-                  </span>
+                  <span className="shrink-0 text-xs text-muted-foreground">{formatDate(module.updatedAt)}</span>
                 </div>
 
-                <pre className="text-xs font-mono bg-muted/50 rounded p-2 max-h-24 overflow-hidden whitespace-pre-wrap">
-                  {m.content}
+                <pre className="max-h-28 overflow-hidden whitespace-pre-wrap rounded-[var(--radius-sm)] border border-border bg-background p-3 font-mono text-xs">
+                  {module.content}
                 </pre>
 
-                {m.tags.length > 0 && (
+                {module.tags.length > 0 ? (
                   <div className="flex flex-wrap gap-1">
-                    {m.tags.map((tag) => (
+                    {module.tags.map((tag) => (
                       <Badge key={tag} variant="secondary" className="text-[10px]">
                         {tag}
                       </Badge>
                     ))}
                   </div>
-                )}
+                ) : null}
 
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 text-xs"
-                    onClick={() => openEdit(m)}
-                    aria-label={`${tc("edit")} ${m.title}`}
-                  >
-                    <PenSquare className="h-3 w-3 mr-1" /> {tc("edit")}
+                <div className="flex flex-wrap gap-2 border-t border-border pt-4">
+                  <Button size="sm" variant="ghost" className="border border-border" onClick={() => openEdit(module)} aria-label={`${tc("edit")} ${module.title}`}>
+                    <PenSquare className="mr-1 size-3.5" /> {tc("edit")}
                   </Button>
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-7 text-xs"
+                    className="border border-border"
                     onClick={async () => {
-                      await copyToClipboard(m.content)
+                      await copyToClipboard(module.content)
                       toast.success(tc("copied"))
                     }}
-                    aria-label={`${tc("copy")} ${m.title}`}
+                    aria-label={`${tc("copy")} ${module.title}`}
                   >
-                    <Copy className="h-3 w-3 mr-1" /> {tc("copy")}
+                    <Copy className="mr-1 size-3.5" /> {tc("copy")}
                   </Button>
                   {canDeleteAssets ? (
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-7 text-xs text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(m.id)}
-                      aria-label={`${tc("delete")} ${m.title}`}
+                      className="border border-border text-destructive hover:text-destructive"
+                      onClick={() => handleDelete(module.id)}
+                      aria-label={`${tc("delete")} ${module.title}`}
                     >
-                      <Trash2 className="h-3 w-3 mr-1" /> {tc("delete")}
+                      <Trash2 className="mr-1 size-3.5" /> {tc("delete")}
                     </Button>
                   ) : null}
                 </div>
-              </BrutalCard>
+              </SurfaceCard>
             )
           })}
         </div>
       )}
 
-      {totalPages > 1 && (
+      {totalPages > 1 ? (
         <div className="flex items-center justify-center gap-3 pt-4">
-          <button
-            type="button"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page <= 1}
-            className="brutal-border brutal-shadow-sm px-4 py-2 font-mono text-sm font-semibold disabled:opacity-40 disabled:shadow-none hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-transform"
-          >
-            ←
-          </button>
+          <Button type="button" variant="outline" onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={page <= 1}>
+            Prev
+          </Button>
           <span className="font-mono text-sm text-muted-foreground">
             {page} / {totalPages}
           </span>
-          <button
-            type="button"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages}
-            className="brutal-border brutal-shadow-sm px-4 py-2 font-mono text-sm font-semibold disabled:opacity-40 disabled:shadow-none hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-transform"
-          >
-            →
-          </button>
+          <Button type="button" variant="outline" onClick={() => setPage((value) => Math.min(totalPages, value + 1))} disabled={page >= totalPages}>
+            Next
+          </Button>
         </div>
-      )}
+      ) : null}
 
       <ModuleEditorDialog
         open={dialogOpen}
@@ -241,6 +209,6 @@ export default function ModulesPage() {
         editModule={editingModule}
         onSaved={refetch}
       />
-    </div>
+    </PageShell>
   )
 }

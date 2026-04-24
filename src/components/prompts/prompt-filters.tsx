@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { SurfaceCard } from "@/components/ui/surface-card"
 import { MODEL_OPTIONS, STATUS_OPTIONS } from "@/lib/constants"
 import { cn } from "@/lib/utils"
 import type { PromptFilters } from "@/hooks/use-prompt-filters"
@@ -42,14 +43,12 @@ export function PromptFiltersBar({
   const tc = useTranslations("common")
   const tm = useTranslations("models")
   const ts = useTranslations("status")
-
   const [tagsExpanded, setTagsExpanded] = useState(false)
   const visibleTags = useMemo(
     () => (tagsExpanded ? allTags : allTags.slice(0, VISIBLE_TAG_COUNT)),
     [allTags, tagsExpanded]
   )
   const hasMoreTags = allTags.length > VISIBLE_TAG_COUNT
-
   const hasFilters =
     filters.search ||
     filters.status !== "all" ||
@@ -57,14 +56,14 @@ export function PromptFiltersBar({
     filters.tag !== "all"
 
   return (
-    <div className="filter-shell brutal-border brutal-shadow bg-card dark:shadow-none">
+    <SurfaceCard inset className="space-y-4">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex min-w-0 flex-1 flex-col gap-3 lg:flex-row lg:items-center">
           <div className="relative flex-1 lg:max-w-xl">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder={tc("search")}
-              className="h-12 rounded-none brutal-border bg-background pl-11 font-mono text-sm focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-11 rounded-[var(--radius-sm)] border-border bg-background pl-10"
               value={filters.search}
               onChange={(event) => updateFilter("search", event.target.value)}
               aria-label={tc("search")}
@@ -76,10 +75,7 @@ export function PromptFiltersBar({
               value={filters.status}
               onValueChange={(value) => updateFilter("status", value as PromptFilters["status"])}
             >
-              <SelectTrigger
-                className="h-11 w-full rounded-none brutal-border bg-background font-mono text-xs uppercase sm:min-w-36 sm:w-auto"
-                aria-label={t("status")}
-              >
+              <SelectTrigger className="h-11 w-full bg-background sm:w-36" aria-label={t("status")}>
                 <SelectValue placeholder={t("status")} />
               </SelectTrigger>
               <SelectContent>
@@ -96,10 +92,7 @@ export function PromptFiltersBar({
               value={filters.model}
               onValueChange={(value) => updateFilter("model", value as PromptFilters["model"])}
             >
-              <SelectTrigger
-                className="h-11 w-full rounded-none brutal-border bg-background font-mono text-xs uppercase sm:min-w-36 sm:w-auto"
-                aria-label={t("model")}
-              >
+              <SelectTrigger className="h-11 w-full bg-background sm:w-36" aria-label={t("model")}>
                 <SelectValue placeholder={t("model")} />
               </SelectTrigger>
               <SelectContent>
@@ -116,10 +109,7 @@ export function PromptFiltersBar({
               value={filters.sort}
               onValueChange={(value) => updateFilter("sort", value as PromptFilters["sort"])}
             >
-              <SelectTrigger
-                className="h-11 w-full rounded-none brutal-border bg-background font-mono text-xs uppercase sm:min-w-40 sm:w-auto"
-                aria-label={t("recentlyUpdated")}
-              >
+              <SelectTrigger className="h-11 w-full bg-background sm:w-40" aria-label={t("recentlyUpdated")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -133,48 +123,45 @@ export function PromptFiltersBar({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline" className="rounded-none border-border bg-background px-3 py-1 font-mono text-[11px] uppercase">
-            <SlidersHorizontal className="mr-1 h-3.5 w-3.5" />
+          <Badge variant="outline" className="gap-1 font-mono text-[11px]">
+            <SlidersHorizontal className="size-3.5" />
             {tc("promptCount", { count: resultCount })}
           </Badge>
           {hasFilters ? (
-            <Button variant="ghost" className="rounded-none border border-border" onClick={resetFilters}>
-              <X className="mr-1 h-4 w-4" />
+            <Button variant="ghost" className="border border-border" onClick={resetFilters}>
+              <X className="mr-1 size-4" />
               {tc("reset")}
             </Button>
           ) : null}
-          <div className="hidden items-center brutal-border bg-background p-1 md:flex">
+          <div className="hidden items-center rounded-[var(--radius-sm)] border border-border bg-background p-1 md:flex">
             <Button
               variant={view === "card" ? "secondary" : "ghost"}
               size="icon"
-              className="h-9 w-9 rounded-none"
+              className="size-9"
               onClick={() => onViewChange("card")}
               aria-label="Card view"
               aria-pressed={view === "card"}
             >
-              <Grid2X2 className="h-4 w-4" />
+              <Grid2X2 className="size-4" />
             </Button>
             <Button
               variant={view === "list" ? "secondary" : "ghost"}
               size="icon"
-              className="h-9 w-9 rounded-none"
+              className="size-9"
               onClick={() => onViewChange("list")}
               aria-label="List view"
               aria-pressed={view === "list"}
             >
-              <List className="h-4 w-4" />
+              <List className="size-4" />
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="chip-row">
+      <div className="flex flex-wrap gap-1.5">
         <Badge
           variant={filters.tag === "all" ? "default" : "outline"}
-          className={cn(
-            "cursor-pointer rounded-none border-2 border-border px-3 py-1 font-mono text-[11px] uppercase transition-transform hover:translate-x-[2px] hover:translate-y-[2px]",
-            filters.tag === "all" ? "bg-primary text-primary-foreground" : "bg-background text-foreground"
-          )}
+          className={cn("cursor-pointer", filters.tag === "all" && "bg-primary text-primary-foreground")}
           onClick={() => updateFilter("tag", "all")}
         >
           {t("allTags")}
@@ -183,25 +170,22 @@ export function PromptFiltersBar({
           <Badge
             key={tag}
             variant={filters.tag === tag ? "default" : "outline"}
-            className={cn(
-              "cursor-pointer rounded-none border-2 border-border px-3 py-1 font-mono text-[11px] uppercase transition-transform hover:translate-x-[2px] hover:translate-y-[2px]",
-              filters.tag === tag ? "bg-primary text-primary-foreground" : "bg-background text-foreground"
-            )}
+            className={cn("cursor-pointer", filters.tag === tag && "bg-primary text-primary-foreground")}
             onClick={() => updateFilter("tag", tag)}
           >
             {tag}
           </Badge>
         ))}
-        {hasMoreTags && (
+        {hasMoreTags ? (
           <Badge
             variant="outline"
-            className="cursor-pointer rounded-none border-2 border-dashed border-border bg-background px-3 py-1 font-mono text-[11px] uppercase text-muted-foreground transition-transform hover:translate-x-[2px] hover:translate-y-[2px] hover:text-foreground"
+            className="cursor-pointer border-dashed text-muted-foreground"
             onClick={() => setTagsExpanded((prev) => !prev)}
           >
-            {tagsExpanded ? "−" : `+${allTags.length - VISIBLE_TAG_COUNT}`}
+            {tagsExpanded ? "less" : `+${allTags.length - VISIBLE_TAG_COUNT}`}
           </Badge>
-        )}
+        ) : null}
       </div>
-    </div>
+    </SurfaceCard>
   )
 }
