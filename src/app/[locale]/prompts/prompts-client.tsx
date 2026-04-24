@@ -153,7 +153,7 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
         <div className="grid gap-3 md:grid-cols-3">
           {highlightedPrompts.map((prompt) => (
             <Link
-              className="lab-card block p-4 no-underline hover:bg-accent"
+              className="prompt-library-item lab-card block p-4 no-underline hover:bg-accent"
               data-interactive="true"
               href={`/prompts/${prompt.id}`}
               key={prompt.id}
@@ -192,7 +192,7 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
         {view === "card" ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
             {sortedPrompts.map((prompt) => (
-              <div className="h-full" key={prompt.id}>
+              <div className="prompt-library-item prompt-draggable-card h-full" key={prompt.id}>
                 <PromptCard prompt={prompt} />
               </div>
             ))}
@@ -211,7 +211,7 @@ function PromptsContent({ initialView }: { initialView: "card" | "list" }) {
                 const statusOption = STATUS_OPTIONS.find((option) => option.value === prompt.status)
                 return (
                   <div
-                    className="grid min-w-[720px] grid-cols-[minmax(0,2.3fr)_auto_auto_auto] items-center gap-4 px-5 py-4 transition hover:bg-accent"
+                    className="prompt-library-item grid min-w-[720px] grid-cols-[minmax(0,2.3fr)_auto_auto_auto] items-center gap-4 px-5 py-4 transition hover:bg-accent"
                     key={prompt.id}
                   >
                     <div className="min-w-0">

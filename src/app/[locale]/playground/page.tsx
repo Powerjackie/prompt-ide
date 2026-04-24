@@ -48,7 +48,7 @@ export default function PlaygroundPage() {
         clear: "清空",
         templates: "模板入口",
         console: "分析记录",
-        disabled: "Agent 分析已关闭",
+        disabled: ta("disabled"),
       }
     : {
         eyebrow: "stateless analysis floor",
@@ -61,7 +61,7 @@ export default function PlaygroundPage() {
         clear: "Clear",
         templates: "Template feed",
         console: "Analysis record",
-        disabled: "Agent analysis is disabled",
+        disabled: ta("disabled"),
       }
 
   useEffect(() => {
@@ -201,6 +201,7 @@ export default function PlaygroundPage() {
             {copy.textarea}
           </label>
           <Textarea
+            className="playground-stage-textarea"
             aria-label={isZh ? "Playground 提示词输入" : "Playground prompt input"}
             id="playground-source"
             onFocus={(event) => handleMobileFocus(event.currentTarget)}
@@ -249,7 +250,7 @@ export default function PlaygroundPage() {
             const active = selectedTemplateId === template.id
             return (
               <button
-                className="lab-card p-4 text-left transition-colors hover:bg-accent"
+                className="playground-template lab-card p-4 text-left transition-colors hover:bg-accent"
                 data-interactive="true"
                 key={template.id}
                 onClick={() => {

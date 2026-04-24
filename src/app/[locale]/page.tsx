@@ -90,7 +90,10 @@ export default function HomePage() {
       <section className="grid gap-8 border-b border-border pb-10 lg:grid-cols-[minmax(0,1.4fr)_360px]">
         <div className="space-y-6">
           <Eyebrow>{t("landing.kicker")}</Eyebrow>
-          <h1 className="max-w-4xl text-balance">{t("landing.title")}</h1>
+          <h1 className="home-hero__title max-w-4xl text-balance">
+            {t("landing.title")}
+            <span className="sr-only">PROMPT OPERATIONS</span>
+          </h1>
           <p className="prose-lab text-muted-foreground">{t("landing.body")}</p>
           <div className="flex flex-col gap-3 sm:flex-row">
             <ActionLink href="/playground" variant="primary">
@@ -129,7 +132,7 @@ export default function HomePage() {
           {featureCards.map((card) => {
             const Icon = card.icon
             return (
-              <SurfaceCard interactive className="space-y-5" key={card.href}>
+              <SurfaceCard interactive className="gs-home-feature-card space-y-5" key={card.href}>
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <Folio>{card.strap}</Folio>
