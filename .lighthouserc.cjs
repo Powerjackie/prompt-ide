@@ -22,6 +22,10 @@ module.exports = {
         preset: "desktop",
         throttlingMethod: "simulate",
         ...(lhciChromePath ? { chromePath: lhciChromePath } : {}),
+        // GitHub Actions runners (Ubuntu 23.10+) disable unprivileged user
+        // namespaces via AppArmor, so Chromium fails with "No usable sandbox".
+        // --no-sandbox is the documented workaround for CI environments.
+        chromeFlags: "--no-sandbox --headless --disable-gpu --disable-dev-shm-usage",
       },
     },
     assert: {
