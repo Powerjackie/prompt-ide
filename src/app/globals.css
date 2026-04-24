@@ -350,6 +350,18 @@
     color: var(--ink);
   }
 
+  .app-shell > aside {
+    grid-row: 1 / span 2;
+  }
+
+  .app-shell > header {
+    grid-column: 2;
+  }
+
+  .app-shell > main {
+    grid-column: 2;
+  }
+
   .app-main {
     min-width: 0;
     height: calc(100dvh - 48px);
@@ -472,7 +484,12 @@
 @media (max-width: 900px) {
   @layer components {
     .app-shell {
-      grid-template-columns: 56px minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .app-shell > header,
+    .app-shell > main {
+      grid-column: 1;
     }
 
     .lab-grid-2,
