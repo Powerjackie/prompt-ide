@@ -19,6 +19,7 @@ AI_PROJECT_STATE.md
 /coverage
 /output/playwright/
 /output/perf/
+/reports/
 
 # next.js
 /.next/

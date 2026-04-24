@@ -1,18 +1,18 @@
 import type { Metadata, Viewport } from "next"
-import { Inter, Inter_Tight, JetBrains_Mono } from "next/font/google"
+import { IBM_Plex_Sans, JetBrains_Mono, Source_Serif_4 } from "next/font/google"
 import { WebVitalsReporter } from "@/components/observability/web-vitals-reporter"
 import "./globals.css"
 
-const inter = Inter({
-  variable: "--font-inter",
+const sourceSerif = Source_Serif_4({
+  variable: "--font-serif",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
 })
 
-const interTight = Inter_Tight({
-  variable: "--font-inter-tight",
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["500", "700", "800", "900"],
+  weight: ["300", "400", "500", "600", "700"],
 })
 
 const jetbrainsMono = JetBrains_Mono({
@@ -43,7 +43,7 @@ export default function RootLayout({
   return (
     <html
       translate="no"
-      className={`${inter.variable} ${interTight.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${sourceSerif.variable} ${ibmPlexSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full overflow-x-hidden notranslate" translate="no">
