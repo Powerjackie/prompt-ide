@@ -4,6 +4,9 @@ import { useActionState } from "react"
 import { useTranslations } from "next-intl"
 import { LockKeyhole } from "lucide-react"
 import { loginAction } from "@/app/actions/auth.actions"
+import { Eyebrow } from "@/components/ui/eyebrow"
+import { Folio } from "@/components/ui/folio"
+import { SurfaceCard } from "@/components/ui/surface-card"
 import { initialAuthState } from "@/types/auth"
 import { PasswordInput } from "./password-input"
 import { SubmitButton } from "./submit-button"
@@ -13,34 +16,25 @@ export function LoginCard() {
   const [state, formAction] = useActionState(loginAction, initialAuthState)
 
   return (
-    <div className="gs-login-card login-glass-card w-full max-w-[26rem] p-7 sm:p-8">
+    <SurfaceCard className="w-full max-w-[26rem] p-7 sm:p-8">
       <div className="space-y-6">
-        {/* Eyebrow */}
-        <div className="flex items-center gap-2 text-white/60">
-          <LockKeyhole className="h-4 w-4" />
-          <span className="text-sm font-medium tracking-wide">{t("eyebrow")}</span>
+        <div className="flex items-center justify-between gap-3">
+          <Eyebrow className="flex items-center gap-2">
+            <LockKeyhole className="size-4" />
+            {t("eyebrow")}
+          </Eyebrow>
+          <Folio>access</Folio>
         </div>
 
-        {/* Title — SplitText target */}
-        <h1 className="gs-login-title font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-          Prompt IDE
-        </h1>
+        <h1 className="text-4xl sm:text-5xl">Prompt IDE</h1>
+        <p className="prose-lab text-muted-foreground">{t("description")}</p>
 
-        {/* Description */}
-        <p className="gs-login-desc text-sm leading-6 text-white/60">
-          {t("description")}
-        </p>
-
-        {/* Form */}
         <form action={formAction} className="space-y-5">
-          <PasswordInput
-            label={t("passwordLabel")}
-            placeholder={t("passwordPlaceholder")}
-          />
+          <PasswordInput label={t("passwordLabel")} placeholder={t("passwordPlaceholder")} />
 
           {state.error ? (
             <p
-              className="rounded-2xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+              className="rounded-[var(--radius-sm)] border border-[var(--vermillion)] bg-[var(--vermillion-wash)] px-4 py-3 text-sm text-[var(--vermillion)]"
               role="alert"
               aria-live="assertive"
             >
@@ -51,6 +45,6 @@ export function LoginCard() {
           <SubmitButton />
         </form>
       </div>
-    </div>
+    </SurfaceCard>
   )
 }

@@ -25,12 +25,10 @@ export function PasswordInput({ label, placeholder }: PasswordInputProps) {
         aria-hidden="true"
         className="sr-only"
       />
-      <div className="gs-login-field-label space-y-2">
-        <Label htmlFor="password" className="text-white/82">
-          {label}
-        </Label>
+      <div className="space-y-2">
+        <Label htmlFor="password">{label}</Label>
       </div>
-      <div className="gs-login-field-input relative">
+      <div className="relative">
         <Input
           id="password"
           name="password"
@@ -38,11 +36,11 @@ export function PasswordInput({ label, placeholder }: PasswordInputProps) {
           placeholder={placeholder}
           autoComplete="current-password"
           required
-          className="h-12 rounded-2xl border-white/8 bg-white/[0.03] text-white placeholder:text-white/35 pr-11"
+          className="h-12 rounded-[var(--radius-sm)] border-border bg-background pr-11"
         />
         <button
           type="button"
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
           onClick={() => setVisible((v) => !v)}
           aria-label={visible ? "Hide password" : "Show password"}
         >
