@@ -92,20 +92,19 @@ export function SearchDialog() {
         onOpenChange={setOpen}
         title={t("dialogTitle")}
         description={t("dialogDescription")}
-        className="command-palette-shell brutal-border brutal-shadow-lg max-w-[min(42rem,calc(100%-1.5rem))]! rounded-none! border-[3px]! bg-card! p-0!"
+        className="max-w-[min(42rem,calc(100%-1.5rem))]! rounded-[var(--radius-md)]! border border-border! bg-card! p-0! shadow-[var(--shadow-page)]!"
       >
         <Command className="rounded-none! border-0 bg-card p-0">
           <CommandInput placeholder={t("placeholder")} />
           <CommandList className="max-h-[min(65vh,32rem)] px-2 pb-2">
             <CommandEmpty>{tc("noResults")}</CommandEmpty>
 
-            <CommandGroup className="command-palette-group" heading={t("pages")}>
+            <CommandGroup heading={t("pages")}>
               {PAGES.map((page) => (
                 <CommandItem
                   key={page.href}
                   onSelect={() => navigate(page.href)}
-                  className="command-palette-item"
-                  data-magnet-target
+                  className="rounded-[var(--radius-sm)]"
                 >
                   <page.icon className="mr-2 h-4 w-4 text-muted-foreground" />
                   {tn(page.nameKey)}
@@ -115,13 +114,12 @@ export function SearchDialog() {
 
             <CommandSeparator />
 
-            <CommandGroup className="command-palette-group" heading={t("prompts")}>
+            <CommandGroup heading={t("prompts")}>
               {activePrompts.map((prompt) => (
                 <CommandItem
                   key={prompt.id}
                   onSelect={() => navigate(`/prompts/${prompt.id}`)}
-                  className="command-palette-item"
-                  data-magnet-target
+                  className="rounded-[var(--radius-sm)]"
                 >
                   <FileText className="mr-2 h-4 w-4 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
@@ -139,13 +137,12 @@ export function SearchDialog() {
             {modules.length > 0 ? (
               <>
                 <CommandSeparator />
-                <CommandGroup className="command-palette-group" heading={t("modules")}>
+                <CommandGroup heading={t("modules")}>
                   {modules.map((module) => (
                     <CommandItem
                       key={module.id}
                       onSelect={() => navigate("/modules")}
-                      className="command-palette-item"
-                      data-magnet-target
+                      className="rounded-[var(--radius-sm)]"
                     >
                       <Puzzle className="mr-2 h-4 w-4 text-muted-foreground" />
                       <div className="min-w-0 flex-1">

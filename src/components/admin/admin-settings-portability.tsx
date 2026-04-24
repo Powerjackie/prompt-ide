@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useMemo, useState, useTransition } from "react"
 import { AlertTriangle, Check, Copy, Download, FileJson } from "lucide-react"
@@ -124,11 +124,11 @@ export function AdminSettingsPortability({
   return (
     <section
       id="admin-portability"
-      className="brutal-border-thick brutal-shadow bg-card p-5 sm:p-6"
+      className="lab-card bg-card p-5 sm:p-6"
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 font-mono text-xs font-black uppercase tracking-[0.16em] text-muted-foreground">
+          <div className="inline-flex items-center gap-2 font-mono text-xs font-medium text-muted-foreground">
             <FileJson className="h-4 w-4 text-primary" />
             {t("portability.title")}
           </div>
@@ -238,8 +238,8 @@ export function AdminSettingsPortability({
       </div>
 
       {validatedSettings ? (
-        <div className="mt-5 brutal-border bg-foreground p-4 text-background">
-          <div className="inline-flex items-center gap-2 font-mono text-[11px] font-black uppercase tracking-[0.16em] text-background/70">
+        <div className="mt-5 rounded-[var(--radius-sm)] border border-border bg-foreground p-4 text-background">
+          <div className="inline-flex items-center gap-2 font-mono text-[11px] font-medium text-background/70">
             <Check className="h-3.5 w-3.5 text-primary" />
             {t("portability.validatedTitle")}
           </div>
@@ -276,3 +276,4 @@ export function AdminSettingsPortability({
     </section>
   )
 }
+

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { Activity, Database, ShieldCheck, Wrench } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -16,9 +16,9 @@ export function AdminDiagnosticsPanel({
   return (
     <section
       id="admin-diagnostics"
-      className="brutal-border-thick brutal-shadow bg-card p-5"
+      className="lab-card bg-card p-5"
     >
-      <div className="inline-flex items-center gap-2 font-mono text-xs font-black uppercase tracking-[0.16em] text-muted-foreground">
+      <div className="inline-flex items-center gap-2 font-mono text-xs font-medium text-muted-foreground">
         <Activity className="h-4 w-4 text-primary" />
         {t("diagnostics.title")}
       </div>
@@ -27,16 +27,16 @@ export function AdminDiagnosticsPanel({
       </p>
 
       <div className="mt-5 space-y-4">
-        <div className="brutal-border bg-muted/40 p-4">
-          <div className="inline-flex items-center gap-2 font-mono text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground">
+        <div className="rounded-[var(--radius-sm)] border border-border bg-muted/40 p-4">
+          <div className="inline-flex items-center gap-2 font-mono text-[11px] font-medium text-muted-foreground">
             <ShieldCheck className="h-3.5 w-3.5 text-primary" />
             {t("diagnostics.role.title")}
           </div>
           <div className="mt-2 text-lg font-black uppercase">{diagnostics.role}</div>
         </div>
 
-        <div className="brutal-border bg-background p-4">
-          <div className="inline-flex items-center gap-2 font-mono text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground">
+        <div className="rounded-[var(--radius-sm)] border border-border bg-background p-4">
+          <div className="inline-flex items-center gap-2 font-mono text-[11px] font-medium text-muted-foreground">
             <Database className="h-3.5 w-3.5 text-primary" />
             {t("diagnostics.storage.title")}
           </div>
@@ -66,8 +66,8 @@ export function AdminDiagnosticsPanel({
           </dl>
         </div>
 
-        <div className="brutal-border bg-background p-4">
-          <div className="inline-flex items-center gap-2 font-mono text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground">
+        <div className="rounded-[var(--radius-sm)] border border-border bg-background p-4">
+          <div className="inline-flex items-center gap-2 font-mono text-[11px] font-medium text-muted-foreground">
             <Database className="h-3.5 w-3.5 text-primary" />
             {t("diagnostics.database.title")}
           </div>
@@ -93,8 +93,8 @@ export function AdminDiagnosticsPanel({
           </dl>
         </div>
 
-        <div className="brutal-border bg-background p-4">
-          <div className="inline-flex items-center gap-2 font-mono text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground">
+        <div className="rounded-[var(--radius-sm)] border border-border bg-background p-4">
+          <div className="inline-flex items-center gap-2 font-mono text-[11px] font-medium text-muted-foreground">
             <Wrench className="h-3.5 w-3.5 text-primary" />
             {t("diagnostics.defaults.title")}
           </div>
@@ -146,8 +146,8 @@ export function AdminDiagnosticsPanel({
           </dl>
         </div>
 
-        <div className="brutal-border bg-foreground p-4 text-background">
-          <div className="inline-flex items-center gap-2 font-mono text-[11px] font-black uppercase tracking-[0.16em] text-background/70">
+        <div className="rounded-[var(--radius-sm)] border border-border bg-foreground p-4 text-background">
+          <div className="inline-flex items-center gap-2 font-mono text-[11px] font-medium text-background/70">
             <ShieldCheck className="h-3.5 w-3.5 text-primary" />
             {t("diagnostics.guardrails.title")}
           </div>
@@ -173,3 +173,4 @@ export function AdminDiagnosticsPanel({
     </section>
   )
 }
+

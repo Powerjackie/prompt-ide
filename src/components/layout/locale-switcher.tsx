@@ -35,8 +35,7 @@ export function LocaleSwitcher({ className, showLabel = false }: LocaleSwitcherP
           <Button
             variant="ghost"
             size={showLabel ? "default" : "icon"}
-            className={cn("rounded-none border-2 border-border hover:bg-muted", className)}
-            data-magnet-target
+            className={cn("rounded-[var(--radius-sm)] border border-border hover:bg-muted", className)}
           />
         }
       >

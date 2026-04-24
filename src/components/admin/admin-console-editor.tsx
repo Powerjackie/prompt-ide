@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useMemo, useState, useTransition } from "react"
 import { useTranslations } from "next-intl"
@@ -249,10 +249,10 @@ export function AdminConsoleEditor({
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_18rem] xl:items-start">
       <div className="space-y-6">
-        <section className="brutal-border-thick brutal-shadow bg-card p-5 sm:p-6">
+        <section className="lab-card bg-card p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 font-mono text-xs font-black uppercase tracking-[0.16em] text-muted-foreground">
+              <div className="inline-flex items-center gap-2 font-mono text-xs font-medium text-muted-foreground">
                 <Settings2 className="h-4 w-4 text-primary" />
                 {t("workspace.title")}
               </div>
@@ -394,10 +394,10 @@ export function AdminConsoleEditor({
           </div>
         </section>
 
-        <section className="brutal-border-thick brutal-shadow bg-card p-5 sm:p-6">
+        <section className="lab-card bg-card p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 font-mono text-xs font-black uppercase tracking-[0.16em] text-muted-foreground">
+              <div className="inline-flex items-center gap-2 font-mono text-xs font-medium text-muted-foreground">
                 <Bot className="h-4 w-4 text-primary" />
                 {t("agent.title")}
               </div>
@@ -418,7 +418,7 @@ export function AdminConsoleEditor({
 
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
             <div className="space-y-4">
-              <div className="brutal-border bg-background p-4">
+              <div className="rounded-[var(--radius-sm)] border border-border bg-background p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="space-y-1">
                     <Label htmlFor="agent-enabled" className="font-mono text-xs uppercase tracking-[0.16em]">
@@ -436,7 +436,7 @@ export function AdminConsoleEditor({
                 </div>
               </div>
 
-              <div className="brutal-border bg-background p-4">
+              <div className="rounded-[var(--radius-sm)] border border-border bg-background p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="space-y-1">
                     <Label htmlFor="agent-auto-analyze" className="font-mono text-xs uppercase tracking-[0.16em]">
@@ -454,7 +454,7 @@ export function AdminConsoleEditor({
                 </div>
               </div>
 
-              <div className="brutal-border bg-background p-4">
+              <div className="rounded-[var(--radius-sm)] border border-border bg-background p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="space-y-1">
                     <Label htmlFor="agent-paste" className="font-mono text-xs uppercase tracking-[0.16em]">
@@ -475,7 +475,7 @@ export function AdminConsoleEditor({
                 </div>
               </div>
 
-              <div className="brutal-border bg-background p-4">
+              <div className="rounded-[var(--radius-sm)] border border-border bg-background p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="space-y-1">
                     <Label htmlFor="agent-normalization" className="font-mono text-xs uppercase tracking-[0.16em]">
@@ -498,7 +498,7 @@ export function AdminConsoleEditor({
                 </div>
               </div>
 
-              <div className="brutal-border bg-background p-4">
+              <div className="rounded-[var(--radius-sm)] border border-border bg-background p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="space-y-1">
                     <Label htmlFor="agent-module-extraction" className="font-mono text-xs uppercase tracking-[0.16em]">
@@ -698,8 +698,8 @@ export function AdminConsoleEditor({
           </div>
         </section>
 
-        <section className="brutal-border-thick bg-card p-5 sm:p-6">
-          <div className="inline-flex items-center gap-2 font-mono text-xs font-black uppercase tracking-[0.16em] text-destructive">
+        <section className="lab-card bg-card p-5 sm:p-6">
+          <div className="inline-flex items-center gap-2 font-mono text-xs font-medium text-destructive">
             <AlertTriangle className="h-4 w-4" />
             {t("danger.title")}
           </div>
@@ -716,32 +716,32 @@ export function AdminConsoleEditor({
       </div>
 
       <aside className="space-y-6 xl:sticky xl:top-6 xl:self-start">
-        <section className="brutal-border bg-foreground p-5 text-background">
-          <div className="inline-flex items-center gap-2 font-mono text-xs font-black uppercase tracking-[0.16em] text-background/70">
+        <section className="rounded-[var(--radius-sm)] border border-border bg-foreground p-5 text-background">
+          <div className="inline-flex items-center gap-2 font-mono text-xs font-medium text-background/70">
             <Check className="h-4 w-4 text-primary" />
             {t("sync.title")}
           </div>
           <div className="mt-4 space-y-3 text-sm leading-7 text-background/85">
             <p>{t("sync.body")}</p>
-            <div className="border-2 border-background/20 px-3 py-2 font-mono text-xs font-black uppercase tracking-[0.16em]">
+            <div className="border-2 border-background/20 px-3 py-2 font-mono text-xs font-medium">
               {workspaceDirty || agentDirty ? t("sync.pending") : t("sync.clean")}
             </div>
           </div>
         </section>
 
-        <section className="brutal-border bg-card p-5">
-          <div className="inline-flex items-center gap-2 font-mono text-xs font-black uppercase tracking-[0.16em] text-muted-foreground">
+        <section className="rounded-[var(--radius-sm)] border border-border bg-card p-5">
+          <div className="inline-flex items-center gap-2 font-mono text-xs font-medium text-muted-foreground">
             <ShieldCheck className="h-4 w-4 text-primary" />
             {t("guards.title")}
           </div>
           <p className="mt-4 text-sm leading-7 text-muted-foreground">{t("guards.body")}</p>
-          <div className="mt-5 border-2 border-border bg-muted px-3 py-2 font-mono text-xs font-black uppercase tracking-[0.16em]">
+          <div className="mt-5 border-2 border-border bg-muted px-3 py-2 font-mono text-xs font-medium">
             {t("guards.ensureAdmin")}
           </div>
         </section>
 
-        <section className="brutal-border bg-card p-5">
-          <div className="inline-flex items-center gap-2 font-mono text-xs font-black uppercase tracking-[0.16em] text-muted-foreground">
+        <section className="rounded-[var(--radius-sm)] border border-border bg-card p-5">
+          <div className="inline-flex items-center gap-2 font-mono text-xs font-medium text-muted-foreground">
             <SlidersHorizontal className="h-4 w-4 text-primary" />
             {t("notes.title")}
           </div>
@@ -757,3 +757,4 @@ export function AdminConsoleEditor({
     </div>
   )
 }
+

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { Eyebrow } from "@/components/ui/eyebrow"
 import { cn } from "@/lib/utils"
 
 interface PageHeaderProps {
@@ -19,16 +20,14 @@ export function PageHeader({
   className,
 }: PageHeaderProps) {
   return (
-    <section className={cn("page-header dark:shadow-none", className)}>
-      <div className="page-header__top">
-        <div className="space-y-3">
-          {eyebrow ? <div className="page-header__eyebrow">{eyebrow}</div> : null}
-          <div className="space-y-2">
-            <h1 className="page-header__title">{title}</h1>
-            {description ? <p className="page-header__description">{description}</p> : null}
-          </div>
+    <section className={cn("mb-8 space-y-5 border-b border-border pb-6", className)}>
+      <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+        <div className="min-w-0 space-y-3">
+          {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
+          <h1 className="max-w-4xl text-balance">{title}</h1>
+          {description ? <p className="prose-lab text-muted-foreground">{description}</p> : null}
         </div>
-        {actions ? <div className="page-actions">{actions}</div> : null}
+        {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
       </div>
       {children}
     </section>

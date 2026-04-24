@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useRef, useCallback, useEffect, useMemo, useTransition } from "react"
 import { useRouter } from "@/i18n/navigation"
@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation"
 import { useLocale, useTranslations } from "next-intl"
 import { ArrowLeft, Save, Eye, Puzzle, Bot, History } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { PageShell } from "@/components/ui/page-shell"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PageHeader } from "@/components/layout/page-header"
 import { SectionHeader } from "@/components/layout/section-header"
@@ -364,7 +365,7 @@ function EditorForm({
   }, [content])
 
   return (
-    <div className="space-y-8">
+    <PageShell width="wide" className="space-y-8">
       <PageHeader
         eyebrow={
           <>
@@ -389,7 +390,7 @@ function EditorForm({
           </>
         }
       >
-        <div className="chip-row">
+        <div className="flex flex-wrap gap-2">
           {dirty ? (
             <span className="rounded-full border border-amber-300/50 bg-amber-400/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">
               {tc("unsavedChanges")}
@@ -404,7 +405,7 @@ function EditorForm({
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(380px,0.92fr)] xl:items-start">
         {/* Left: Metadata + Editor */}
         <div className="space-y-6">
-          <div className="app-panel p-4 dark:shadow-none sm:p-6">
+          <div className="lab-card p-4  sm:p-6">
             <SectionHeader
               title={t("metadataTitle")}
               description={t("metadataDescription")}
@@ -414,7 +415,7 @@ function EditorForm({
             </div>
           </div>
 
-          <div className="app-panel space-y-4 p-4 dark:shadow-none sm:p-6">
+          <div className="lab-card space-y-4 p-4  sm:p-6">
             <SectionHeader
               title={t("contentLabel")}
               description={t("contentDescription")}
@@ -428,7 +429,7 @@ function EditorForm({
         </div>
 
         {/* Right: Preview / Agent / Modules tabs */}
-        <div className="app-panel flex min-h-[420px] flex-col overflow-hidden p-4 dark:shadow-none sm:p-5 md:min-h-[680px] xl:self-start xl:max-h-[min(920px,calc(100vh-8rem))] xl:p-6">
+        <div className="lab-card flex min-h-[420px] flex-col overflow-hidden p-4  sm:p-5 md:min-h-[680px] xl:self-start xl:max-h-[min(920px,calc(100vh-8rem))] xl:p-6">
           <div className="mb-4">
             <SectionHeader
               title={t("toolsTitle")}
@@ -530,6 +531,7 @@ function EditorForm({
           </Tabs>
         </div>
       </div>
-    </div>
+    </PageShell>
   )
 }
+

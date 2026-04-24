@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { use, useCallback, useEffect, useState, useTransition } from "react"
 import { Link, useRouter } from "@/i18n/navigation"
@@ -17,6 +17,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { PageShell } from "@/components/ui/page-shell"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
@@ -357,6 +358,7 @@ export default function PromptDetailPage({
   }
 
   return (
+    <PageShell width="wide">
     <div className={cn("space-y-8", pending && "pointer-events-none opacity-70")}>
       <PageHeader
         eyebrow={
@@ -498,7 +500,7 @@ export default function PromptDetailPage({
         }
       >
         <div className="space-y-3">
-          <div className="chip-row">
+          <div className="flex flex-wrap gap-2">
             <Badge variant="outline" className="rounded-full px-3 py-1">{modelLabel}</Badge>
             <Badge variant="outline" className="rounded-full px-3 py-1">{prompt.category}</Badge>
             {prompt.tags.slice(0, 4).map((tag) => (
@@ -507,7 +509,7 @@ export default function PromptDetailPage({
               </Link>
             ))}
           </div>
-          <div className="chip-row">
+          <div className="flex flex-wrap gap-2">
             {sectionLinks.map((section) => (
               <a
                 key={section.id}
@@ -523,7 +525,7 @@ export default function PromptDetailPage({
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start">
         <div className="order-2 space-y-6 xl:order-1">
-          <Card id="content" className="app-panel scroll-mt-24">
+          <Card id="content" className="lab-card scroll-mt-24">
             <CardHeader className="flex flex-col items-start gap-3 pb-2 sm:flex-row sm:items-center sm:justify-between">
               <CardTitle className="text-sm">{t("promptContent")}</CardTitle>
               <Button variant="ghost" size="sm" onClick={handleCopy} className="rounded-2xl">
@@ -539,7 +541,7 @@ export default function PromptDetailPage({
           </Card>
 
           {prompt.variables.length > 0 && (
-            <Card id="variables" className="app-panel scroll-mt-24">
+            <Card id="variables" className="lab-card scroll-mt-24">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">{t("variables")}</CardTitle>
               </CardHeader>
@@ -581,7 +583,7 @@ export default function PromptDetailPage({
           )}
 
           {prompt.notes && (
-            <Card id="notes" className="app-panel scroll-mt-24">
+            <Card id="notes" className="lab-card scroll-mt-24">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">{t("notes")}</CardTitle>
               </CardHeader>
@@ -591,7 +593,7 @@ export default function PromptDetailPage({
             </Card>
           )}
 
-          <section id="versions" className="app-panel scroll-mt-24 p-4 sm:p-6">
+          <section id="versions" className="lab-card scroll-mt-24 p-4 sm:p-6">
             <SectionHeader
               title={t("versions.title")}
               description={t("detailVersionsDescription")}
@@ -610,7 +612,7 @@ export default function PromptDetailPage({
             </div>
           </section>
 
-          <section id="benchmark" className="app-panel scroll-mt-24 p-4 sm:p-6">
+          <section id="benchmark" className="lab-card scroll-mt-24 p-4 sm:p-6">
             <SectionHeader
               title={t("detailBenchmarkTitle")}
               description={t("detailBenchmarkDescription")}
@@ -625,7 +627,7 @@ export default function PromptDetailPage({
             </div>
           </section>
 
-          <section id="agent" className="app-panel scroll-mt-24 p-4 sm:p-6">
+          <section id="agent" className="lab-card scroll-mt-24 p-4 sm:p-6">
             <SectionHeader
               title={ta("title")}
               description={t("detailAgentDescription")}
@@ -667,7 +669,7 @@ export default function PromptDetailPage({
         </div>
 
         <div className="order-1 space-y-4 xl:order-2 xl:sticky xl:top-6 xl:self-start">
-          <Card id="overview" className="app-panel">
+          <Card id="overview" className="lab-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">{t("metadata")}</CardTitle>
             </CardHeader>
@@ -714,7 +716,7 @@ export default function PromptDetailPage({
             </CardContent>
           </Card>
 
-          <Card className="app-panel">
+          <Card className="lab-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">{t("versions.fields.tags")}</CardTitle>
             </CardHeader>
@@ -738,5 +740,7 @@ export default function PromptDetailPage({
         </div>
       </div>
     </div>
+    </PageShell>
   )
 }
+
