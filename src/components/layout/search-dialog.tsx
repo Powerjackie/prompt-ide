@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 import {
@@ -24,7 +24,6 @@ import {
 } from "lucide-react"
 import { getPrompts, type SerializedPrompt } from "@/app/actions/prompt-surface.actions"
 import { getModules, type SerializedModule } from "@/app/actions/module.actions"
-import { gsap, useGSAP } from "@/lib/gsap-config"
 import { emitNavigationStart, SEARCH_DIALOG_OPEN_EVENT } from "@/components/layout/motion-events"
 
 const PAGES = [
@@ -39,7 +38,6 @@ const PAGES = [
 
 export function SearchDialog() {
   const [open, setOpen] = useState(false)
-  const shellRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const [prompts, setPrompts] = useState<SerializedPrompt[]>([])
   const [modules, setModules] = useState<SerializedModule[]>([])
@@ -87,67 +85,8 @@ export function SearchDialog() {
     router.push(href)
   }
 
-  useGSAP(
-    () => {
-      if (!open) return
-
-      const overlay = document.querySelector("[data-slot='dialog-overlay']")
-      const content = document.querySelector("[data-slot='dialog-content']")
-      const items = Array.from(document.querySelectorAll("[data-slot='command-item']"))
-      const input = document.querySelector("[data-slot='command-input-wrapper']")
-      const headings = Array.from(document.querySelectorAll("[cmdk-group-heading]"))
-      if (!overlay || !content || !input) return
-
-      const mm = gsap.matchMedia()
-      mm.add(
-        {
-          normal: "(prefers-reduced-motion: no-preference)",
-          reduced: "(prefers-reduced-motion: reduce)",
-        },
-        (context) => {
-          if (context.conditions?.reduced) {
-            gsap.set([overlay, content, input, ...items, ...headings], {
-              clearProps: "all",
-            })
-            return
-          }
-
-          gsap.set(content, { transformPerspective: 900 })
-
-          gsap
-            .timeline({ defaults: { ease: "power3.out" } })
-            .fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.2 }, 0)
-            .fromTo(
-              content,
-              { y: 28, autoAlpha: 0, rotateX: -8, scale: 0.96 },
-              { y: 0, autoAlpha: 1, rotateX: 0, scale: 1, duration: 0.32 },
-              0
-            )
-            .fromTo(input, { y: 10, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.22 }, 0.08)
-            .fromTo(
-              headings,
-              { x: -10, autoAlpha: 0 },
-              { x: 0, autoAlpha: 1, duration: 0.18, stagger: 0.03 },
-              0.12
-            )
-            .fromTo(
-              items,
-              { y: 12, autoAlpha: 0 },
-              { y: 0, autoAlpha: 1, duration: 0.22, stagger: 0.018 },
-              0.12
-            )
-        }
-      )
-
-      return () => {
-        mm.revert()
-      }
-    },
-    { scope: shellRef, dependencies: [open, activePrompts.length, modules.length] }
-  )
-
   return (
-    <div ref={shellRef}>
+    <div>
       <CommandDialog
         open={open}
         onOpenChange={setOpen}
