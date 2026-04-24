@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Card</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;padding:0;background:var(--paper);}
+  .card{padding:22px 26px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .b{font-family:var(--font-sans);font-size:11px;font-weight:500;padding:3px 9px;border-radius:999px;border:1px solid var(--rule-fine);background:var(--ivory);color:var(--ink);letter-spacing:.02em;display:inline-flex;align-items:center;gap:5px;}
+  .dot{width:6px;height:6px;border-radius:999px;}
+  .b.prod .dot{background:var(--verdigris);} .b.prod{border-color:var(--verdigris);color:var(--verdigris-deep);background:var(--verdigris-wash);}
+  .b.inbox .dot{background:var(--amber-rule);}
+  .b.arch .dot{background:var(--ink-soft);} .b.arch{color:var(--ink-muted);}
+  .b.risk .dot{background:var(--vermillion);} .b.risk{color:var(--vermillion);border-color:var(--vermillion);background:var(--vermillion-wash);}
+  .tag{font-family:var(--font-mono);font-size:10.5px;padding:2px 8px;border-radius:3px;background:var(--paper-deep);color:var(--ink);border:1px solid var(--rule-fine);}
+  .lbl{width:100%;font-family:var(--font-mono);font-size:10px;color:var(--ink-muted);letter-spacing:.04em;margin-top:4px;}
+</style></head><body>
+<div class="card">
+  <span class="b prod"><span class="dot"></span>production</span>
+  <span class="b inbox"><span class="dot"></span>inbox</span>
+  <span class="b arch"><span class="dot"></span>archived</span>
+  <span class="b risk"><span class="dot"></span>high risk</span>
+  <span class="tag">writing</span>
+  <span class="tag">minimax</span>
+  <span class="tag">{{audience}}</span>
+  <span class="tag">v3</span>
+  <div class="lbl">status chips · pill, 1px hairline, dot indicator · tags · mono, square, paper-deep fill</div>
+</div>
+</body></html>

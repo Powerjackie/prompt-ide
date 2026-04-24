@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Card</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;padding:0;background:var(--paper);}
+  .card{padding:22px 26px;display:flex;flex-direction:column;gap:16px;}
+  .row{display:flex;gap:12px;align-items:center;}
+  .rule-demo{flex:1;}
+  .rule-demo hr{margin:0;}
+  .lbl{font-family:var(--font-mono);font-size:10px;color:var(--ink-muted);letter-spacing:.04em;width:110px;flex-shrink:0;}
+  .hint{font-family:var(--font-sans);font-size:11px;color:var(--ink-muted);line-height:1.45;}
+</style></head><body>
+<div class="card">
+  <div class="row"><span class="lbl">rule-fine</span><div class="rule-demo"><hr></div></div>
+  <div class="row"><span class="lbl">rule-amber</span><div class="rule-demo"><hr class="rule-amber"></div></div>
+  <div class="row"><span class="lbl">rule-strong</span><div class="rule-demo"><hr class="rule-strong"></div></div>
+  <div class="hint">Sections separate with <strong style="font-family:var(--font-serif);">hairline rules, not color blocks.</strong> 1px default; 2px ink reserved for emphasis only; amber is typographic flavor (marginalia, link underlines).</div>
+</div>
+</body></html>

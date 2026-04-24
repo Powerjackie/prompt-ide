@@ -1,0 +1,19 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Card</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;padding:0;background:var(--paper);}
+  .card{padding:22px 26px;display:flex;gap:18px;align-items:flex-end;}
+  .col{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .box{width:70px;height:70px;background:var(--ivory);border:1px solid var(--rule-fine);}
+  .lbl{font-family:var(--font-mono);font-size:10px;color:var(--ink-muted);letter-spacing:.04em;}
+  .hint{font-family:var(--font-sans);font-size:11px;color:var(--ink-muted);margin-left:auto;max-width:180px;line-height:1.45;}
+</style></head><body>
+<div class="card">
+  <div class="col"><div class="box" style="border-radius:0;"></div><div class="lbl">0 · square</div></div>
+  <div class="col"><div class="box" style="border-radius:3px;"></div><div class="lbl">sm · 3</div></div>
+  <div class="col"><div class="box" style="border-radius:5px;"></div><div class="lbl">md · 5</div></div>
+  <div class="col"><div class="box" style="border-radius:6px;"></div><div class="lbl">lg · 6</div></div>
+  <div class="col"><div class="box" style="border-radius:999px;"></div><div class="lbl">full · pill</div></div>
+  <div class="hint">Mostly square. Pills reserved for chips and status dots. No rounding beyond 6px.</div>
+</div>
+</body></html>

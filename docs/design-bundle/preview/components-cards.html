@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Card</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;padding:0;background:var(--paper);}
+  .card{padding:22px 26px;display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .page{background:var(--ivory);border:1px solid var(--rule-fine);border-radius:5px;padding:16px 18px;box-shadow:0 1px 0 rgba(26,44,42,.06),0 2px 4px rgba(26,44,42,.04);display:flex;flex-direction:column;gap:6px;}
+  .eyebrow{font-family:var(--font-sans);font-size:10px;font-weight:500;color:var(--ink-muted);letter-spacing:.08em;font-variant-caps:all-small-caps;}
+  .h{font-family:var(--font-serif);font-size:18px;font-weight:600;color:var(--ink);letter-spacing:-0.01em;margin:0;}
+  .p{font-family:var(--font-sans);font-size:12.5px;line-height:1.55;color:var(--ink-muted);margin:0;}
+  .meta{font-family:var(--font-mono);font-size:10px;color:var(--ink-soft);letter-spacing:.04em;display:flex;gap:10px;margin-top:4px;}
+</style></head><body>
+<div class="card">
+  <div class="page">
+    <div class="eyebrow">prompt · v3</div>
+    <h3 class="h">Article intro rewriter</h3>
+    <p class="p">Rewrites rough notes into a polished article intro with audience, tone, and word-limit slots.</p>
+    <div class="meta"><span>writing</span><span>·</span><span>claude</span><span>·</span><span>apr 14</span></div>
+  </div>
+  <div class="page" style="border-color:var(--verdigris);box-shadow:0 1px 0 rgba(26,44,42,.08),0 4px 10px rgba(26,44,42,.06);">
+    <div class="eyebrow" style="color:var(--verdigris-deep);">selected</div>
+    <h3 class="h">Translation · en → zh</h3>
+    <p class="p">Preserves bullet structure, keeps product names intact, flags phrases that need localization review.</p>
+    <div class="meta"><span>language</span><span>·</span><span>minimax</span><span>·</span><span>apr 20</span></div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 64" width="320" height="64">
+  
+  <text class="mark" x="8" y="38">Prompt</text>
+  <circle class="dot" cx="130" cy="30" r="3"></circle>
+  <text class="mark" x="142" y="38">IDE</text>
+  <line x1="8" y1="50" x2="200" y2="50" stroke="#CDC8B8" stroke-width="1"></line>
+  <text class="sub" x="8" y="62">prompt r&amp;d workbench</text>
+</svg>

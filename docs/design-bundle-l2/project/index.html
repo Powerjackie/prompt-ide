@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Prompt IDE — 10 Routes · Lab Notebook</title>
+<link rel="stylesheet" href="styles/tokens.css"/>
+<style>
+  html, body { margin: 0; padding: 0; }
+  body { overflow: hidden; height: 100vh; }
+  * { box-sizing: border-box; }
+  /* artboard frame */
+  .route-frame {
+    height: 100%;
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--paper);
+    box-shadow: 0 0 0 1px var(--rule-fine);
+  }
+  .route-frame.dark {
+    /* dark mode is scoped — set on the frame root below */
+  }
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div id="root" style="width:100vw;height:100vh"></div>
+
+<!-- Shell + Primitives (window-attached) -->
+<script type="text/babel" src="shell/icons.jsx"></script>
+<script type="text/babel" src="shell/primitives.jsx"></script>
+
+<!-- Routes -->
+<script type="text/babel" src="routes/routes-core.jsx"></script>
+<script type="text/babel" src="routes/routes-prompts.jsx"></script>
+<script type="text/babel" src="routes/routes-ops.jsx"></script>
+
+<!-- Design canvas -->
+<script type="text/babel" src="design-canvas.jsx"></script>
+
+<!-- App — renders one Shell per artboard with its route active -->
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// --- Route renderer ---------------------------------------------------------
+function Route({ id, dark, setDark }) {
+  // No-op nav inside static mockups — preserves active page per artboard
+  const onNav = () => {};
+  const [collapsed, setCollapsed] = useState(false);
+
+  if (id === "login") {
+    // Login has no shell
+    return (
+      <div style={{ height: "100%", background: "var(--paper)", display: "flex", flexDirection: "column" }}>
+        <header style={{
+          height: 48, borderBottom: "1px solid var(--rule-fine)",
+          display: "flex", alignItems: "center", padding: "0 20px", gap: 14,
+          background: "var(--paper)",
+        }}>
+          <span className="folio" style={{ color: "var(--ink-soft)" }}>§ access</span>
+          <span style={{ color: "var(--ink-soft)", fontSize: 11 }}>/</span>
+          <span style={{ fontFamily: "var(--font-serif)", fontSize: 15, color: "var(--ink)", fontWeight: 600 }}>Sign in</span>
+          <div style={{ flex: 1 }}/>
+          <button onClick={() => setDark(d => !d)} title="Toggle theme" style={{
+            width: 28, height: 28, border: "1px solid var(--rule-fine)",
+            background: "var(--ivory)", color: "var(--ink-muted)",
+            borderRadius: 4, cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>{dark ? <I.Sun size={13}/> : <I.Moon size={13}/>}</button>
+        </header>
+        <div style={{ flex: 1, overflow: "auto" }}>
+          <LoginRoute onNav={onNav}/>
+        </div>
+      </div>
+    );
+  }
+
+  // Nav active-key mapping
+  const activeMap = {
+    home: "home",
+    playground: "playground",
+    prompts: "prompts",
+    "prompt-detail": "prompts",
+    editor: "editor",
+    "editor-id": "editor",
+    modules: "modules",
+    docs: "docs",
+    admin: "admin",
+  };
+
+  const titles = {
+    home:             { eyebrow: "workbench / zh",  title: "Home" },
+    playground:       { eyebrow: "agent lab / zh",  title: "Playground" },
+    prompts:          { eyebrow: "library / zh",    title: "Prompts" },
+    "prompt-detail":  { eyebrow: "library / zh",    title: "Senior writing assistant" },
+    editor:           { eyebrow: "workspace / zh",  title: "New prompt" },
+    "editor-id":      { eyebrow: "workspace / zh",  title: "Senior writing assistant" },
+    modules:          { eyebrow: "operators / zh",  title: "Modules" },
+    docs:             { eyebrow: "docs / zh",       title: "Handbook" },
+    admin:            { eyebrow: "admin / zh",      title: "Settings" },
+  };
+  const meta = titles[id] || { eyebrow: "workbench", title: "Prompt IDE" };
+
+  return (
+    <Shell
+      active={activeMap[id]}
+      onNav={onNav}
+      collapsed={collapsed}
+      onToggleCollapsed={() => setCollapsed(c => !c)}
+      title={meta.title}
+      eyebrow={meta.eyebrow}
+      dark={dark}
+      onToggleDark={() => setDark(d => !d)}
+      hideSearch={id === "docs"}
+    >
+      {id === "home" && <HomeRoute onNav={onNav}/>}
+      {id === "playground" && <PlaygroundRoute/>}
+      {id === "prompts" && <PromptsRoute onNav={onNav}/>}
+      {id === "prompt-detail" && <PromptDetailRoute onNav={onNav}/>}
+      {id === "editor" && <EditorRoute onNav={onNav} isNew={true}/>}
+      {id === "editor-id" && <EditorRoute onNav={onNav} isNew={false}/>}
+      {id === "modules" && <ModulesRoute/>}
+      {id === "docs" && <DocsRoute/>}
+      {id === "admin" && <AdminRoute/>}
+    </Shell>
+  );
+}
+
+// --- RouteFrame: wraps a Route with dark-mode scoping -----------------------
+function RouteFrame({ routeId, width, height, globalDark }) {
+  const [localDark, setLocalDark] = useState(null); // null = follow global
+  const dark = localDark === null ? globalDark : localDark;
+  return (
+    <div className={"route-frame" + (dark ? " dark" : "")} style={{ width, height }}>
+      <Route id={routeId} dark={dark} setDark={(v) => {
+        const next = typeof v === "function" ? v(dark) : v;
+        setLocalDark(next);
+      }}/>
+    </div>
+  );
+}
+
+// --- Canvas layout ----------------------------------------------------------
+const ROUTES = [
+  { id: "home",            label: "01 · /zh — Home",              w: 1400, h: 900 },
+  { id: "login",           label: "02 · /zh/login",               w: 900,  h: 900 },
+  { id: "playground",      label: "03 · /zh/playground",          w: 1400, h: 900 },
+  { id: "prompts",         label: "04 · /zh/prompts",             w: 1400, h: 900 },
+  { id: "prompt-detail",   label: "05 · /zh/prompts/[id]",        w: 1400, h: 900 },
+  { id: "editor",          label: "06 · /zh/editor (new)",        w: 1400, h: 900 },
+  { id: "editor-id",       label: "07 · /zh/editor/[id]",         w: 1400, h: 900 },
+  { id: "modules",         label: "08 · /zh/modules",             w: 1400, h: 900 },
+  { id: "docs",            label: "09 · /zh/docs",                w: 1100, h: 900 },
+  { id: "admin",           label: "10 · /zh/admin",               w: 1200, h: 900 },
+];
+
+function App() {
+  const [globalDark, setGlobalDark] = useState(false);
+
+  // NOTE: do NOT toggle .dark on <html> — dark mode is applied per-frame
+  // via the `route-frame dark` class so each artboard renders its own palette.
+
+  return (
+    <>
+    {/* Floating global theme switcher */}
+    <div style={{
+      position: "fixed", top: 14, right: 14, zIndex: 50,
+      display: "flex", alignItems: "center", gap: 8,
+      background: "rgba(255,255,255,0.9)", backdropFilter: "blur(4px)",
+      padding: "5px 9px", borderRadius: 6,
+      border: "1px solid rgba(0,0,0,0.08)",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+      fontFamily: "'IBM Plex Sans', sans-serif", fontSize: 11,
+    }}>
+      <span style={{ color: "rgba(60,50,40,0.7)" }}>theme</span>
+      <div style={{ display: "flex", gap: 2, padding: 2, background: "rgba(0,0,0,0.05)", borderRadius: 4 }}>
+        {[{k:false,label:"light"},{k:true,label:"dark"}].map(o => (
+          <button key={String(o.k)} onClick={() => setGlobalDark(o.k)} style={{
+            fontFamily: "inherit", fontSize: 11, padding: "3px 10px", border: "none",
+            background: globalDark === o.k ? "#fff" : "transparent",
+            color: globalDark === o.k ? "#1A2C2A" : "rgba(60,50,40,0.7)",
+            borderRadius: 3, cursor: "pointer",
+          }}>{o.label}</button>
+        ))}
+      </div>
+    </div>
+    <DesignCanvas>
+      <DCSection
+        id="routes"
+        title="All routes · /zh locale"
+        subtitle="Every prompt-ide surface, in one canvas. Each artboard is a scrollable mockup. Click a theme chip in the toolbar for global light/dark; each artboard also has its own theme button in its top-bar for mixed views."
+      >
+        {ROUTES.map(r => (
+          <DCArtboard key={r.id} id={r.id} label={r.label} width={r.w} height={r.h}>
+            <RouteFrame routeId={r.id} width={r.w} height={r.h} globalDark={globalDark}/>
+          </DCArtboard>
+        ))}
+      </DCSection>
+    </DesignCanvas>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+
+</body>
+</html>

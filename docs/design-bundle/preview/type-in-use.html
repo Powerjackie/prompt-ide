@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Card</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;padding:0;background:var(--paper);}
+  .card{padding:22px 26px;display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+  .demo{border:1px solid var(--rule-fine);border-radius:5px;background:var(--ivory);padding:18px 20px;}
+  .eyebrow{font-family:var(--font-sans);font-size:11px;font-weight:500;letter-spacing:.08em;color:var(--ink-muted);font-variant-caps:all-small-caps;margin-bottom:6px;}
+  .h{font-family:var(--font-serif);font-size:22px;color:var(--ink);font-weight:600;letter-spacing:-0.01em;margin:0 0 6px;}
+  .p{font-family:var(--font-serif);font-size:15px;line-height:1.65;color:var(--ink);margin:0;}
+  .lbl{font-family:var(--font-mono);font-size:10px;color:var(--ink-muted);margin-top:8px;letter-spacing:.04em;}
+</style></head><body>
+<div class="card">
+  <div>
+    <div class="demo">
+      <div class="eyebrow">prompt r&amp;d</div>
+      <h3 class="h">Draft hard. Keep the good copy.</h3>
+      <p class="p">Private workbench for one operator. Move from capture to analysis, refactor, benchmark, and packaging in one place.</p>
+    </div>
+    <div class="lbl">eyebrow · h3 · serif prose</div>
+  </div>
+  <div>
+    <div class="demo">
+      <p class="p" style="font-family:var(--font-sans);font-size:13px;color:var(--ink-muted);line-height:1.6;">This run is stateless: it does not write Prompt, AgentHistory, or benchmark data back into the workspace.<sup style="color:#B89868;font-family:var(--font-mono);">†</sup></p>
+      <hr class="rule" style="margin:10px 0;">
+      <p class="p" style="font-family:var(--font-serif);font-size:13px;font-style:italic;color:var(--ink-muted);">† Stateless pass. Saved prompts flow through the library instead.</p>
+    </div>
+    <div class="lbl">UI meta · rule · marginalia footnote</div>
+  </div>
+</div>
+</body></html>

@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Card</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;padding:0;background:var(--paper);}
+  .card{padding:22px 26px;display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  label{font-family:var(--font-sans);font-size:11px;font-weight:500;color:var(--ink-muted);letter-spacing:.04em;}
+  input,textarea,select{font-family:var(--font-sans);font-size:13px;color:var(--ink);background:var(--ivory);border:1px solid var(--rule-fine);border-radius:5px;padding:8px 10px;outline:none;transition:border-color 120ms ease,box-shadow 120ms ease;}
+  input:focus,textarea:focus{border-color:var(--verdigris);box-shadow:0 0 0 2px var(--verdigris-wash);}
+  textarea{font-family:var(--font-mono);min-height:62px;resize:none;}
+  .hint{font-family:var(--font-sans);font-size:11px;color:var(--ink-soft);}
+  .err{font-family:var(--font-sans);font-size:11px;color:var(--vermillion);}
+</style></head><body>
+<div class="card">
+  <div class="field">
+    <label>Title</label>
+    <input value="English speaking coach"/>
+    <div class="hint">Required. Shown in the prompt library.</div>
+  </div>
+  <div class="field">
+    <label>Password</label>
+    <input type="password" value="········" style="border-color:var(--vermillion);box-shadow:0 0 0 2px var(--vermillion-wash);"/>
+    <div class="err">The password is incorrect.</div>
+  </div>
+  <div class="field" style="grid-column:1/-1;">
+    <label>Prompt content</label>
+    <textarea>You are a senior writing assistant. Rewrite the rough notes into a polished article intro for {{audience}}.</textarea>
+  </div>
+</div>
+</body></html>

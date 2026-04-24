@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Reference design bundles from claude.ai/design — not application code
+    "docs/design-bundle/**",
+    "docs/design-bundle-l2/**",
   ]),
 ]);
 

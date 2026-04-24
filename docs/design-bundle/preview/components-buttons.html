@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Card</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;padding:0;background:var(--paper);}
+  .card{padding:22px 26px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .btn{font-family:var(--font-sans);font-size:13px;font-weight:500;padding:8px 14px;border-radius:5px;cursor:pointer;border:1px solid transparent;transition:background 120ms ease,color 120ms ease,border-color 120ms ease;display:inline-flex;align-items:center;gap:6px;}
+  .btn-primary{background:var(--verdigris);color:var(--ivory);border-color:var(--verdigris-deep);}
+  .btn-primary:hover{background:var(--verdigris-deep);}
+  .btn-secondary{background:var(--ivory);color:var(--ink);border-color:var(--rule-fine);}
+  .btn-secondary:hover{background:var(--paper-deep);}
+  .btn-ghost{background:transparent;color:var(--ink);}
+  .btn-ghost:hover{background:var(--paper-deep);}
+  .btn-link{background:transparent;color:var(--verdigris-deep);text-decoration:underline;text-decoration-color:var(--amber-rule);text-underline-offset:3px;padding:4px 2px;}
+  .btn-destructive{background:transparent;color:var(--vermillion);border-color:var(--vermillion);}
+  .btn-destructive:hover{background:var(--vermillion-wash);}
+  .lbl{width:100%;font-family:var(--font-mono);font-size:10px;color:var(--ink-muted);letter-spacing:.04em;margin-top:4px;}
+</style></head><body>
+<div class="card">
+  <button class="btn btn-primary">Run analysis</button>
+  <button class="btn btn-secondary">Open playground</button>
+  <button class="btn btn-ghost">Cancel</button>
+  <button class="btn btn-destructive">Delete forever</button>
+  <button class="btn btn-link">View version trail</button>
+  <div class="lbl">primary · secondary · ghost · destructive · link &nbsp;—&nbsp; natural case, 5px radius, no offset shadow</div>
+</div>
+</body></html>

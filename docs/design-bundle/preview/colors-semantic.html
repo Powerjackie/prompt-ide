@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Card</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;padding:0;background:var(--paper);}
+  .card{padding:20px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .tok{border:1px solid var(--rule-fine);border-radius:4px;background:var(--ivory);padding:10px 12px;display:flex;gap:10px;align-items:center;}
+  .chip{width:22px;height:22px;border-radius:3px;border:1px solid var(--rule-fine);flex-shrink:0;}
+  .meta{font-family:var(--font-mono);font-size:10.5px;line-height:1.35;}
+  .meta .k{color:var(--ink);font-weight:600;}
+  .meta .v{color:var(--ink-muted);}
+</style></head><body>
+<div class="card">
+  <div class="tok"><div class="chip" style="background:#F4EFE3"></div><div class="meta"><div class="k">--background</div><div class="v">paper</div></div></div>
+  <div class="tok"><div class="chip" style="background:#1A2C2A"></div><div class="meta"><div class="k">--foreground</div><div class="v">ink</div></div></div>
+  <div class="tok"><div class="chip" style="background:#FAF6EB"></div><div class="meta"><div class="k">--card</div><div class="v">ivory</div></div></div>
+  <div class="tok"><div class="chip" style="background:#6B9080"></div><div class="meta"><div class="k">--primary</div><div class="v">verdigris</div></div></div>
+  <div class="tok"><div class="chip" style="background:#EDE6D3"></div><div class="meta"><div class="k">--muted</div><div class="v">paper-deep</div></div></div>
+  <div class="tok"><div class="chip" style="background:#E4ECE7"></div><div class="meta"><div class="k">--accent</div><div class="v">verdigris-wash</div></div></div>
+  <div class="tok"><div class="chip" style="background:#C44E2C"></div><div class="meta"><div class="k">--destructive</div><div class="v">vermillion</div></div></div>
+  <div class="tok"><div class="chip" style="background:#CDC8B8"></div><div class="meta"><div class="k">--border</div><div class="v">rule-fine</div></div></div>
+  <div class="tok"><div class="chip" style="background:#6B9080"></div><div class="meta"><div class="k">--ring</div><div class="v">verdigris</div></div></div>
+</div>
+</body></html>

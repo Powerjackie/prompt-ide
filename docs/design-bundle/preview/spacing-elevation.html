@@ -1,0 +1,22 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Card</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  html,body{margin:0;padding:0;background:var(--paper);}
+  .card{padding:22px 26px;display:flex;gap:22px;align-items:center;}
+  .col{display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .page{width:120px;height:96px;background:var(--ivory);border:1px solid var(--rule-fine);border-radius:5px;}
+  .e0{box-shadow:none;}
+  .e1{box-shadow:0 1px 0 rgba(26,44,42,.06), 0 2px 4px rgba(26,44,42,.04);}
+  .e2{box-shadow:0 1px 0 rgba(26,44,42,.08), 0 4px 10px rgba(26,44,42,.06);}
+  .e3{box-shadow:inset 0 0 0 1px rgba(26,44,42,.05);}
+  .lbl{font-family:var(--font-mono);font-size:10px;color:var(--ink-muted);letter-spacing:.04em;}
+  .hint{font-family:var(--font-sans);font-size:11px;color:var(--ink-muted);margin-left:auto;max-width:160px;line-height:1.45;}
+</style></head><body>
+<div class="card">
+  <div class="col"><div class="page e0"></div><div class="lbl">flat</div></div>
+  <div class="col"><div class="page e1"></div><div class="lbl">page · default</div></div>
+  <div class="col"><div class="page e2"></div><div class="lbl">hover</div></div>
+  <div class="col"><div class="page e3"></div><div class="lbl">inset · pressed</div></div>
+  <div class="hint">Shadows are ink-tinted, 1–2px, 4–6% opacity. No offset brutalism. No colored glow.</div>
+</div>
+</body></html>
