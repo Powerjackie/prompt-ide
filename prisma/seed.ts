@@ -5,13 +5,18 @@ import { dirname, resolve } from "path"
 import { fileURLToPath } from "url"
 
 const __dir = dirname(fileURLToPath(import.meta.url))
-const envContent = readFileSync(resolve(__dir, "..", ".env"), "utf-8")
 
-for (const line of envContent.split("\n")) {
-  const match = line.match(/^([^#=]+)=(.*)$/)
-  if (match) {
-    process.env[match[1].trim()] = match[2].trim().replace(/^"|"$/g, "")
+try {
+  const envContent = readFileSync(resolve(__dir, "..", ".env"), "utf-8")
+  for (const line of envContent.split("\n")) {
+    const match = line.match(/^([^#=]+)=(.*)$/)
+    if (match) {
+      process.env[match[1].trim()] = match[2].trim().replace(/^"|"$/g, "")
+    }
   }
+} catch (e: unknown) {
+  if ((e as NodeJS.ErrnoException)?.code !== "ENOENT") throw e
+  // No .env file (CI / Vercel etc.) — assume env vars are injected by the runtime.
 }
 
 const adapter = new PrismaLibSql({ url: process.env.DATABASE_URL! })
