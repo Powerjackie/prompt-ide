@@ -287,6 +287,8 @@
     "previewRenderedTitle": "Rendered Prompt",
     "previewRenderedDescription": "Preview the final prompt with fallback values filled in.",
     "previewModeBadge": "Preview mode",
+    "previewModeRendered": "Rendered",
+    "previewModeRaw": "Raw",
     "previewStats": {
       "characters": "Characters",
       "words": "Words",

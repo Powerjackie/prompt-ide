@@ -428,6 +428,182 @@
     letter-spacing: 0.06em;
   }
 
+  /*
+   * .markdown-preview — Lab Notebook prose styling for the editor preview pane.
+   * Goal: render Markdown faithfully (h1-h6, lists, code, tables, blockquote,
+   * images, links, hr) using Lab Notebook tokens (paper / ink / verdigris /
+   * vermillion / amber-rule) so the rendered prompt feels like a hand-set
+   * laboratory notebook page rather than a generic typography theme.
+   */
+  .markdown-preview {
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: var(--text-sm);
+    line-height: 1.7;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+  .markdown-preview > * + * {
+    margin-top: 1em;
+  }
+  .markdown-preview h1,
+  .markdown-preview h2,
+  .markdown-preview h3,
+  .markdown-preview h4,
+  .markdown-preview h5,
+  .markdown-preview h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.2;
+    letter-spacing: -0.005em;
+  }
+  .markdown-preview h1 {
+    font-size: 1.875rem;
+    margin-top: 1.4em;
+    padding-bottom: 0.4em;
+    border-bottom: 1px solid var(--rule-fine);
+  }
+  .markdown-preview h2 {
+    font-size: 1.5rem;
+    margin-top: 1.4em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid var(--rule-fine);
+  }
+  .markdown-preview h3 {
+    font-size: 1.25rem;
+    margin-top: 1.3em;
+  }
+  .markdown-preview h4 {
+    font-size: 1.05rem;
+    margin-top: 1.2em;
+  }
+  .markdown-preview h5,
+  .markdown-preview h6 {
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+    margin-top: 1.2em;
+  }
+  .markdown-preview p {
+    margin: 0;
+  }
+  .markdown-preview a {
+    color: var(--verdigris-deep);
+    text-decoration: underline;
+    text-decoration-color: var(--verdigris);
+    text-underline-offset: 2px;
+  }
+  .markdown-preview a:hover {
+    text-decoration-color: var(--vermillion);
+  }
+  .markdown-preview strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .markdown-preview em {
+    font-style: italic;
+  }
+  .markdown-preview code {
+    font-family: var(--font-code);
+    font-size: 0.875em;
+    color: var(--vermillion);
+    background-color: var(--paper-deep);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--rule-fine);
+  }
+  .markdown-preview pre {
+    font-family: var(--font-code);
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--ink);
+    background-color: var(--ivory);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--rule-fine);
+    overflow-x: auto;
+  }
+  .markdown-preview pre code {
+    color: inherit;
+    background: transparent;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    font-size: inherit;
+  }
+  .markdown-preview blockquote {
+    border-left: 2px solid var(--amber-rule);
+    padding: 0.25rem 0 0.25rem 1rem;
+    color: var(--ink-muted);
+    font-style: italic;
+  }
+  .markdown-preview blockquote > :first-child {
+    margin-top: 0;
+  }
+  .markdown-preview ul,
+  .markdown-preview ol {
+    padding-left: 1.5rem;
+  }
+  .markdown-preview ul {
+    list-style: disc;
+  }
+  .markdown-preview ol {
+    list-style: decimal;
+  }
+  .markdown-preview li + li {
+    margin-top: 0.35em;
+  }
+  .markdown-preview li > p + p {
+    margin-top: 0.5em;
+  }
+  .markdown-preview ul ul,
+  .markdown-preview ol ol,
+  .markdown-preview ul ol,
+  .markdown-preview ol ul {
+    margin-top: 0.35em;
+  }
+  /* GFM task list checkboxes */
+  .markdown-preview input[type="checkbox"] {
+    margin-right: 0.4em;
+    accent-color: var(--verdigris-deep);
+  }
+  .markdown-preview hr {
+    border: 0;
+    border-top: 1px solid var(--rule-fine);
+    margin: 1.5em 0;
+  }
+  .markdown-preview table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    border: 1px solid var(--rule-fine);
+  }
+  .markdown-preview thead {
+    background-color: var(--paper-deep);
+  }
+  .markdown-preview th,
+  .markdown-preview td {
+    border: 1px solid var(--rule-fine);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  .markdown-preview th {
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .markdown-preview img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--rule-fine);
+    border-radius: 0.5rem;
+  }
+  .markdown-preview del {
+    color: var(--ink-soft);
+    text-decoration-color: var(--ink-muted);
+  }
+
   .ui-body {
     font-family: var(--font-body);
     font-size: var(--text-sm);

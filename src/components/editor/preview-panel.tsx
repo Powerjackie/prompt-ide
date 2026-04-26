@@ -1,9 +1,14 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useTranslations } from "next-intl"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 import { Badge } from "@/components/ui/badge"
 import { extractPromptVariables, renderPromptTemplate } from "@/lib/prompt-render"
+import { cn } from "@/lib/utils"
+
+type PreviewMode = "rendered" | "raw"
 
 interface PreviewPanelProps {
   content: string
@@ -12,6 +17,8 @@ interface PreviewPanelProps {
 
 export function PreviewPanel({ content, variables }: PreviewPanelProps) {
   const t = useTranslations("editor")
+  const [mode, setMode] = useState<PreviewMode>("rendered")
+
   const rendered = useMemo(() => {
     return renderPromptTemplate(
       content,
@@ -69,18 +76,55 @@ export function PreviewPanel({ content, variables }: PreviewPanelProps) {
       )}
 
       <div className="rounded-[1.5rem] border border-border/70 bg-muted/20 p-4 dark:border-primary/12">
-        <div className="mb-3 flex items-center justify-between gap-3 border-b border-border/60 pb-3">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-3">
           <div>
             <p className="text-sm font-semibold tracking-tight">{t("previewRenderedTitle")}</p>
             <p className="text-xs text-muted-foreground">
               {t("previewRenderedDescription")}
             </p>
           </div>
-          <div className="rounded-full border border-border/70 bg-background/80 px-3 py-1 text-[11px] font-medium text-muted-foreground dark:border-primary/12 dark:bg-background/70">
-            {t("previewModeBadge")}
+          <div
+            role="tablist"
+            aria-label={t("previewModeBadge")}
+            className="inline-flex items-center gap-0 rounded-full border border-border/70 bg-background/80 p-0.5 text-[11px] font-medium dark:border-primary/12 dark:bg-background/70"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "rendered"}
+              onClick={() => setMode("rendered")}
+              className={cn(
+                "rounded-full px-3 py-1 transition-colors",
+                mode === "rendered"
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {t("previewModeRendered")}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "raw"}
+              onClick={() => setMode("raw")}
+              className={cn(
+                "rounded-full px-3 py-1 transition-colors",
+                mode === "raw"
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {t("previewModeRaw")}
+            </button>
           </div>
         </div>
-        <pre className="whitespace-pre-wrap font-mono text-sm leading-7">{rendered}</pre>
+        {mode === "rendered" ? (
+          <div className="markdown-preview">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{rendered}</ReactMarkdown>
+          </div>
+        ) : (
+          <pre className="whitespace-pre-wrap font-mono text-sm leading-7">{rendered}</pre>
+        )}
       </div>
     </div>
   )

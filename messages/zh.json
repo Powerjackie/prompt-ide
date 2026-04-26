@@ -289,6 +289,8 @@
     "previewRenderedTitle": "渲染后的 Prompt",
     "previewRenderedDescription": "这里会展示替换变量后的 Prompt 结果。",
     "previewModeBadge": "实时",
+    "previewModeRendered": "渲染",
+    "previewModeRaw": "原文",
     "previewStats": {
       "characters": "字符",
       "words": "词数",
