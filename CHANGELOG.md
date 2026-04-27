@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.0](https://github.com/Powerjackie/prompt-ide/compare/prompt-ide-v0.2.0...prompt-ide-v0.3.0) (2026-04-27)
+
+
+### Features
+
+* **docs:** rewrite docs page from engineering retrospective to user guide ([5e82f25](https://github.com/Powerjackie/prompt-ide/commit/5e82f252d32f4299d3ac293640ffde0a02522afd))
+* **editor:** let preview tab grow with content ([9fd98e8](https://github.com/Powerjackie/prompt-ide/commit/9fd98e80bd9fa1ff0a9d3ec034d0e6059a514c4c))
+* **editor:** render preview as markdown with rendered/raw toggle ([d76b162](https://github.com/Powerjackie/prompt-ide/commit/d76b162ad10bd3c2a48c928ee462cbf43751f064))
+
 ## [0.2.0](https://github.com/zackpower-bot/prompt-ide/compare/prompt-ide-v0.1.0...prompt-ide-v0.2.0) (2026-04-24)
 
 
