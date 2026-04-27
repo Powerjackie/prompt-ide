@@ -31,6 +31,7 @@ import type { ModelType, PromptStatus, Variable } from "@/types/prompt"
 import type { AgentAnalysisResult, AgentTrajectoryStep } from "@/types/agent"
 import type { PromptVersionSnapshot } from "@/types/prompt-version"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 
 interface EditorLayoutProps {
   promptId?: string
@@ -161,6 +162,8 @@ function EditorForm({
   const [trajectory, setTrajectory] = useState<AgentTrajectoryStep[] | null>(null)
   const [trajectoryLoading, setTrajectoryLoading] = useState(Boolean(existing?.id))
   const [analyzing, setAnalyzing] = useState(false)
+  const [activeTab, setActiveTab] = useState<string>("preview")
+  const isPreviewTab = activeTab === "preview"
   const cursorRef = useRef<HTMLTextAreaElement | null>(null)
   const isEdit = !!savedPrompt
 
@@ -428,15 +431,27 @@ function EditorForm({
           </div>
         </div>
 
-        {/* Right: Preview / Agent / Modules tabs */}
-        <div className="lab-card flex min-h-[420px] flex-col overflow-hidden p-4  sm:p-5 md:min-h-[680px] xl:self-start xl:max-h-[min(920px,calc(100vh-8rem))] xl:p-6">
+        {/* Right: Preview / Agent / Modules tabs.
+            Preview tab grows naturally with rendered content (no internal
+            scroll) so long markdown renders are read at page level. Other
+            tabs (agent / versions / modules) keep the capped height +
+            internal scroll because their streamed/list content can be very
+            long and locking it to the viewport keeps actions reachable. */}
+        <div
+          className={cn(
+            "lab-card flex min-h-[420px] flex-col p-4 sm:p-5 md:min-h-[680px] xl:self-start xl:p-6",
+            isPreviewTab
+              ? ""
+              : "overflow-hidden xl:max-h-[min(920px,calc(100vh-8rem))]"
+          )}
+        >
           <div className="mb-4">
             <SectionHeader
               title={t("toolsTitle")}
               description={t("toolsDescription")}
             />
           </div>
-          <Tabs defaultValue="preview" className="flex h-full min-h-0 flex-col">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex h-full min-h-0 flex-col">
             <TabsList className="flex h-auto flex-wrap justify-start rounded-2xl border border-border/60 bg-muted/45 p-1 dark:border-primary/10 dark:bg-background/60">
                 <TabsTrigger value="preview">
                   <Eye className="h-3.5 w-3.5 mr-1" /> {t("preview")}
@@ -453,7 +468,7 @@ function EditorForm({
                 <Puzzle className="h-3.5 w-3.5 mr-1" /> {t("modules")}
               </TabsTrigger>
             </TabsList>
-            <TabsContent value="preview" className="mt-4 min-h-0 flex-1 overflow-y-auto">
+            <TabsContent value="preview" className="mt-4">
               <div className="border-2 border-border bg-background p-4 pr-3">
                 <PreviewPanel content={content} variables={variables} />
               </div>
