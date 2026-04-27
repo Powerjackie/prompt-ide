@@ -2015,114 +2015,127 @@
     }
   },
   "docsSurface": {
-    "eyebrow": "当前界面指南",
-    "title": "使用文档",
-    "description": "这是一份围绕已验收 post-refactor 状态编写的单页使用文档。它只描述当前真实存在的产品界面、明确列出刻意缺席的界面，并同步 Prompts、Editor、Admin 与 Playground 的真实合同。",
+    "eyebrow": "使用文档",
+    "title": "Prompt IDE 使用指南",
+    "description": "Prompt IDE 是你的个人提示词工作台。在这里把零散的指令草稿打磨成可复用的资产 —— 用变量参数化、按版本演化、随时检索取用。",
     "open": "打开",
-    "currentPage": "当前页面",
-    "productSurface": {
-      "title": "产品界面",
-      "body": "当前 live surface 是刻意收束过的工作边界。下面这些路由都是真实存在、可作为当前产品面理解的保留集合。",
-      "liveRoutes": {
-        "root": "/",
-        "login": "/login",
-        "playground": "/playground",
-        "prompts": "/prompts",
-        "promptDetail": "/prompts/[id]",
-        "editor": "/editor",
-        "editorDetail": "/editor/[id]",
-        "modules": "/modules",
-        "docs": "/docs",
-        "admin": "/admin"
+    "quickStart": {
+      "title": "上手 5 步",
+      "body": "如果第一次打开,从这条线走最快。",
+      "steps": {
+        "browse": {
+          "title": "浏览你的提示词库",
+          "body": "在 Prompts 看到所有保存过的提示词,可以按标签、状态筛选,切换卡片或列表视图。"
+        },
+        "edit": {
+          "title": "进入编辑器",
+          "body": "点开任一条进入 Editor。左边写正文,右边实时预览渲染后的效果,支持 Markdown。"
+        },
+        "variable": {
+          "title": "用变量参数化",
+          "body": "在正文里写 {{变量名}},编辑器会高亮,预览面板会列出所有变量并允许填默认值试跑。"
+        },
+        "module": {
+          "title": "抽出可复用片段",
+          "body": "把同一段指令在多条 prompt 里反复用?保存成 Module,需要时一键插入。"
+        },
+        "test": {
+          "title": "在实验场测试",
+          "body": "Playground 是无状态的测试台。粘贴或选一段提示词,立刻拿到 Agent 的结构化分析建议。"
+        }
       }
     },
-    "adminPermissions": {
-      "title": "管理与权限",
-      "body": "管理能力仍然在线，但旧的 Settings 路由没有恢复。权限边界依旧明确，并继续由服务端守卫执行。",
+    "concepts": {
+      "title": "核心概念",
+      "body": "5 个词覆盖整个产品的语义。",
       "items": {
-        "liveRoute": "/admin 是当前唯一的 live 管理界面，而且现在是可编辑的，不再是只读状态。",
-        "memberDenied": "member 用户访问 /admin 时仍然只会看到 denial state，而不是可写控制项。",
-        "serverGuard": "设置读取与写入仍然依赖服务端 ensureAdmin() 保护，而不是只靠前端禁用。",
-        "settingsAbsent": "/settings 仍然是刻意缺席的路由，没有作为平行控制台被恢复。"
-      }
-    },
-    "verification": {
-      "title": "验证基线",
-      "body": "retained-surface browser smoke 已经是 accepted baseline，但它有明确边界，不等于所有深度验收都塞进默认 smoke。",
-      "items": {
-        "smokeCoverage": "当前 smoke baseline 覆盖 retained live routes、可编辑 /admin、member /admin denial、390x844 mobile、reduced motion，以及 command palette 中 Docs/Admin 的可发现性。",
-        "excludedSuccessPath": "默认 smoke 不把 Playground 的 MiniMax provider success-path 当作硬门槛；那仍属于更深层的单独验收。",
-        "port": "项目本地基线端口仍然是 3000。在当前这台 Windows 主机上，浏览器验收临时使用 5173 作为 fallback，但这不构成项目端口合同变更。"
+        "prompts": {
+          "label": "prompts",
+          "title": "提示词",
+          "body": "一篇可命名、可标签、可分模型/状态的提示词资产。每次保存都自动留下版本。"
+        },
+        "variables": {
+          "label": "variables",
+          "title": "变量",
+          "body": "用 {{name}} 标记可变部分。编辑时高亮,预览时按填入值或 [name] 占位渲染。"
+        },
+        "modules": {
+          "label": "modules",
+          "title": "模块",
+          "body": "可复用的指令片段。多条 prompt 共用同一段指令时,抽成 Module 集中维护。"
+        },
+        "versions": {
+          "label": "versions",
+          "title": "版本",
+          "body": "每次保存自动创建不可变快照。任何时候都可以对比两个版本,或一键恢复到旧版(恢复也是新版本,不破坏历史)。"
+        },
+        "agent": {
+          "label": "agent",
+          "title": "Agent 分析",
+          "body": "MiniMax 引擎读你的提示词,给一份结构化分析(角色清晰度、目标拆解、潜在改进点等)。无状态运行,不写回历史。"
+        }
       }
     },
     "workflowSection": {
-      "title": "当前工作路由",
-      "body": "这些才是当前 accepted product 中应该实际使用的路由。本页会继续保持单页结构，不会恢复旧的多层 docs tree。"
+      "title": "界面索引",
+      "body": "每个界面都有一件事是它最擅长的。"
     },
     "workflow": {
       "home": {
         "title": "首页",
-        "description": "从首页工作台进入当前保留的核心产品路线。"
+        "description": "工作台入口。展示最近编辑、推荐操作、整体使用概览。"
       },
       "playground": {
         "title": "实验场",
-        "description": "运行无状态提示词分析，不把结果写入历史。"
+        "description": "无状态测试台。临时粘贴一段提示词,拿 Agent 分析,不写入库。"
       },
       "prompts": {
         "title": "提示词库",
-        "description": "浏览提示词库，切换卡片/列表视图，并进入提示词详情。"
+        "description": "你所有保存过的提示词。支持按标签、状态、关键词筛选,卡片或列表两种视图。"
       },
       "editor": {
         "title": "编辑器",
-        "description": "创建或编辑工作副本，再保存为版本。"
+        "description": "写或改一条提示词。左编辑右预览,自动版本化,支持 Markdown 渲染和变量插值。"
       },
       "modules": {
         "title": "模块",
-        "description": "管理可复用的指令片段，用于提示词组合。"
-      },
-      "docs": {
-        "title": "文档",
-        "description": "在这张单页文档里查看当前产品界面、权限模型和验证规则，不再依赖旧的多层文档树。"
+        "description": "管理可复用的提示词片段。每条 module 可以被多个 prompt 引用。"
       },
       "admin": {
-        "title": "管理",
-        "description": "使用当前 live 的可编辑 Admin Console 管理工作区默认值、Agent 设置和受保护的重置操作。"
+        "title": "管理控制台",
+        "description": "管理员设置:默认 model、默认视图、Agent 开关、数据维护操作。仅 admin 角色可访问。"
       }
     },
-    "settingsHydration": {
-      "title": "设置下发",
-      "body": "管理员配置现在不再只是“能写入”的字段，而是会通过经过鉴权的服务端读取路径真正驱动产品默认行为。",
+    "faq": {
+      "title": "常见操作",
+      "body": "几个新用户最常问的问题。",
       "items": {
-        "promptsDesktop": "桌面端 /prompts 现在会读取服务端 defaultView，而不是继续硬编码成 card。",
-        "promptsMobile": "移动端 /prompts 仍然强制使用 card，保留更安全的小屏布局。",
-        "editorNew": "新建 /editor prompt 时，defaultModel 和 defaultStatus 现在来自 effective settings。",
-        "editorExisting": "已有 /editor/[id] prompt 会继续保留自己已经持久化的 model/status，不会被默认值覆盖。",
-        "createPrompt": "createPrompt 的缺省回退现在会先读取 effective settings，再补 model/status。",
-        "agentEnabled": "agent.enabled 现在同时门控 UI 和 server action 路径，包括 Playground 与已保存 prompt 的 agent 动作。"
+        "new": {
+          "q": "怎么写一条新提示词?",
+          "a": "Prompts 列表右上角点「新建」,或者直接打开 /editor。填好标题描述、写正文(支持 Markdown),点保存即可。第一次保存会自动创建 v1 版本。"
+        },
+        "variables": {
+          "q": "变量怎么用?",
+          "a": "在正文里写 {{变量名}},名字只用字母数字下划线(不要带空格或中文)。编辑器会自动高亮,预览面板会列出所有变量,可以临时填默认值预览效果。"
+        },
+        "save": {
+          "q": "我的修改会自动保存吗?",
+          "a": "不会自动保存到数据库。改动会在编辑器顶部显示「未保存改动」徽章,点保存按钮才落库并创建新版本。这样可以在保存前自由试错。"
+        },
+        "model": {
+          "q": "怎么改默认 model?",
+          "a": "进 Admin Console(/admin),在设置区改 defaultModel。新建 prompt 时会用这个值;已有 prompt 保留自己设的 model 不变。"
+        },
+        "backup": {
+          "q": "怎么备份我的数据?",
+          "a": "数据全在 SQLite 单文件里。自托管时随时复制 data/prompt-ide.db;项目自带 deploy/backup.sh 脚本,每次执行 deploy/update.sh 都会自动 preupdate 备份。"
+        }
       }
     },
-    "playgroundContract": {
-      "title": "Playground 合同",
-      "body": "即使引入了 Admin Console 和 settings hydration，Playground 仍然保持无状态分析界面这一核心合同。",
-      "items": {
-        "stateless": "Playground 分析仍然是 stateless surface，默认运行路径不会把结果写回 Prompt 历史。",
-        "smokeBaseline": "日常 retained-surface smoke 只校验 Playground 的 UI 可达性：stage 可见、template click 生效、允许时 Analyze 可用。",
-        "deepAcceptance": "provider-backed 的 live-result success 仍然属于更深层的单独验收，不属于默认 smoke baseline。"
-      }
-    },
-    "removed": {
-      "title": "已移除 / 缺席界面",
-      "body": "这些路由在当前产品里是刻意缺席的。这里仅用于同步产品事实，不会把它们做成可点击入口。",
-      "items": {
-        "settings": "/settings 已由 /admin 取代",
-        "skills": "/skills/** 当前不在 live surface",
-        "oldDocs": "旧的 /docs/** 子路由没有恢复",
-        "collections": "/collections 当前不在 live surface",
-        "archive": "/archive 当前不在 live surface",
-        "favorites": "/favorites 当前不在 live surface",
-        "inbox": "/inbox 当前不在 live surface",
-        "tags": "/tags 当前不在 live surface"
-      }
+    "selfHost": {
+      "label": "self-host",
+      "title": "自托管说明",
+      "body": "Prompt IDE 是单用户、单实例设计。所有数据本地 SQLite,无外部依赖(除非你启用 Agent 用的 MiniMax provider)。Docker 一键部署,deploy/update.sh 一键升级。"
     }
   },
   "adminConsole": {
@@ -2229,28 +2242,28 @@
       "thresholdRange": "阈值必须是 0 到 1 之间的数字。"
     },
     "portability": {
-      "title": "\u8bbe\u7f6e\u8fc1\u79fb",
-      "description": "\u5c06\u5f53\u524d\u751f\u6548\u7684\u8bbe\u7f6e\u5bfc\u51fa\u4e3a JSON\uff0c\u6216\u8005\u901a\u8fc7\u53d7\u5b88\u536b\u7684\u7ba1\u7406\u8def\u5f84\u9a8c\u8bc1\u540e\u5bfc\u5165\u4e00\u4efd\u5b8c\u6574\u7684\u66ff\u6362 payload\u3002",
-      "copy": "\u590d\u5236 JSON",
-      "download": "\u4e0b\u8f7d JSON",
-      "copySuccess": "\u8bbe\u7f6e JSON \u5df2\u590d\u5236\u3002",
-      "copyFailed": "\u8bbe\u7f6e JSON \u590d\u5236\u5931\u8d25\u3002",
-      "importLabel": "\u5bfc\u5165\u8bbe\u7f6e JSON",
-      "importHelp": "\u7c98\u8d34\u4e00\u4efd\u5b8c\u6574\u7684 AppSettings JSON payload\u3002\u53ea\u6709\u5728\u901a\u8fc7\u9a8c\u8bc1\u5e76\u7ecf\u8fc7\u786e\u8ba4\u540e\u624d\u4f1a\u771f\u6b63\u5bfc\u5165\uff0c\u65e0\u6548 payload \u4e0d\u4f1a\u53d1\u751f\u90e8\u5206\u5199\u5165\u3002",
-      "validate": "\u9a8c\u8bc1 JSON",
-      "validating": "\u9a8c\u8bc1\u4e2d...",
-      "validateSuccess": "\u8bbe\u7f6e JSON \u9a8c\u8bc1\u901a\u8fc7\u3002",
-      "validateFailed": "\u8bbe\u7f6e JSON \u9a8c\u8bc1\u5931\u8d25\u3002",
-      "validateFirst": "\u8bf7\u5148\u5bf9\u5f53\u524d JSON payload \u8fdb\u884c\u9a8c\u8bc1\uff0c\u518d\u6267\u884c\u5bfc\u5165\u3002",
-      "import": "\u5bfc\u5165\u8bbe\u7f6e",
-      "importing": "\u5bfc\u5165\u4e2d...",
-      "importSuccess": "\u8bbe\u7f6e\u5df2\u5bfc\u5165\u3002",
-      "importFailed": "\u8bbe\u7f6e\u5bfc\u5165\u5931\u8d25\u3002",
-      "confirmTitle": "\u8981\u8986\u76d6\u5f53\u524d\u8bbe\u7f6e\u5417\uff1f",
-      "confirmBody": "\u8fd9\u4f1a\u7528\u5df2\u9a8c\u8bc1\u7684\u5bfc\u5165 payload \u66ff\u6362\u5f53\u524d\u6301\u4e45\u5316\u7684 AppSettings\u3002\u53ea\u6709\u5728\u4f60\u786e\u8ba4\u8981\u8986\u76d6\u73b0\u6709\u7ba1\u7406\u57fa\u7ebf\u65f6\u624d\u5e94\u6267\u884c\u3002",
-      "confirmCancel": "\u53d6\u6d88",
-      "confirmAction": "\u7acb\u5373\u5bfc\u5165",
-      "validatedTitle": "\u5df2\u9a8c\u8bc1 payload \u6458\u8981"
+      "title": "设置迁移",
+      "description": "将当前生效的设置导出为 JSON，或者通过受守卫的管理路径验证后导入一份完整的替换 payload。",
+      "copy": "复制 JSON",
+      "download": "下载 JSON",
+      "copySuccess": "设置 JSON 已复制。",
+      "copyFailed": "设置 JSON 复制失败。",
+      "importLabel": "导入设置 JSON",
+      "importHelp": "粘贴一份完整的 AppSettings JSON payload。只有在通过验证并经过确认后才会真正导入，无效 payload 不会发生部分写入。",
+      "validate": "验证 JSON",
+      "validating": "验证中...",
+      "validateSuccess": "设置 JSON 验证通过。",
+      "validateFailed": "设置 JSON 验证失败。",
+      "validateFirst": "请先对当前 JSON payload 进行验证，再执行导入。",
+      "import": "导入设置",
+      "importing": "导入中...",
+      "importSuccess": "设置已导入。",
+      "importFailed": "设置导入失败。",
+      "confirmTitle": "要覆盖当前设置吗？",
+      "confirmBody": "这会用已验证的导入 payload 替换当前持久化的 AppSettings。只有在你确认要覆盖现有管理基线时才应执行。",
+      "confirmCancel": "取消",
+      "confirmAction": "立即导入",
+      "validatedTitle": "已验证 payload 摘要"
     },
     "sync": {
       "title": "同步状态",
@@ -2259,47 +2272,47 @@
       "clean": "已保存并同步"
     },
     "diagnostics": {
-      "title": "\u8fd0\u884c\u65f6\u8bca\u65ad",
-      "description": "\u8fd9\u662f\u5f53\u524d\u7ba1\u7406\u72b6\u6001\u3001\u5b58\u50a8\u60c5\u51b5\u548c\u751f\u6548\u9ed8\u8ba4\u503c\u7684\u975e\u79d8\u5bc6\u8fd0\u884c\u6458\u8981\u3002",
-      "refreshFailed": "\u5237\u65b0\u8fd0\u884c\u65f6\u8bca\u65ad\u5931\u8d25\u3002",
+      "title": "运行时诊断",
+      "description": "这是当前管理状态、存储情况和生效默认值的非秘密运行摘要。",
+      "refreshFailed": "刷新运行时诊断失败。",
       "role": {
-        "title": "\u89d2\u8272"
+        "title": "角色"
       },
       "storage": {
-        "title": "\u8bbe\u7f6e\u5b58\u50a8",
-        "key": "\u8bbe\u7f6e key",
-        "rowExists": "\u914d\u7f6e\u884c\u662f\u5426\u5b58\u5728",
-        "source": "\u5f53\u524d\u6765\u6e90",
-        "sourcePersisted": "\u6301\u4e45\u5316\u914d\u7f6e",
-        "sourceFallback": "\u9ed8\u8ba4 fallback"
+        "title": "设置存储",
+        "key": "设置 key",
+        "rowExists": "配置行是否存在",
+        "source": "当前来源",
+        "sourcePersisted": "持久化配置",
+        "sourceFallback": "默认 fallback"
       },
       "database": {
-        "title": "\u6570\u636e\u5e93\u6458\u8981",
-        "provider": "\u63d0\u4f9b\u65b9",
-        "target": "\u76ee\u6807\u63d0\u793a",
-        "mode": "\u5b58\u50a8\u6a21\u5f0f",
-        "modeFile": "\u6587\u4ef6\u578b SQLite"
+        "title": "数据库摘要",
+        "provider": "提供方",
+        "target": "目标提示",
+        "mode": "存储模式",
+        "modeFile": "文件型 SQLite"
       },
       "defaults": {
-        "title": "\u751f\u6548\u4e2d\u7684\u9ed8\u8ba4\u503c",
-        "view": "\u9ed8\u8ba4\u89c6\u56fe",
-        "model": "\u9ed8\u8ba4\u6a21\u578b",
-        "status": "\u9ed8\u8ba4\u72b6\u6001",
-        "agentEnabled": "Agent \u5df2\u542f\u7528",
-        "provider": "Agent \u63d0\u4f9b\u65b9",
-        "depth": "\u5206\u6790\u6df1\u5ea6"
+        "title": "生效中的默认值",
+        "view": "默认视图",
+        "model": "默认模型",
+        "status": "默认状态",
+        "agentEnabled": "Agent 已启用",
+        "provider": "Agent 提供方",
+        "depth": "分析深度"
       },
       "values": {
-        "yes": "\u662f",
-        "no": "\u5426",
-        "enabled": "\u5df2\u542f\u7528",
-        "disabled": "\u5df2\u7981\u7528"
+        "yes": "是",
+        "no": "否",
+        "enabled": "已启用",
+        "disabled": "已禁用"
       },
       "guardrails": {
-        "title": "\u5b88\u536b\u8fb9\u754c",
-        "ensureAdmin": "\u7ba1\u7406\u5199\u5165\u4ecd\u7136\u5fc5\u987b\u7ecf\u8fc7 ensureAdmin()\u3002",
-        "settingsAbsent": "/settings \u4ecd\u7136\u7f3a\u5e2d\u3002",
-        "adminOnly": "/admin \u4ecd\u7136\u662f\u552f\u4e00\u7684 live admin route\u3002"
+        "title": "守卫边界",
+        "ensureAdmin": "管理写入仍然必须经过 ensureAdmin()。",
+        "settingsAbsent": "/settings 仍然缺席。",
+        "adminOnly": "/admin 仍然是唯一的 live admin route。"
       }
     },
     "guards": {

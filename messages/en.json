@@ -2015,114 +2015,127 @@
     }
   },
   "docsSurface": {
-    "eyebrow": "Current Surface Guide",
-    "title": "Usage Docs",
-    "description": "A single-page guide to the current Prompt IDE product truth after the accepted post-refactor initiatives. It documents the live surface, the intentionally absent surface, and the real contracts that now drive Prompts, Editor, Admin, and Playground.",
+    "eyebrow": "User Guide",
+    "title": "Using Prompt IDE",
+    "description": "Prompt IDE is your personal prompt workbench. Take rough instruction drafts and turn them into reusable assets — parameterize with variables, evolve through versions, retrieve at any time.",
     "open": "Open",
-    "currentPage": "Current Page",
-    "productSurface": {
-      "title": "Product Surface",
-      "body": "The current live surface is intentionally compact. The routes below are real, retained, and safe to treat as the working product boundary.",
-      "liveRoutes": {
-        "root": "/",
-        "login": "/login",
-        "playground": "/playground",
-        "prompts": "/prompts",
-        "promptDetail": "/prompts/[id]",
-        "editor": "/editor",
-        "editorDetail": "/editor/[id]",
-        "modules": "/modules",
-        "docs": "/docs",
-        "admin": "/admin"
+    "quickStart": {
+      "title": "5-Step Quick Start",
+      "body": "If you have never used it before, follow this path.",
+      "steps": {
+        "browse": {
+          "title": "Browse your prompt library",
+          "body": "Prompts shows everything you have saved. Filter by tags or status, switch between card and list views."
+        },
+        "edit": {
+          "title": "Open the editor",
+          "body": "Click any prompt to enter Editor. Left side for writing, right side for live Markdown preview."
+        },
+        "variable": {
+          "title": "Parameterize with variables",
+          "body": "Write {{name}} in the body. The editor highlights them; the preview panel lists all variables and lets you fill defaults to try."
+        },
+        "module": {
+          "title": "Extract reusable snippets",
+          "body": "Using the same instruction across many prompts? Save it as a Module and insert it with one click."
+        },
+        "test": {
+          "title": "Test in the playground",
+          "body": "Playground is a stateless sandbox. Paste or select a prompt to get instant structured analysis from the Agent."
+        }
       }
     },
-    "adminPermissions": {
-      "title": "Admin & Permissions",
-      "body": "Admin tooling is live, but the old Settings route was not restored. Permissions remain explicit and server-enforced.",
+    "concepts": {
+      "title": "Core Concepts",
+      "body": "Five terms cover the entire product vocabulary.",
       "items": {
-        "liveRoute": "/admin is the only live admin surface, and it is editable rather than read-only.",
-        "memberDenied": "Member users still see a denial state instead of writable admin controls.",
-        "serverGuard": "Settings reads and writes continue to rely on server-side ensureAdmin() protection.",
-        "settingsAbsent": "/settings remains intentionally absent instead of being revived as a parallel control surface."
-      }
-    },
-    "verification": {
-      "title": "Verification Baseline",
-      "body": "Retained-surface browser smoke is part of the accepted product baseline, but it has a defined scope.",
-      "items": {
-        "smokeCoverage": "The accepted smoke baseline covers retained live routes, editable /admin, member /admin denial, mobile 390x844, reduced motion, and command palette Docs/Admin discoverability.",
-        "excludedSuccessPath": "Default smoke does not require MiniMax provider success-path completion inside Playground; that remains a separate deeper acceptance path.",
-        "port": "The project baseline port remains 3000. On this Windows host, the current browser-verification fallback is 5173, and that fallback does not change the project port contract."
+        "prompts": {
+          "label": "prompts",
+          "title": "Prompts",
+          "body": "A named, taggable prompt asset with optional model and status. Every save auto-creates a version."
+        },
+        "variables": {
+          "label": "variables",
+          "title": "Variables",
+          "body": "Mark mutable parts with {{name}}. Highlighted while editing; rendered with substituted values or [name] fallback in preview."
+        },
+        "modules": {
+          "label": "modules",
+          "title": "Modules",
+          "body": "Reusable instruction snippets. When the same chunk lives across multiple prompts, extract it into a Module to maintain in one place."
+        },
+        "versions": {
+          "label": "versions",
+          "title": "Versions",
+          "body": "Every save creates an immutable snapshot. Compare any two versions or restore an older one (restore is itself a new version — history stays intact)."
+        },
+        "agent": {
+          "label": "agent",
+          "title": "Agent Analysis",
+          "body": "The MiniMax engine reads your prompt and returns structured analysis (role clarity, goal decomposition, improvement hints). Stateless — does not write back to history."
+        }
       }
     },
     "workflowSection": {
-      "title": "Working Routes",
-      "body": "These are the routes people should actually use in the accepted product. This page stays single-surface on purpose and does not recreate the old multi-page docs tree."
+      "title": "Surface Index",
+      "body": "Each surface is best at one thing."
     },
     "workflow": {
       "home": {
         "title": "Home",
-        "description": "Start from the landing workbench, then jump into the active product routes."
+        "description": "The workbench entry. Recent edits, suggested actions, overall usage at a glance."
       },
       "playground": {
         "title": "Playground",
-        "description": "Run stateless prompt analysis without writing the result into history."
+        "description": "Stateless sandbox. Paste a prompt, get Agent analysis, nothing is written to your library."
       },
       "prompts": {
         "title": "Prompts",
-        "description": "Browse the prompt library, switch card/list views, and open prompt detail pages."
+        "description": "Every prompt you have saved. Filter by tags, status, keyword. Card or list view."
       },
       "editor": {
         "title": "Editor",
-        "description": "Create or edit a working prompt copy before saving versions."
+        "description": "Write or revise a prompt. Side-by-side editor and Markdown preview, auto-versioned, supports {{variable}} interpolation."
       },
       "modules": {
         "title": "Modules",
-        "description": "Manage reusable instruction blocks that support prompt composition."
-      },
-      "docs": {
-        "title": "Docs",
-        "description": "Stay on this single-page usage guide when you need the current product surface, permission model, and verification rules."
+        "description": "Manage reusable prompt snippets. A single module can be referenced by many prompts."
       },
       "admin": {
-        "title": "Admin",
-        "description": "Use the live editable Admin Console for workspace defaults, agent settings, and guarded reset operations."
+        "title": "Admin Console",
+        "description": "Admin settings: default model, default view, agent toggle, maintenance operations. Admin role only."
       }
     },
-    "settingsHydration": {
-      "title": "Settings Hydration",
-      "body": "Admin-managed settings are no longer just writable fields. They now drive real product defaults through authenticated, server-backed hydration.",
+    "faq": {
+      "title": "Common Tasks",
+      "body": "Questions new users ask most.",
       "items": {
-        "promptsDesktop": "Desktop /prompts now consumes the server-backed defaultView instead of hardcoding card view.",
-        "promptsMobile": "Mobile /prompts still forces card so the safer small-screen layout is preserved.",
-        "editorNew": "New /editor prompt creation now consumes defaultModel and defaultStatus from effective settings.",
-        "editorExisting": "Existing /editor/[id] prompts keep their persisted model and status instead of being overwritten by defaults.",
-        "createPrompt": "createPrompt fallback now resolves missing model and status from effective settings before snapshot creation.",
-        "agentEnabled": "agent.enabled now gates both UI affordances and server action paths, including Playground and saved-prompt agent actions."
+        "new": {
+          "q": "How do I create a new prompt?",
+          "a": "Click New in the Prompts list, or go straight to /editor. Fill in title, description, body (Markdown supported), then save. First save creates v1."
+        },
+        "variables": {
+          "q": "How do variables work?",
+          "a": "Write {{name}} in the body. Use letters, digits, underscores only (no spaces or non-ASCII). The editor highlights them; the preview panel lists each one and lets you fill defaults to test."
+        },
+        "save": {
+          "q": "Are my edits saved automatically?",
+          "a": "No automatic save. Changes show an Unsaved changes badge at the top of the editor — click Save to persist and create a new version. This lets you experiment freely before committing."
+        },
+        "model": {
+          "q": "How do I change the default model?",
+          "a": "Open Admin Console (/admin), set defaultModel. New prompts pick up this value; existing prompts keep their own."
+        },
+        "backup": {
+          "q": "How do I back up my data?",
+          "a": "All data lives in a single SQLite file. For self-hosting, copy data/prompt-ide.db at any time. The deploy/backup.sh script ships with the project; deploy/update.sh runs preupdate backup automatically."
+        }
       }
     },
-    "playgroundContract": {
-      "title": "Playground Contract",
-      "body": "Playground remains a stateless analysis surface even after the admin console and settings hydration work.",
-      "items": {
-        "stateless": "Playground analysis is still stateless and does not write Prompt history as part of its default run path.",
-        "smokeBaseline": "Daily retained-surface smoke only verifies Playground UI reachability: stage visible, template fill works, and Analyze becomes available when allowed.",
-        "deepAcceptance": "Provider-backed live-result success remains a separate deeper acceptance path rather than part of the default smoke baseline."
-      }
-    },
-    "removed": {
-      "title": "Removed / Absent Surfaces",
-      "body": "These routes are intentionally absent from the current product. They are documented here as product truth, not exposed as live links.",
-      "items": {
-        "settings": "/settings is replaced by /admin",
-        "skills": "/skills/** is not in the live surface",
-        "oldDocs": "old /docs/** child routes were not restored",
-        "collections": "/collections is not in the live surface",
-        "archive": "/archive is not in the live surface",
-        "favorites": "/favorites is not in the live surface",
-        "inbox": "/inbox is not in the live surface",
-        "tags": "/tags is not in the live surface"
-      }
+    "selfHost": {
+      "label": "self-host",
+      "title": "Self-Hosting",
+      "body": "Prompt IDE is designed for a single user, single instance. All data stays in local SQLite with no external dependencies (unless you enable the MiniMax-backed Agent). Docker-based one-command deploy, deploy/update.sh for one-command upgrades."
     }
   },
   "adminConsole": {
