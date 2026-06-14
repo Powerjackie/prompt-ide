@@ -258,7 +258,7 @@
     "descriptionLabel": "描述",
     "descriptionPlaceholder": "简要描述",
     "contentLabel": "提示词内容 *",
-    "contentPlaceholder": "在这里编写提示词... 使用 {{variable}} 表示动态值。",
+    "contentPlaceholder": "在这里编写提示词... 使用 '{{variable}}' 表示动态值。",
     "sourceLabel": "来源",
     "sourcePlaceholder": "这个提示词来自哪里？",
     "tagsLabel": "标签",
@@ -281,7 +281,7 @@
     "canvasCharacters": "{count} 个字符",
     "canvasLines": "{count} 行",
     "canvasPlaceholdersEnabled": "已启用占位符",
-    "canvasPlaceholderHint": "使用 {{variable}} 表示动态输入位。",
+    "canvasPlaceholderHint": "使用 '{{variable}}' 表示动态输入位。",
     "previewLiveTitle": "实时预览",
     "previewEmptyTitle": "开始输入后即可查看预览",
     "previewEmptyDescription": "系统会根据当前内容与变量，渲染一份更贴近最终执行态的 Prompt 预览。",
@@ -397,12 +397,12 @@
       "writing": {
         "title": "写作助手",
         "description": "测试把粗糙笔记改写成更完整表达的 Prompt。",
-        "content": "你现在是一位高级写作助手。请把下面的粗略笔记改写成面向 {{audience}} 的文章开头，整体语气保持 {{tone}}，控制在 {{word_limit}} 字以内，并以一个明确的下一步行动收尾。"
+        "content": "你现在是一位高级写作助手。请把下面的粗略笔记改写成面向 '{{audience}}' 的文章开头，整体语气保持 '{{tone}}'，控制在 '{{word_limit}}' 字以内，并以一个明确的下一步行动收尾。"
       },
       "translation": {
         "title": "翻译 Prompt",
         "description": "适合测试术语保持、双语转换和本地化说明。",
-        "content": "请把下面的产品公告从 {{source_language}} 翻译成 {{target_language}}。保留项目符号结构，不要改动产品名，并标记任何可能需要本地化复核的表达。"
+        "content": "请把下面的产品公告从 '{{source_language}}' 翻译成 '{{target_language}}'。保留项目符号结构，不要改动产品名，并标记任何可能需要本地化复核的表达。"
       },
       "support": {
         "title": "客服回复",
@@ -1457,7 +1457,7 @@
           "categoriesTitle": "可用分类："
         },
         "content": {
-          "content": "在正文区域编写主要提示词内容，并使用 {{variable}} 语法表示动态输入。按 Ctrl+S 或 Cmd+S 可以快速保存。"
+          "content": "在正文区域编写主要提示词内容，并使用 '{{variable}}' 语法表示动态输入。按 Ctrl+S 或 Cmd+S 可以快速保存。"
         },
         "tools": {
           "content": "右侧工具面板把配套工作流程放在提示词旁边，避免你频繁切换页面。",
@@ -1484,11 +1484,11 @@
         },
         "syntax": {
           "title": "变量语法",
-          "content": "Prompt IDE 使用 {{variableName}} 形式识别变量。变量名建议只使用字母、数字和下划线，便于统一管理。"
+          "content": "Prompt IDE 使用 '{{variableName}}' 形式识别变量。变量名建议只使用字母、数字和下划线，便于统一管理。"
         },
         "detection": {
           "title": "自动识别",
-          "content": "你不需要手动先声明变量。编辑器会扫描正文，自动提取所有 {{...}} 占位符。",
+          "content": "你不需要手动先声明变量。编辑器会扫描正文，自动提取所有 '{{...}}' 占位符。",
           "name": "名称来自正文中的占位符本身，不能在变量表里手动改名。",
           "description": "描述是可选的，用来说明这个变量应该填什么内容。",
           "defaultValue": "默认值也是可选的，主要用于预览渲染。"
@@ -1502,7 +1502,7 @@
         "example": {
           "title": "示例",
           "content": "下面这个简单模板展示了如何用变量保持主结构稳定，同时灵活切换输入。",
-          "code": "You are a {{role}}. Please analyze the following {{topic}} and provide {{outputFormat}}."
+          "code": "You are a '{{role}}'. Please analyze the following '{{topic}}' and provide '{{outputFormat}}'."
         },
         "calloutTip": "变量不仅会用于预览，也会继续进入 AI 分析和技能运行器流程，所以清晰的变量命名很重要。"
       },
@@ -1962,7 +1962,7 @@
           },
           "variableSyntax": {
             "title": "变量语法是什么？",
-            "answer1": "Prompt IDE 使用双花括号语法，例如 {{variableName}}。编辑器会自动识别这些占位符，并把它们纳入变量系统。",
+            "answer1": "Prompt IDE 使用双花括号语法，例如 '{{variableName}}'。编辑器会自动识别这些占位符，并把它们纳入变量系统。",
             "answer2": "为了保持一致性，变量名最好只使用字母、数字和下划线。"
           },
           "modulesVsPrompts": {
@@ -2033,7 +2033,7 @@
         },
         "variable": {
           "title": "用变量参数化",
-          "body": "在正文里写 {{变量名}},编辑器会高亮,预览面板会列出所有变量并允许填默认值试跑。"
+          "body": "在正文里写 '{{变量名}}',编辑器会高亮,预览面板会列出所有变量并允许填默认值试跑。"
         },
         "module": {
           "title": "抽出可复用片段",
@@ -2057,7 +2057,7 @@
         "variables": {
           "label": "variables",
           "title": "变量",
-          "body": "用 {{name}} 标记可变部分。编辑时高亮,预览时按填入值或 [name] 占位渲染。"
+          "body": "用 '{{name}}' 标记可变部分。编辑时高亮,预览时按填入值或 [name] 占位渲染。"
         },
         "modules": {
           "label": "modules",
@@ -2116,7 +2116,7 @@
         },
         "variables": {
           "q": "变量怎么用?",
-          "a": "在正文里写 {{变量名}},名字只用字母数字下划线(不要带空格或中文)。编辑器会自动高亮,预览面板会列出所有变量,可以临时填默认值预览效果。"
+          "a": "在正文里写 '{{变量名}}',名字只用字母数字下划线(不要带空格或中文)。编辑器会自动高亮,预览面板会列出所有变量,可以临时填默认值预览效果。"
         },
         "save": {
           "q": "我的修改会自动保存吗?",

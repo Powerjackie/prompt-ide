@@ -267,7 +267,7 @@
     "descriptionLabel": "Description",
     "descriptionPlaceholder": "Brief description",
     "contentLabel": "Prompt Content *",
-    "contentPlaceholder": "Write your prompt here... Use {{variable}} for dynamic values.",
+    "contentPlaceholder": "Write your prompt here... Use '{{variable}}' for dynamic values.",
     "sourceLabel": "Source",
     "sourcePlaceholder": "Where did this prompt come from?",
     "tagsLabel": "Tags",
@@ -279,7 +279,7 @@
     "canvasCharacters": "{count} chars",
     "canvasLines": "{count} lines",
     "canvasPlaceholdersEnabled": "Dynamic placeholders enabled",
-    "canvasPlaceholderHint": "Use {{variable}} for reusable slots.",
+    "canvasPlaceholderHint": "Use '{{variable}}' for reusable slots.",
     "previewLiveTitle": "Live Preview",
     "previewEmptyTitle": "Start writing to see a preview.",
     "previewEmptyDescription": "We will render the current draft with its variable placeholders so you can inspect tone, structure, and reusable slots.",
@@ -397,12 +397,12 @@
       "writing": {
         "title": "Writing assistant",
         "description": "A structured prompt for rewriting rough notes into polished prose.",
-        "content": "You are a senior writing assistant. Rewrite the following rough notes into a polished article intro for {{audience}}. Keep the tone {{tone}}, stay under {{word_limit}} words, and end with one concrete next step."
+        "content": "You are a senior writing assistant. Rewrite the following rough notes into a polished article intro for '{{audience}}'. Keep the tone '{{tone}}', stay under '{{word_limit}}' words, and end with one concrete next step."
       },
       "translation": {
         "title": "Translation prompt",
         "description": "Test bilingual prompts that preserve nuance, terminology, and formatting.",
-        "content": "Translate the following product announcement from {{source_language}} to {{target_language}}. Preserve bullet structure, keep product names unchanged, and note any phrases that may need localization review."
+        "content": "Translate the following product announcement from '{{source_language}}' to '{{target_language}}'. Preserve bullet structure, keep product names unchanged, and note any phrases that may need localization review."
       },
       "support": {
         "title": "Customer support",
@@ -1457,7 +1457,7 @@
           "categoriesTitle": "Available categories:"
         },
         "content": {
-          "content": "Write the main prompt body in the content editor and use {{variableName}} placeholders where the prompt should stay reusable. Use Ctrl+S or Cmd+S to save without leaving the keyboard."
+          "content": "Write the main prompt body in the content editor and use '{{variableName}}' placeholders where the prompt should stay reusable. Use Ctrl+S or Cmd+S to save without leaving the keyboard."
         },
         "tools": {
           "content": "The right-hand tool panel keeps the supporting workflows close to the prompt you are editing.",
@@ -1484,7 +1484,7 @@
         },
         "syntax": {
           "title": "Variable syntax",
-          "content": "Prompt IDE detects variables written in the {{variableName}} form. Variable names should use letters, numbers, and underscores so they stay predictable across the workspace."
+          "content": "Prompt IDE detects variables written in the '{{variableName}}' form. Variable names should use letters, numbers, and underscores so they stay predictable across the workspace."
         },
         "detection": {
           "title": "Automatic detection",
@@ -1502,7 +1502,7 @@
         "example": {
           "title": "Example",
           "content": "A simple template can expose several change points while keeping the overall instruction stable.",
-          "code": "You are a {{role}}. Please analyze the following {{topic}} and provide {{outputFormat}}."
+          "code": "You are a '{{role}}'. Please analyze the following '{{topic}}' and provide '{{outputFormat}}'."
         },
         "calloutTip": "Detected variables also feed into AI analysis and the skill runner, so clear variable names make later workflows easier to understand."
       },
@@ -1962,7 +1962,7 @@
           },
           "variableSyntax": {
             "title": "What is the variable syntax?",
-            "answer1": "Prompt IDE uses double curly braces such as {{variableName}} to mark variables inside prompt content. The editor detects those placeholders automatically.",
+            "answer1": "Prompt IDE uses double curly braces such as '{{variableName}}' to mark variables inside prompt content. The editor detects those placeholders automatically.",
             "answer2": "For best results, keep variable names simple and use letters, numbers, and underscores only."
           },
           "modulesVsPrompts": {
@@ -2033,7 +2033,7 @@
         },
         "variable": {
           "title": "Parameterize with variables",
-          "body": "Write {{name}} in the body. The editor highlights them; the preview panel lists all variables and lets you fill defaults to try."
+          "body": "Write '{{name}}' in the body. The editor highlights them; the preview panel lists all variables and lets you fill defaults to try."
         },
         "module": {
           "title": "Extract reusable snippets",
@@ -2057,7 +2057,7 @@
         "variables": {
           "label": "variables",
           "title": "Variables",
-          "body": "Mark mutable parts with {{name}}. Highlighted while editing; rendered with substituted values or [name] fallback in preview."
+          "body": "Mark mutable parts with '{{name}}'. Highlighted while editing; rendered with substituted values or [name] fallback in preview."
         },
         "modules": {
           "label": "modules",
@@ -2095,7 +2095,7 @@
       },
       "editor": {
         "title": "Editor",
-        "description": "Write or revise a prompt. Side-by-side editor and Markdown preview, auto-versioned, supports {{variable}} interpolation."
+        "description": "Write or revise a prompt. Side-by-side editor and Markdown preview, auto-versioned, supports '{{variable}}' interpolation."
       },
       "modules": {
         "title": "Modules",
@@ -2116,7 +2116,7 @@
         },
         "variables": {
           "q": "How do variables work?",
-          "a": "Write {{name}} in the body. Use letters, digits, underscores only (no spaces or non-ASCII). The editor highlights them; the preview panel lists each one and lets you fill defaults to test."
+          "a": "Write '{{name}}' in the body. Use letters, digits, underscores only (no spaces or non-ASCII). The editor highlights them; the preview panel lists each one and lets you fill defaults to test."
         },
         "save": {
           "q": "Are my edits saved automatically?",
